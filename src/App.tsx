@@ -1,124 +1,58 @@
-import { useMemo, useReducer } from 'react';
-import { calculate } from './lib/accounting';
-import { initialState, reducer } from './lib/state';
-import { FIELD_KEYS, validateInputs } from './lib/validation';
-import Header from './components/Header';
-import Welcome from './components/Welcome';
-import BusinessPicker from './components/BusinessPicker';
-import InputPanel from './components/InputPanel';
-import ResultsDashboard from './components/ResultsDashboard';
-import WhatIfSimulator from './components/WhatIfSimulator';
-import Charts from './components/Charts';
-import LearnSection from './components/LearnSection';
+import { type ReactNode } from 'react';
+import { ConfirmProvider } from './app/Confirm';
+import { useRoute, type SectionId } from './app/routes';
+import { StoreProvider } from './app/StoreContext';
 import Footer from './components/Footer';
-import Locked from './components/Locked';
-import InventoryEstimator from './components/InventoryEstimator';
+import Header from './components/Header';
+import type { AppState } from './lib/store';
+import BusinessChallenge from './sections/BusinessChallenge';
+import BusinessReport from './sections/BusinessReport';
+import Home from './sections/Home';
+import InventoryHub from './sections/InventoryHub';
+import MyBusiness from './sections/MyBusiness';
+import PricingLab from './sections/PricingLab';
+import ProductionPlanner from './sections/ProductionPlanner';
+import ProfitDashboard from './sections/ProfitDashboard';
 
-export default function App() {
-  const [state, dispatch] = useReducer(reducer, undefined, () => initialState());
-
-  // Inputs are validated on every change; results are recalculated from the
-  // current valid inputs, so every section always shows the same numbers.
-  const validation = useMemo(() => validateInputs(state.raw), [state.raw]);
-  const results = useMemo(
-    () => (validation.values ? calculate(validation.values) : null),
-    [validation.values],
-  );
-
-  const handleCalculate = () => {
-    dispatch({ type: 'calculate' });
-    const firstError = FIELD_KEYS.find((k) => validation.errors[k]);
-    if (firstError) {
-      document.getElementById(`field-${firstError}`)?.focus();
-    } else {
-      requestAnimationFrame(() =>
-        document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      );
-    }
-  };
-
-  const showResults = state.submitted;
-  const businessName = state.raw.businessName.trim() || 'Your business';
-
+/**
+ * Every section stays mounted (just hidden), so moving between sections never
+ * loses anything typed – and all sections share one store.
+ */
+function Panel({ id, route, children }: { id: SectionId; route: SectionId; children: ReactNode }) {
   return (
-    <div className="min-h-screen">
-      <a
-        href="#simulator"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2"
-      >
-        Skip to the simulator
-      </a>
-      <Header />
-      <main>
-        <Welcome />
-
-        <section id="simulator" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-14 sm:px-6">
-          <BusinessPicker
-            selected={state.businessId}
-            onSelect={(id) => dispatch({ type: 'select-business', id })}
-          />
-          <InputPanel
-            state={state}
-            errors={validation.errors}
-            dispatch={dispatch}
-            onCalculate={handleCalculate}
-          />
-        </section>
-
-        <section id="results" className="scroll-mt-20 bg-white/60 py-14">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            {showResults ? (
-              <ResultsDashboard results={results} businessName={businessName} />
-            ) : (
-              <Locked
-                eyebrow="Step 3 · Discover"
-                title="Your profit dashboard"
-                text="Press “Calculate My Profit” above to see your revenue, profit, break-even point and margin of safety."
-              />
-            )}
-          </div>
-        </section>
-
-        <section id="what-if" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-14 sm:px-6">
-          {showResults && results ? (
-            <WhatIfSimulator base={results} whatIfRaw={state.whatIfRaw} dispatch={dispatch} />
-          ) : (
-            <Locked
-              eyebrow="Signature feature"
-              title="What If You Changed Your Price?"
-              text={
-                showResults
-                  ? 'Fix the highlighted inputs above to use the what-if simulator.'
-                  : 'Calculate your profit first, then test a different price here without changing your original numbers.'
-              }
-            />
-          )}
-        </section>
-
-        <section id="charts" className="scroll-mt-20 bg-white/60 py-14">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            {showResults && results ? (
-              <Charts results={results} />
-            ) : (
-              <Locked
-                eyebrow="Visualize"
-                title="See your numbers on a chart"
-                text={
-                  showResults
-                    ? 'Fix the highlighted inputs above to see the charts.'
-                    : 'Charts of revenue, costs and profit at different sales volumes appear after you calculate.'
-                }
-              />
-            )}
-          </div>
-        </section>
-
-        <LearnSection />
-
-        {/* Inventory & Sales Estimator. `key` reloads the sample inventory when the business changes. */}
-        <InventoryEstimator key={state.businessId} businessId={state.businessId} pricing={validation.values} />
-      </main>
-      <Footer />
+    <div id={`panel-${id}`} hidden={route !== id}>
+      {children}
     </div>
+  );
+}
+
+export default function App({ initial }: { initial?: AppState }) {
+  const [route] = useRoute();
+  return (
+    <StoreProvider initial={initial}>
+      <ConfirmProvider>
+        <div className="flex min-h-screen flex-col">
+          <button
+            type="button"
+            onClick={() => document.getElementById('main')?.focus()}
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2"
+          >
+            Skip to content
+          </button>
+          <Header route={route} />
+          <main id="main" tabIndex={-1} className="flex-1 outline-none">
+            <Panel id="home" route={route}><Home /></Panel>
+            <Panel id="my-business" route={route}><MyBusiness /></Panel>
+            <Panel id="dashboard" route={route}><ProfitDashboard /></Panel>
+            <Panel id="pricing" route={route}><PricingLab /></Panel>
+            <Panel id="inventory" route={route}><InventoryHub /></Panel>
+            <Panel id="planner" route={route}><ProductionPlanner /></Panel>
+            <Panel id="challenge" route={route}><BusinessChallenge /></Panel>
+            <Panel id="report" route={route}><BusinessReport /></Panel>
+          </main>
+          <Footer />
+        </div>
+      </ConfirmProvider>
+    </StoreProvider>
   );
 }

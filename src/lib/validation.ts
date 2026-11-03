@@ -42,7 +42,11 @@ export function cleanNumberText(raw: string): { text: string } | { error: string
 }
 
 export function parseMoney(raw: string, field: Exclude<FieldKey, 'units'>): ParseResult {
-  const name = FIELD_NAMES[field];
+  return parseAmount(raw, FIELD_NAMES[field]);
+}
+
+/** Validates a CAD amount (0 or more, max 2 decimals). `name` is used in messages, e.g. "selling price". */
+export function parseAmount(raw: string, name: string): ParseResult {
   if (raw.trim() === '') return { ok: false, error: `Please enter the ${name}.` };
 
   const cleaned = cleanNumberText(raw);

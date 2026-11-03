@@ -1,16 +1,11 @@
 /**
- * Inventory & Sales Estimator – calculations.
- *
- * How many finished products can be made from the inventory on hand, which
- * item runs out first, and what that means for sales, revenue and profit.
- * Revenue and profit reuse `calculate` from accounting.ts, so they follow
- * exactly the same formulas as the rest of the app.
+ * Inventory units, quantities and the round-down production rule.
+ * (Shared-inventory planning for several products lives in planning.ts.)
  *
  * Quantities are converted to a base unit (grams, millilitres or pieces) and
  * stored as whole thousandths of that unit. Using whole numbers keeps the
  * "round down" step exact (e.g. 0.3 ÷ 0.1 is exactly 3, not 2.9999…).
  */
-import { calculate, type PricingInputs } from './accounting';
 import type { BusinessId } from './businesses';
 import { cleanNumberText, type ParseResult } from './validation';
 
@@ -52,19 +47,10 @@ export function toBase(value: number, unit: UnitId): number {
 }
 
 /* ------------------------------------------------------------------ */
-/* Inputs and validation                                               */
+/* Quantities                                                          */
 /* ------------------------------------------------------------------ */
 
-/** One inventory row exactly as the user typed it. */
-export interface InventoryItemInput {
-  id: string;
-  name: string;
-  available: string;
-  availableUnit: UnitId;
-  required: string;
-  requiredUnit: UnitId;
-}
-
+/** Quantity ready for the round-down production calculation. */
 export interface ParsedItem {
   id: string;
   name: string;
@@ -74,8 +60,6 @@ export interface ParsedItem {
   /** Quantity needed for one product, in thousandths of the base unit. */
   requiredBase: number;
 }
-
-export type ItemErrors = Partial<Record<'name' | 'available' | 'required' | 'unit', string>>;
 
 /** Largest quantity accepted in any inventory field (one billion). */
 export const MAX_QUANTITY = 1_000_000_000;
@@ -120,59 +104,6 @@ export function parseQuantity(raw: string, kind: 'available' | 'required'): Pars
   return { ok: true, value };
 }
 
-const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-export function validateItem(item: InventoryItemInput): { parsed: ParsedItem | null; errors: ItemErrors } {
-  const errors: ItemErrors = {};
-  const name = item.name.trim();
-  if (name === '') errors.name = 'Please give this item a name, such as “Milk”.';
-
-  const available = parseQuantity(item.available, 'available');
-  if (!available.ok) errors.available = available.error;
-  const required = parseQuantity(item.required, 'required');
-  if (!required.ok) errors.required = required.error;
-
-  const a = UNITS[item.availableUnit];
-  const r = UNITS[item.requiredUnit];
-  if (a.dimension !== r.dimension) {
-    errors.unit = `${capitalise(a.plural)} and ${r.plural} can’t be converted. Use weight (g, kg), volume (mL, L) or pieces for both quantities.`;
-  }
-
-  if (Object.keys(errors).length > 0 || !available.ok || !required.ok) return { parsed: null, errors };
-  return {
-    parsed: {
-      id: item.id,
-      name,
-      dimension: a.dimension,
-      availableBase: toBase(available.value, item.availableUnit),
-      requiredBase: toBase(required.value, item.requiredUnit),
-    },
-    errors,
-  };
-}
-
-export interface InventoryValidation {
-  /** Every item parsed, or `null` if there are no items or any item is invalid. */
-  parsed: ParsedItem[] | null;
-  errors: Record<string, ItemErrors>;
-  issue: 'no-items' | 'invalid' | null;
-}
-
-export function validateInventory(items: InventoryItemInput[]): InventoryValidation {
-  if (items.length === 0) return { parsed: null, errors: {}, issue: 'no-items' };
-  const errors: Record<string, ItemErrors> = {};
-  const parsed: ParsedItem[] = [];
-  for (const item of items) {
-    const result = validateItem(item);
-    if (result.parsed) parsed.push(result.parsed);
-    else errors[item.id] = result.errors;
-  }
-  // Ignoring an invalid row could overstate capacity, so nothing is calculated
-  // until every row is valid.
-  if (Object.keys(errors).length > 0) return { parsed: null, errors, issue: 'invalid' };
-  return { parsed, errors, issue: null };
-}
-
 /* ------------------------------------------------------------------ */
 /* Maximum production                                                  */
 /* ------------------------------------------------------------------ */
@@ -210,77 +141,6 @@ export function calculateProduction(items: ParsedItem[]): ProductionResult {
 }
 
 /* ------------------------------------------------------------------ */
-/* Sales estimate                                                      */
-/* ------------------------------------------------------------------ */
-
-export interface SalesEstimate {
-  /** Production capacity from materials. */
-  maxProduction: number;
-  /** Expected customer demand (expected monthly sales from Step 2). */
-  expectedDemand: number;
-  /** MIN(maximum production, expected demand). */
-  estimatedSales: number;
-  inventorySufficient: boolean;
-  /** Maximum production × selling price (assumes everything producible is sold). */
-  maxPotentialRevenue: number;
-  /** Estimated sales × selling price. */
-  estimatedRevenue: number;
-  /** Estimated sales × (price − variable cost) − fixed costs. */
-  estimatedOperatingProfit: number;
-  /** Operating profit on the main dashboard (assumes all expected sales happen). */
-  dashboardProfit: number;
-}
-
-export function estimateSales(maxProduction: number, pricing: PricingInputs): SalesEstimate {
-  const expectedDemand = pricing.units;
-  // Estimated Sales = MIN(Maximum Production, Expected Monthly Sales)
-  const estimatedSales = Math.min(maxProduction, expectedDemand);
-  const atCapacity = calculate({ ...pricing, units: maxProduction });
-  const atEstimate = calculate({ ...pricing, units: estimatedSales });
-  return {
-    maxProduction,
-    expectedDemand,
-    estimatedSales,
-    inventorySufficient: maxProduction >= expectedDemand,
-    maxPotentialRevenue: atCapacity.revenue,
-    estimatedRevenue: atEstimate.revenue,
-    estimatedOperatingProfit: atEstimate.operatingProfit,
-    dashboardProfit: calculate(pricing).operatingProfit,
-  };
-}
-
-/* ------------------------------------------------------------------ */
-/* Shortages                                                           */
-/* ------------------------------------------------------------------ */
-
-export interface Shortage {
-  id: string;
-  name: string;
-  dimension: Dimension;
-  /** Expected sales × quantity required per product. */
-  requiredTotalBase: number;
-  availableBase: number;
-  /** MAX(0, required − available). */
-  shortageBase: number;
-}
-
-export function findShortages(items: ParsedItem[], expectedSales: number): Shortage[] {
-  return items.map((item) => {
-    // Required Inventory = Expected Sales Volume × Quantity Required Per Product
-    const requiredTotalBase = expectedSales * item.requiredBase;
-    return {
-      id: item.id,
-      name: item.name,
-      dimension: item.dimension,
-      requiredTotalBase,
-      availableBase: item.availableBase,
-      // Shortage = MAX(0, Required Inventory − Available Inventory)
-      shortageBase: Math.max(0, requiredTotalBase - item.availableBase),
-    };
-  });
-}
-
-/* ------------------------------------------------------------------ */
 /* Display helpers                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -304,69 +164,18 @@ export function formatQuantity(base: number, dimension: Dimension, style: 'long'
   return `${num} ${value === 1 ? info.singular : info.plural}`;
 }
 
-/** Keeps a name as typed but lower-cases a capital first letter mid-sentence ("Milk" → "milk", "BC salt" stays). */
-export function midSentence(name: string): string {
-  return /^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name;
-}
-
 export function joinNames(names: string[]): string {
   if (names.length <= 1) return names.join('');
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
 /* ------------------------------------------------------------------ */
-/* Business-specific wording and fictional sample inventory            */
+/* Business-specific notes                                             */
 /* ------------------------------------------------------------------ */
-
-export interface ProductNoun {
-  one: string;
-  many: string;
-}
-
-export const PRODUCT_NOUNS: Record<BusinessId, ProductNoun> = {
-  coffee: { one: 'coffee', many: 'coffees' },
-  bakery: { one: 'baked good', many: 'baked goods' },
-  nails: { one: 'service', many: 'services' },
-  clothing: { one: 'item', many: 'items' },
-  custom: { one: 'product', many: 'products' },
-};
-
-export function countNoun(count: number, noun: ProductNoun): string {
-  return `${count.toLocaleString('en-CA')} ${count === 1 ? noun.one : noun.many}`;
-}
 
 export const BUSINESS_NOTES: Partial<Record<BusinessId, string>> = {
   nails:
     'For a service business, the result is the number of services your consumable supplies can cover. It does not account for staff availability or appointment capacity.',
   clothing:
     'Enter your finished products as inventory, with 1 piece required per item sold. Add packaging, such as shopping bags, as separate items.',
-};
-
-type SampleItem = Omit<InventoryItemInput, 'id'>;
-
-/** Fictional example inventory for each business – not industry benchmarks. */
-export const SAMPLE_INVENTORY: Record<BusinessId, SampleItem[]> = {
-  coffee: [
-    { name: 'Coffee beans', available: '2000', availableUnit: 'g', required: '20', requiredUnit: 'g' },
-    { name: 'Milk', available: '5000', availableUnit: 'mL', required: '200', requiredUnit: 'mL' },
-    { name: 'Coffee cups', available: '100', availableUnit: 'pcs', required: '1', requiredUnit: 'pcs' },
-  ],
-  bakery: [
-    { name: 'Flour', available: '25', availableUnit: 'kg', required: '80', requiredUnit: 'g' },
-    { name: 'Butter', available: '5', availableUnit: 'kg', required: '20', requiredUnit: 'g' },
-    { name: 'Pastry boxes', available: '400', availableUnit: 'pcs', required: '1', requiredUnit: 'pcs' },
-  ],
-  nails: [
-    { name: 'Gel polish', available: '1', availableUnit: 'L', required: '5', requiredUnit: 'mL' },
-    { name: 'Nail files', available: '200', availableUnit: 'pcs', required: '1', requiredUnit: 'pcs' },
-    { name: 'Cotton pads', available: '1000', availableUnit: 'pcs', required: '4', requiredUnit: 'pcs' },
-  ],
-  clothing: [
-    { name: 'Finished clothing items', available: '150', availableUnit: 'pcs', required: '1', requiredUnit: 'pcs' },
-    { name: 'Shopping bags', available: '200', availableUnit: 'pcs', required: '1', requiredUnit: 'pcs' },
-  ],
-  custom: [
-    { name: 'Main material', available: '10', availableUnit: 'kg', required: '50', requiredUnit: 'g' },
-    { name: 'Packaging', available: '80', availableUnit: 'pcs', required: '1', requiredUnit: 'pcs' },
-  ],
 };

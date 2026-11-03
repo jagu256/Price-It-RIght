@@ -94,3 +94,35 @@ input[type='range'].slider::-moz-range-thumb {
     transition-duration: 0.01ms !important;
   }
 }
+
+@layer components {
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-loss-600 px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-loss-700;
+  }
+  .btn-small {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border border-sage-200 bg-white px-3 py-1.5 text-sm font-semibold text-sage-800 transition hover:border-sage-400 hover:bg-sage-50 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .data-table {
+    @apply w-full text-left text-sm tabular-nums;
+  }
+  .data-table th[scope='col'] {
+    @apply whitespace-nowrap border-b-2 border-sage-200 px-2 py-2 text-xs font-bold uppercase tracking-wider text-sage-600;
+  }
+  .data-table td,
+  .data-table th[scope='row'] {
+    @apply border-b border-sage-100 px-2 py-2 align-top;
+  }
+  .select {
+    @apply rounded-xl border-2 border-sage-200 bg-white px-3 py-2 text-sm font-semibold text-sage-900 outline-none focus:border-sage-500 focus:ring-2 focus:ring-sage-400/40;
+  }
+  .text-input {
+    @apply w-full rounded-2xl border-2 border-sage-200 bg-white px-4 py-3 text-lg font-semibold outline-none transition focus:border-sage-500 focus:ring-2 focus:ring-sage-400/40;
+  }
+}
+
+/* Keep visually-hidden (absolutely positioned) labels inside scrolling tables,
+   so they can't widen the page. */
+.overflow-x-auto,
+.overflow-auto {
+  position: relative;
+}

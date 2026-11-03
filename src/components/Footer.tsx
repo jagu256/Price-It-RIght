@@ -12,10 +12,10 @@ export default function Footer() {
         </div>
         <div className="space-y-2 text-sm text-cream-200/80">
           <p>
-            Educational tool for an ACCT 4500 group project. Example values are fictional and are not industry
-            benchmarks. Results are simplified estimates, not financial advice.
+            An educational decision-support tool for an ACCT 4500 group project. Results depend entirely on the assumptions you enter. Example and demo data are
+            fictional and are not industry benchmarks. Not financial advice.
           </p>
-          <p>All calculations run in your browser. Nothing you enter is saved or sent anywhere.</p>
+          <p>Everything runs in your browser. Uploaded files and numbers are not saved or sent anywhere – please don’t enter confidential information.</p>
           <p>Built with AI assistance (Claude by Anthropic) and reviewed by the project team.</p>
         </div>
       </div>
