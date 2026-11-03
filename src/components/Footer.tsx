@@ -1,0 +1,24 @@
+import Logo from './Logo';
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-sage-100 bg-sage-900 text-cream-100">
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-[1fr_1.4fr] sm:px-6">
+        <div>
+          <p className="flex items-center gap-2 font-display text-lg font-bold">
+            <Logo className="h-7 w-7" /> Price It Right
+          </p>
+          <p className="mt-2 text-sm text-cream-200/80">Set your price. Know your costs. Maximize your profit.</p>
+        </div>
+        <div className="space-y-2 text-sm text-cream-200/80">
+          <p>
+            Educational tool for an ACCT 4500 group project. Example values are fictional and are not industry
+            benchmarks. Results are simplified estimates, not financial advice.
+          </p>
+          <p>All calculations run in your browser. Nothing you enter is saved or sent anywhere.</p>
+          <p>Built with AI assistance (Claude by Anthropic) and reviewed by the project team.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
