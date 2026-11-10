@@ -69,6 +69,16 @@ The old single-product dashboard, what-if and estimator were folded in (not dupl
 - Vercel project `price-it-r-ight` (Hobby), live at https://price-it-r-ight.vercel.app. Every push to `main` redeploys.
 - Open issue: a custom domain `price-it-right.ca` was added in Vercel with "Invalid Configuration", and the vercel.app address was set to redirect to it. Advice given: remove the domain/redirect unless it is actually owned. If owned, add DNS A record `@ → 216.198.79.1` at the registrar.
 
+## Stage 4 – Feature upgrades in Claude Code (from 9 Nov 2026)
+Work moved from claude.ai to Claude Code. The repository was cloned fresh from GitHub; before any change, `npm install`, `npm test` (156 passed) and `npm run build` were run and passed. Features are built one at a time, each with tests, a README update, a commit and a check of the live site by the student before the next one starts.
+
+### Feature 1 – "Show the math" (9 Nov 2026)
+- New `src/lib/showMath.ts`: pure functions that take an already-calculated result and return the formula in words, the formula with the user's numbers, and the result as displayed. They do no arithmetic of their own, so an explanation cannot disagree with the screen.
+- New `ShowMath` button component, added to the six dashboard cards, sales-mix break-even, margin of safety, the one-product break-even calculator, the What-If modified plan, the minimum calculated price, the profit goal tracker and the Production Planner's modified plan.
+- No existing calculation or feature was changed. One duplicated rounding check in the price assistant now uses a shared, tested helper.
+
+**Checks:** 171 tests in 11 files passed (156 unchanged + 13 unit + 2 click-through); build passed. Looked at in a browser at phone width (375 px) with nine explanations open: no sideways scrolling. `npm audit` reports 3 advisories in the test tool (Vitest) only, not in the published site; left as is because the fix is a major-version upgrade.
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

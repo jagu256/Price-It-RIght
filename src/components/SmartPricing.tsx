@@ -3,7 +3,9 @@ import { useStore } from '../app/StoreContext';
 import { toCents } from '../lib/business';
 import { formatCAD, unitsLabel } from '../lib/format';
 import { requiredPrice } from '../lib/pricing';
+import { isWholeCents, requiredPriceMath, type RequiredPriceInput } from '../lib/showMath';
 import { parseAmount, parseMoney, parseUnits, toInputText } from '../lib/validation';
+import ShowMath from './ShowMath';
 import { CellInput, ErrorList, Notice, SubHeader } from './ui';
 
 /** 💡 What Price Should I Charge? */
@@ -28,16 +30,17 @@ export default function SmartPricing() {
   const others = products.filter((p) => p.id !== product.id);
   const otherCM = others.reduce((s, p) => s + (toCents(p.price) - toCents(p.variableCost)) * p.units, 0) / 100;
   const ready = targetR.ok && unitsR.ok && vcR.ok && (!shareR || shareR.ok);
-  const result =
+  const input: RequiredPriceInput | null =
     ready && targetR.ok && unitsR.ok && vcR.ok
-      ? requiredPrice({
+      ? {
           variableCost: vcR.value,
           units: unitsR.value,
           fixedCosts: mode === 'business' ? model.fixedCosts : shareR && shareR.ok ? shareR.value : 0,
           targetProfit: targetR.value,
           otherContribution: mode === 'business' ? otherCM : 0,
-        })
+        }
       : null;
+  const result = input ? requiredPrice(input) : null;
 
   return (
     <section aria-labelledby="smart-title" className="card space-y-5 p-5 sm:p-8">
@@ -92,9 +95,10 @@ export default function SmartPricing() {
                 </div>
                 <p className="max-w-md text-sm opacity-95">
                   At {formatCAD(result.price)} and {unitsR.ok ? unitsLabel(unitsR.value) : ''} of {product.name}, projected operating profit would be {formatCAD(result.profitAtPrice)}
-                  {mode === 'share' ? ' (for this product’s share)' : ''}. {Math.round(result.exact * 100) === Math.round(result.price * 100) && Math.abs(result.exact * 100 - Math.round(result.exact * 100)) < 1e-9 ? 'The formula gives this price exactly.' : `The formula gives $${result.exact.toFixed(4)}, rounded up to the next cent so the target is met.`}
+                  {mode === 'share' ? ' (for this product’s share)' : ''}. {isWholeCents(result.exact) ? 'The formula gives this price exactly.' : `The formula gives $${result.exact.toFixed(4)}, rounded up to the next cent so the target is met.`}
                 </p>
               </div>
+              {input && <ShowMath label="the minimum calculated price" items={requiredPriceMath(input, result)} />}
               {result.belowVariableCost && (
                 <Notice tone="warn">This price is below the variable cost per unit – each {product.name} would lose money, but other products would still cover the target.</Notice>
               )}

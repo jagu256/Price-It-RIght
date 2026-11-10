@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useStore } from '../app/StoreContext';
+import ShowMath from '../components/ShowMath';
 import { CellInput, ErrorList, Notice, SectionHeader, SignedMoney, StatusPill, SubHeader } from '../components/ui';
 import { formatCAD, formatSignedCAD } from '../lib/format';
 import { UNITS, formatQuantity, parseQuantity, toBase } from '../lib/inventory';
@@ -16,6 +17,7 @@ import {
   type PlanCheck,
   type PlanFinancials,
 } from '../lib/planning';
+import { summaryMath } from '../lib/showMath';
 import { parseUnits } from '../lib/validation';
 
 export default function ProductionPlanner() {
@@ -217,6 +219,7 @@ function Comparison({ original, originalCheck, modified, modifiedCheck }: { orig
     ['Contribution margin', original.summary.totalCM, modified.summary.totalCM],
     ['Operating profit', original.summary.operatingProfit, modified.summary.operatingProfit],
   ];
+  const math = summaryMath(modified.summary, 'units sold (planned units, but never more than expected demand)');
   const label = (c: PlanCheck) => (c.feasibility === 'feasible' ? '✅ Feasible' : c.feasibility === 'infeasible' ? '🔴 Not feasible – inventory short' : '🟡 Unverified – some products have no recipe');
   return (
     <div className="card overflow-x-auto p-4 sm:p-6" aria-live="polite">
@@ -248,6 +251,8 @@ function Comparison({ original, originalCheck, modified, modifiedCheck }: { orig
           Planned above demand: {modified.unsold.map((u) => `${u.units} ${u.name}`).join(', ')}. Unsold units are not counted as revenue.
         </p>
       )}
+      <ShowMath label="the modified production plan" items={[math.revenue, math.variableCosts, math.contributionMargin, math.operatingProfit]} />
+      {modifiedCheck.feasibility === 'infeasible' && <p className="mt-2 text-xs font-semibold text-loss-700">The math describes a plan your inventory can’t support, so its profit is not achievable.</p>}
     </div>
   );
 }

@@ -64,6 +64,42 @@ describe('home page', () => {
   });
 });
 
+describe('show the math', () => {
+  it('reveals the formula with the demo café’s numbers, matching the card, and hides again', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const dash = within(panel('dashboard'));
+    const card = dash.getByRole('heading', { name: 'Projected Operating Profit' }).closest('article')!;
+    expect(within(card).queryByRole('region')).not.toBeInTheDocument();
+
+    await user.click(dash.getByRole('button', { name: 'Show the math for Projected Operating Profit' }));
+    const math = within(card).getByRole('region', { name: 'The math for Projected Operating Profit' });
+    expect(math).toHaveTextContent('Operating profit = total contribution margin − fixed costs');
+    expect(math).toHaveTextContent('$2,475 − $1,500 = $975');
+    // The explanation ends in the same figure the card displays.
+    const displayed = card.querySelector('p.font-display')!.textContent!;
+    expect(displayed).toBe('$975');
+    expect(math.textContent).toContain(`= ${displayed}`);
+
+    await user.click(dash.getByRole('button', { name: 'Hide the math for Projected Operating Profit' }));
+    expect(within(card).queryByRole('region')).not.toBeInTheDocument();
+  });
+
+  it('explains break-even on the dashboard and the required price in the Pricing Lab', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const dash = within(panel('dashboard'));
+    await user.click(dash.getByRole('button', { name: 'Show the math for break-even' }));
+    expect(dash.getByRole('region', { name: 'The math for break-even' })).toHaveTextContent('$1,500 ÷ ($2,475 ÷ 750) = 454.55, rounded UP to 455 units');
+
+    await go('pricing');
+    const lab = within(panel('pricing'));
+    const target = lab.getByLabelText('Desired monthly operating profit');
+    await user.clear(target);
+    await user.type(target, '1500');
+    await user.click(lab.getByRole('button', { name: 'Show the math for the minimum calculated price' }));
+    expect(lab.getByRole('region', { name: 'The math for the minimum calculated price' })).toHaveTextContent('$2 + ($1,500 + $1,500 − $1,275) ÷ 300 = $7.75');
+  });
+});
+
 describe('products', () => {
   it('adds, duplicates and deletes products (with confirmation)', async () => {
     const { user } = setup();

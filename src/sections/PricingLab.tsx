@@ -3,12 +3,14 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
 import ProfitGoal from '../components/ProfitGoal';
+import ShowMath from '../components/ShowMath';
 import SmartPricing from '../components/SmartPricing';
 import SurpriseEvents from '../components/SurpriseEvents';
 import { CellInput, ErrorList, NeedsValidBusiness, Notice, SectionHeader, SignedMoney, SubHeader } from '../components/ui';
 import type { BusinessSummary } from '../lib/business';
 import { formatCAD, formatCompactCAD, formatSignedCAD, roundCents } from '../lib/format';
 import { resolveScenario } from '../lib/pricing';
+import { summaryMath } from '../lib/showMath';
 import { toInputText } from '../lib/validation';
 
 export default function PricingLab() {
@@ -25,6 +27,12 @@ export default function PricingLab() {
     </div>
   );
 }
+
+/** The modified plan’s figures, explained with the same summary the table shows. */
+const planMath = (s: BusinessSummary) => {
+  const x = summaryMath(s);
+  return [x.revenue, x.variableCosts, x.contributionMargin, x.operatingProfit];
+};
 
 const breakEvenText = (s: BusinessSummary) =>
   s.breakEven.status === 'reachable' ? `${s.breakEven.totalUnits.toLocaleString('en-CA')} units` : s.breakEven.status === 'no-fixed-costs' ? '0 units' : 'Not Available';
@@ -170,6 +178,7 @@ function WhatIfSimulator() {
         </table>
         {!modified && <p className="mt-3 text-sm font-semibold text-loss-700">Fix the highlighted values to see the modified plan.</p>}
         {modified && !scenario.changed && <p className="mt-3 text-sm text-sage-600">No changes yet – edit any value above to compare.</p>}
+        {modified && <ShowMath label="the modified plan" items={planMath(modified)} />}
       </div>
 
       <div className="flex flex-wrap gap-3">

@@ -5,6 +5,7 @@ import { CoinsIcon, PieIcon, ShieldIcon, TagIcon, TrendDownIcon, TrendIcon } fro
 import PriceSlider from '../components/PriceSlider';
 import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
+import ShowMath from '../components/ShowMath';
 import { NeedsValidBusiness, Notice, SectionHeader, SubHeader } from '../components/ui';
 import { calculate } from '../lib/accounting';
 import { scaledTotals, type BusinessSummary } from '../lib/business';
@@ -12,6 +13,7 @@ import { sliderMax } from '../lib/chartData';
 import { breakEvenSummary, breakEvenValue, marginOfSafetySummary } from '../lib/explain';
 import { formatCAD, formatCompactCAD, formatNumber, formatPercent, roundCents, unitsLabel } from '../lib/format';
 import type { ParsedProduct } from '../lib/model';
+import { breakEvenMath, marginOfSafetyMath, singleBreakEvenMath, summaryMath } from '../lib/showMath';
 import { parseMoney, toInputText } from '../lib/validation';
 
 export const CHART_COLOURS = ['#3E5A40', '#C9A227', '#86A882', '#A8324F', '#5B7DA8', '#8C6D1F', '#6B5B95', '#D08C60'];
@@ -32,6 +34,7 @@ export default function ProfitDashboard() {
 
 function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduct[] }) {
   const profit = roundCents(s.operatingProfit);
+  const math = summaryMath(s);
   return (
     <>
       <div className={`rounded-3xl p-5 sm:p-6 ${profit < 0 ? 'bg-loss-50 ring-1 ring-loss-100' : 'bg-sage-700 text-cream-50'}`} aria-live="polite">
@@ -48,10 +51,10 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <ResultCard title="Total Monthly Revenue" value={formatCAD(s.totalRevenue)} detail="Sum of every product’s price × expected units." icon={<CoinsIcon />} />
-        <ResultCard title="Total Variable Costs" value={formatCAD(s.totalVariableCosts)} detail="Costs that grow with each unit sold." icon={<TagIcon />} />
-        <ResultCard title="Total Contribution Margin" value={formatCAD(s.totalCM)} detail="Revenue − variable costs. What’s left to cover fixed costs." icon={<PieIcon />} tone={s.totalCM < 0 ? 'loss' : 'neutral'} />
-        <ResultCard title="Monthly Fixed Costs" value={formatCAD(s.fixedCosts)} detail="Entered once for the whole business." icon={<ShieldIcon />} />
+        <ResultCard title="Total Monthly Revenue" value={formatCAD(s.totalRevenue)} detail="Sum of every product’s price × expected units." icon={<CoinsIcon />} math={math.revenue} />
+        <ResultCard title="Total Variable Costs" value={formatCAD(s.totalVariableCosts)} detail="Costs that grow with each unit sold." icon={<TagIcon />} math={math.variableCosts} />
+        <ResultCard title="Total Contribution Margin" value={formatCAD(s.totalCM)} detail="Revenue − variable costs. What’s left to cover fixed costs." icon={<PieIcon />} tone={s.totalCM < 0 ? 'loss' : 'neutral'} math={math.contributionMargin} />
+        <ResultCard title="Monthly Fixed Costs" value={formatCAD(s.fixedCosts)} detail="Entered once for the whole business." icon={<ShieldIcon />} math={math.fixedCosts} />
         <ResultCard
           title={profit < 0 ? 'Projected Operating Loss' : 'Projected Operating Profit'}
           value={formatCAD(profit)}
@@ -59,12 +62,14 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
           detail="Total contribution margin − fixed costs."
           icon={profit < 0 ? <TrendDownIcon /> : <TrendIcon />}
           tone={profit > 0 ? 'profit' : profit < 0 ? 'loss' : 'neutral'}
+          math={math.operatingProfit}
         />
         <ResultCard
           title="Overall CM Ratio"
           value={s.overallCMRatio === null ? 'N/A' : formatPercent(s.overallCMRatio)}
           detail={s.overallCMRatio === null ? 'Not available when expected revenue is $0.' : 'Share of each sales dollar left after variable costs.'}
           icon={<PieIcon />}
+          math={math.cmRatio}
         />
       </div>
 
@@ -197,6 +202,7 @@ function BreakEven({ s, products }: { s: BusinessSummary; products: ParsedProduc
             <Stat label="Break-even units (total)" value={unitsLabel(be.totalUnits)} note={`Theoretical: ${formatNumber(be.totalUnitsExact)} = fixed costs ÷ weighted CM, rounded up`} />
             <Stat label="Break-even revenue" value={formatCAD(be.revenueExact)} note={`Whole-unit plan below: ${formatCAD(be.revenueAtAllocation)}`} />
           </dl>
+          <ShowMath label="break-even" items={breakEvenMath(s)} />
           <div className="overflow-x-auto">
             <table className="data-table min-w-[24rem]">
               <caption className="sr-only">Break-even units by product at the expected sales mix</caption>
@@ -227,6 +233,7 @@ function BreakEven({ s, products }: { s: BusinessSummary; products: ParsedProduc
               ? `Margin of safety: ${formatCAD(s.marginOfSafety)} (${formatPercent(s.marginOfSafetyPercent)} of expected revenue, measured against the theoretical break-even revenue of ${formatCAD(be.revenueExact)}). ${s.marginOfSafety >= 0 ? 'Sales could fall this much before reaching break-even.' : 'Expected revenue is below break-even.'}`
               : 'Margin of safety: Not Available.'}
           </p>
+          <ShowMath label="margin of safety" items={marginOfSafetyMath(s)} />
         </>
       ) : (
         <Notice tone={be.status === 'no-fixed-costs' ? 'success' : 'error'} title={be.status === 'no-fixed-costs' ? 'Break-even at 0 units' : 'Break-even: Not Available'}>
@@ -310,6 +317,7 @@ function SingleProductBreakEven({ products, fixedCosts }: { products: ParsedProd
           <div className="space-y-1 text-sage-800">
             <p>{breakEvenSummary(r)}</p>
             <p className="text-sm text-sage-600">{marginOfSafetySummary(r)}</p>
+            <ShowMath label="one-product break-even" items={singleBreakEvenMath(r)} />
           </div>
         </div>
       )}

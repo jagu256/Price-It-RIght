@@ -54,6 +54,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **📦 Smart Inventory Hub** | Upload **Excel (.xlsx) or CSV** by file picker or drag-and-drop. Includes worksheet choice, preview, column mapping you confirm, row-by-row validation, and replace or add. Downloadable template. Editable inventory table with unit conversion, purchase costs and 🟢/🟡/🔴 status. **🔗 Connect Your Products to Inventory**: recipes typed in or uploaded, with matching for unknown names. **🧾 Know Your Product Costs**: material costing, using manual or itemized cost. **📦 How Much Can You Produce?**: single-product capacity and shared-inventory check. |
 | **🏆 Production Planner** | **What Should I Produce More Of?** shows CM per unit of the scarce resource, with a chart and explanation. Production Plan Simulator: adjust planned units and hypothetical extra inventory, then compare the original and modified plans. Includes a "keep my mix" constrained plan, a labelled **suggested** plan, and inventory alerts. |
 | **🎮 Business Challenge** | **Can You Save Your Business?** Beginner, Intermediate and Expert fictional scenarios with clear success conditions. Kept separate from your own data. |
+| **🧮 Show the math** (everywhere) | A small **Show the math** button on every main number: the six dashboard cards, sales-mix break-even, margin of safety, the one-product break-even calculator, the What-If modified plan, the minimum calculated price, the profit goal gap, and the Production Planner's modified plan. It shows the formula in words, then the same formula with your own numbers, e.g. *Operating profit = total contribution margin − fixed costs* → *$2,475 − $1,500 = $975*. |
 | **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. |
 
 ## Main user workflows
@@ -81,6 +82,7 @@ All calculations are plain, independently tested TypeScript functions in [`src/l
 | `recipes.ts` | Recipes and material cost |
 | `planning.ts` | Shared inventory, shortages, CM per scarce resource, constrained and suggested plans |
 | `pricing.ts` | Scenarios, required price, profit goals |
+| `showMath.ts` | "Show the math": turns an already-calculated result into the formula in words plus the formula with the user's numbers |
 | `importer.ts`, `templates.ts` | Excel/CSV import and templates |
 | `events.ts`, `challenges.ts` | Surprise events and challenges |
 | `report.ts`, `reportPdf.ts` | The report's contents and its PDF layout |
@@ -126,6 +128,23 @@ Fixed costs are **never** subtracted from each product. Product CM is not profit
   - *One product:* extra units = ⌈additional CM ÷ that product's CM⌉. Not possible if its CM ≤ 0.
   - *Sales mix (expected or user-chosen):* the smallest whole-unit plan whose CM ≥ fixed costs + target. Products are never assumed to have the same margin.
 
+### Show the math
+The explanations do **no calculating of their own**. Each one receives a result that another function in `src/lib` already produced (the same object the screen displays) and formats its figures with the same helpers the cards use. This means the explanation cannot disagree with the number on screen. The formulas shown are exactly the ones in this section:
+
+| Number | Formula shown | Demo café |
+|---|---|---|
+| Total revenue | Selling price × expected units, added up for every product (one working line per product) | $1,800 + $600 + $900 + $600 = $3,900 |
+| Total variable costs | Variable cost per unit × expected units, added up for every product | $600 + $225 + $400 + $200 = $1,425 |
+| Total contribution margin | Total revenue − total variable costs | $3,900 − $1,425 = $2,475 |
+| Operating profit | Total contribution margin − fixed costs | $2,475 − $1,500 = $975 |
+| Overall CM ratio | Total contribution margin ÷ total revenue × 100 | $2,475 ÷ $3,900 × 100 = 63.5% |
+| Weighted-average CM per unit | Total contribution margin ÷ total expected units | $2,475 ÷ 750 units = $3.30 |
+| Break-even units (sales mix) | Fixed costs ÷ weighted-average CM per unit, rounded up | $1,500 ÷ ($2,475 ÷ 750) = 454.55, rounded UP to 455 units |
+| Break-even revenue | Fixed costs ÷ (total contribution margin ÷ total revenue) | $1,500 ÷ ($2,475 ÷ $3,900) = $2,363.64 |
+| Margin of safety | Expected revenue − break-even revenue | $3,900 − $2,363.64 = $1,536.36 |
+
+Total CM ÷ total units is the same number as Σ (mix share × CM per unit); the explanation uses the first form because both figures are already on the dashboard. Negative figures are put in brackets, e.g. −$300 − (−$200) = −$100. When a figure is not available (for example the CM ratio with $0 revenue) the explanation says why instead of showing a number.
+
 ### Inventory and costing
 | Measure | Formula |
 |---|---|
@@ -159,6 +178,7 @@ Fixed costs are **never** subtracted from each product. Product CM is not profit
 - **Buying inventory is a cash outflow, not an expense.** Its cost is recognised through variable cost per unit when products are sold, so hypothetical extra inventory does not reduce operating profit by itself.
 - **Inventory turnover is not calculated**, because it needs beginning/ending inventory values and cost-of-goods-sold records. It is only defined in the learning section.
 - Surprise events and challenges are **fictional, hypothetical scenarios**, not forecasts.
+- **Show the math** displays money rounded to the cent and percentages to one decimal, like the rest of the app. Where a displayed step is rounded (e.g. a weighted-average CM of $2.67), a note says the unrounded figure is used for the next step.
 
 ## Inventory upload instructions
 
@@ -227,13 +247,15 @@ npm run test:watch  # re-run while editing
 | `inventoryPlanning.test.ts` | Required inventory example; **shared-inventory scenario worked by hand**; shortages; low stock; extra inventory; CM per litre; material costs; constrained and suggested plans; unsold units; zero inventory; tied limiting items; demand limits; recipes (missing, invalid units, deleted items); costing without double counting; missing costs; inventory validation and duplicates; unit changes; all sample businesses; store actions (add, duplicate, delete, scenario reset/apply) |
 | `importer.test.ts` | CSV and real Excel files (multiple sheets); unsupported, empty, oversized and damaged files; column guessing; required and duplicate mappings; missing values; negative and invalid numbers; unsupported units; duplicates flagged on both rows; existing names; wrong-mapping warning; row limit; **downloaded templates import cleanly**; recipe import with unknown-name matching; incompatible units; duplicate recipe lines |
 | `pricingEvents.test.ts` | Scenario comparison and invalid scenario values; required price (single, multi-product, rounding up, zero sales, already met, below VC); profit goals; extra units per product; mix plan for target; all five surprise events; all three challenges (success only for valid, feasible plans); report contents; PDF generation |
+| `showMath.test.ts` | "Show the math": the demo café's explanations (profit $2,475 − $1,500 = $975, revenue, variable costs, CM, CM ratio, break-even 455 units and $2,363.64, margin of safety); **each explanation's result equals the figure the dashboard displays**; losses and negative numbers; $0 revenue (N/A, no NaN); rounded weighted CM note; one-product break-even; required price ($7.75) with its rounding step and profit check; profit goal gap |
 | `accounting.test.ts`, `validation.test.ts`, `explain.test.ts`, `chartData.test.ts`, `inventory.test.ts` | The original single-product calculator, input validation and explanations (kept and still used) |
-| `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
+| `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
 
 **Automated test record (development environment, Vitest 3.2.7, Node 22):**
 - 2 November 2026, original single-product version: 61 tests passed.
 - 2 November 2026, with the Inventory & Sales Estimator: 98 tests passed.
 - 2 November 2026, this upgraded version: **156 tests in 10 files passed**. `npm run build` completed without errors.
+- 9 November 2026, after adding "Show the math" (Vitest 3.2.7, Node 26): **171 tests in 11 files passed**. `npm run build` completed without errors.
 
 Re-run `npm test` yourself to confirm.
 
@@ -267,6 +289,12 @@ Re-run `npm test` yourself to confirm.
 | 21 | Surprise event | Rent increase $300 on demo | Profit $975 → $675; accept applies it | | |
 | 22 | PDF report | Business Report → Download | PDF downloads with all sections, labelled CAD | | |
 | 23 | Mobile | Open on a phone | All sections usable, no sideways page scrolling | | |
+| 24 | Show the math – profit | Demo → Profit Dashboard → *Show the math* on Projected Operating Profit | "Operating profit = total contribution margin − fixed costs" then "$2,475 − $1,500 = $975"; same $975 as the card; button changes to *Hide the math* and hides it | | |
+| 25 | Show the math – revenue | Demo → *Show the math* on Total Monthly Revenue | One line per product (Coffee $6 × 300 = $1,800 …) and $1,800 + $600 + $900 + $600 = $3,900 | | |
+| 26 | Show the math – break-even | Demo → *Show the math* under the break-even figures | $1,500 ÷ ($2,475 ÷ 750) = 454.55, rounded UP to 455 units; break-even revenue $2,363.64 | | |
+| 27 | Show the math – follows changes | Change Coffee price to $7 in My Business, reopen the profit math | Numbers in the explanation change with the card ($2,775 − $1,500 = $1,275) | | |
+| 28 | Show the math – required price | Demo → Pricing Lab → target $1,500 → *Show the math* | $2 + ($1,500 + $1,500 − $1,275) ÷ 300 = $7.75, plus a profit check ending in $1,500 | | |
+| 29 | Show the math – phone | Open several explanations on a phone | Text wraps inside the card; no sideways page scrolling | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
@@ -313,6 +341,7 @@ On 2 November 2026 a separate checking step (a second AI agent that had not seen
 - **Inventory is a snapshot**; there is no purchasing, reorder points, lead times or inventory turnover.
 - **Taxes:** no income tax, GST/PST/HST, interest or financing costs. Operating profit is not net income.
 - **Rounding:** itemized variable costs are rounded to the nearest cent per unit before multiplying by volume.
+- **Show the math** covers the main figures only. It does not explain every table cell, the charts, the inventory figures, the challenges or the PDF report, and it gives no explanation when a break-even point does not exist (the screen already says why). With many products the revenue and variable-cost explanations become long lists.
 - **PDF fonts** use standard Latin characters, so emojis and some symbols are left out of the PDF.
 - **Previews:** some preview environments block file downloads (templates and PDF). They work when the app runs locally or on Vercel.
 

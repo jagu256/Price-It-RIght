@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useStore } from '../app/StoreContext';
 import { formatCAD, formatPercent, formatSignedCAD, unitsLabel } from '../lib/format';
 import { extraUnitsOfProduct, goalProgress, planForTarget } from '../lib/pricing';
+import { goalMath } from '../lib/showMath';
+import ShowMath from './ShowMath';
 import { Field, parseSignedAmount } from './SmartPricing';
 import { ErrorList, Notice, SignedMoney, SubHeader } from './ui';
 
@@ -47,6 +49,7 @@ export default function ProfitGoal() {
               </div>
             ))}
           </dl>
+          <ShowMath label="the profit goal" items={goalMath(g)} />
 
           <div>
             <div className="flex justify-between text-sm font-semibold text-sage-700">
