@@ -110,6 +110,35 @@ describe('show the math', () => {
   });
 });
 
+describe('sensitivity analysis', () => {
+  it('shows ±10% results and DOL for the demo café, and “Not meaningful” for a loss', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const dash = within(panel('dashboard'));
+    const section = within(dash.getByRole('heading', { name: /Sensitivity analysis/ }).closest('section')!);
+    const rowOf = (name: string) => section.getByRole('rowheader', { name }).closest('tr')!;
+    expect(rowOf('Selling prices')).toHaveTextContent('$1,365');
+    expect(rowOf('Selling prices')).toHaveTextContent('+$390');
+    expect(rowOf('Variable costs')).toHaveTextContent('$832.50');
+    expect(rowOf('Sales volume (same mix)')).toHaveTextContent('$1,222.50');
+    expect(rowOf('Sales volume (same mix)')).toHaveTextContent('+25.4%');
+    expect(rowOf('Fixed costs')).toHaveTextContent('$825');
+    expect(section.getByText('Degree of operating leverage (DOL)').parentElement).toHaveTextContent('2.54');
+
+    await user.click(section.getByRole('button', { name: 'Show the math for degree of operating leverage' }));
+    expect(section.getByRole('region', { name: 'The math for degree of operating leverage' })).toHaveTextContent('$2,475 ÷ $975 = 2.54');
+
+    await go('my-business');
+    const fixed = screen.getByLabelText('Monthly fixed costs (whole business)');
+    await user.clear(fixed);
+    await user.type(fixed, '3000');
+    await go('dashboard');
+    // The dashboard redrew (it pauses while a field is blank), so look the section up again.
+    const after = within(dash.getByRole('heading', { name: /Sensitivity analysis/ }).closest('section')!);
+    expect(after.getByText('Not meaningful')).toBeInTheDocument();
+    expect(after.getByText(/The business has an operating loss/)).toBeInTheDocument();
+  });
+});
+
 describe('save my work', () => {
   const jsonFile = (text: string, name = 'saved.json') => new File([text], name, { type: 'application/json' });
   const coffeeSales = () => screen.getByLabelText('Expected monthly sales for Coffee');

@@ -12,6 +12,7 @@ import type { PricingResults } from './accounting';
 import type { BusinessSummary } from './business';
 import { formatCAD, formatNumber, formatPercent, formatSignedCAD, roundCents, unitsLabel } from './format';
 import type { GoalProgress, RequiredPriceResult } from './pricing';
+import { formatLeverage, type OperatingLeverage, type SensitivityResult } from './sensitivity';
 
 export interface MathExplanation {
   /** Which number this explains. */
@@ -285,6 +286,40 @@ export function goalMath(g: GoalProgress): MathExplanation[] {
         : `${formatCAD(g.target)} − ${m(g.current)} = ${formatCAD(g.additionalCMRequired)}`,
       resultText: formatCAD(g.additionalCMRequired),
       note: 'Fixed costs stay the same, so every extra dollar of contribution margin is an extra dollar of operating profit.',
+    },
+  ];
+}
+
+/* ------------------------------------------------------------------ */
+/* Sensitivity analysis and operating leverage                         */
+/* ------------------------------------------------------------------ */
+
+/** One explanation per input: p % of the total it affects, then the new profit. */
+export function sensitivityMath(r: SensitivityResult): MathExplanation[] {
+  return r.rows.map((row) => ({
+    title: `${row.label} +${r.percent}%`,
+    formula: `Change in operating profit = ${r.percent}% × ${row.baseName}${row.upChange < 0 ? ', which lowers profit' : ''}`,
+    steps: [],
+    withNumbers: `${r.percent}% × ${formatCAD(row.baseAmount)} = ${formatSignedCAD(row.upChange)}, so ${formatCAD(r.baseProfit)} ${row.upChange < 0 ? '−' : '+'} ${formatCAD(Math.abs(row.upChange))} = ${formatCAD(row.upProfit)}`,
+    resultText: formatCAD(row.upProfit),
+    note: `A ${r.percent}% decrease gives the opposite change: ${formatSignedCAD(row.downChange)} → ${formatCAD(row.downProfit)}.`,
+  }));
+}
+
+export function leverageMath(d: OperatingLeverage, r: SensitivityResult): MathExplanation[] {
+  if (d.status !== 'ok') return [];
+  const volume = r.rows.find((x) => x.factor === 'volume');
+  return [
+    {
+      title: 'Degree of operating leverage',
+      formula: 'Degree of operating leverage = total contribution margin ÷ operating profit',
+      steps: [],
+      withNumbers: `${formatCAD(d.totalCM)} ÷ ${formatCAD(d.operatingProfit)} = ${formatLeverage(d.value)}`,
+      resultText: formatLeverage(d.value),
+      note:
+        volume && volume.upPercent !== null
+          ? `Check: sales volume +${r.percent}% changes profit by ${formatPercent(volume.upPercent)}, which is ${formatLeverage(d.value)} × ${r.percent}%.`
+          : undefined,
     },
   ];
 }

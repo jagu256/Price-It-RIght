@@ -5,6 +5,7 @@ import { CoinsIcon, PieIcon, ShieldIcon, TagIcon, TrendDownIcon, TrendIcon } fro
 import PriceSlider from '../components/PriceSlider';
 import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
+import Sensitivity from '../components/Sensitivity';
 import ShowMath from '../components/ShowMath';
 import { NeedsValidBusiness, Notice, SectionHeader, SubHeader } from '../components/ui';
 import { calculate } from '../lib/accounting';
@@ -76,6 +77,7 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
       <ProfitLenses />
       <Charts s={s} products={products} />
       <BreakEven s={s} products={products} />
+      <Sensitivity s={s} />
       <SingleProductBreakEven products={products} fixedCosts={s.fixedCosts} />
     </>
   );

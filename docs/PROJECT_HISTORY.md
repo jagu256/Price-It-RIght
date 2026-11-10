@@ -93,6 +93,16 @@ Work moved from claude.ai to Claude Code. The repository was cloned fresh from G
 
 **Checks:** 196 tests in 12 files passed (171 earlier + 16 unit + 9 click-through); build passed. In a browser: typing $1,750 saved immediately with schema version 1 and only the business; after a page reload $1,750 and the "restored" message were back; at 375 px the Save card fits with no sideways scrolling.
 
+### Export label (9 Nov 2026)
+The student expected "Export my business" to give a spreadsheet. The .json file is a backup for re-importing, so the button now says "(backup file)" and a note explains why a computer may show it as a code file. The Excel download is Feature 7.
+
+### Feature 3 – Sensitivity analysis + degree of operating leverage (9 Nov 2026)
+- New `src/lib/sensitivity.ts`: profit when selling prices, variable costs, sales volume (same mix) or fixed costs move ±10 % on their own, in whole cents; degree of operating leverage = total CM ÷ operating profit, or "not meaningful" (with the reason) at $0 profit or a loss.
+- On the Profit Dashboard: a table, a tornado chart (largest swing at the top), the DOL figure and "Show the math" for both.
+- From the student's brief, all five hand-checked answers are reproduced exactly by unit tests: +$390 → $1,365; −$142.50 → $832.50; +$247.50 → $1,222.50 (+25.4 % = DOL × 10 %); −$150 → $825; DOL 2.54.
+
+**Checks:** 210 tests in 13 files passed; build passed. At 375 px the dashboard has no sideways scrolling and the chart draws all 8 bars.
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
