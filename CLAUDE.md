@@ -1,5 +1,7 @@
 # Price It Right – notes for Claude Code
 
+> **Start here:** read [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) for everything done so far, and [`docs/requirements/`](docs/requirements/) for the student's original briefs (1 = first app, 2 = inventory estimator, 3 = full upgrade – the current target).
+
 Small-business pricing, inventory and profitability simulator for an **ACCT 4500** university group project (KPU). The student owner has no coding background, so explain changes in plain language and keep the code simple enough to explain in an oral demo.
 
 ## Commands
