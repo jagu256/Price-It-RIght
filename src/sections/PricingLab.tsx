@@ -3,6 +3,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
 import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } from '../components/AfterTaxTarget';
+import DemandExplorer from '../components/DemandExplorer';
 import ProfitGoal from '../components/ProfitGoal';
 import ShowMath from '../components/ShowMath';
 import SmartPricing from '../components/SmartPricing';
@@ -10,7 +11,7 @@ import SurpriseEvents from '../components/SurpriseEvents';
 import { CellInput, ErrorList, NeedsValidBusiness, Notice, SectionHeader, SignedMoney, SubHeader } from '../components/ui';
 import type { BusinessSummary } from '../lib/business';
 import { formatCAD, formatCompactCAD, formatSignedCAD, roundCents } from '../lib/format';
-import { resolveScenario } from '../lib/pricing';
+import { contributionFromOthers, resolveScenario } from '../lib/pricing';
 import { summaryMath } from '../lib/showMath';
 import { toInputText } from '../lib/validation';
 
@@ -215,8 +216,41 @@ function WhatIfSimulator() {
 
       <Notice tone="idea">
         Each scenario uses only the numbers you enter. In real life, changing a price can change how many customers buy – adjust
-        expected sales too if you expect demand to react.
+        expected sales too if you expect demand to react, or try the optional assumption below.
       </Notice>
+      <WhatIfDemand />
     </section>
+  );
+}
+
+/** The optional price-sensitive demand assumption for one product of the CURRENT plan; "Try" copies the result into the modified plan. */
+function WhatIfDemand() {
+  const { dispatch, model } = useStore();
+  const [productId, setProductId] = useState(model.products[0]?.id ?? '');
+  const product = model.products.find((p) => p.id === productId) ?? model.products[0];
+  if (!product || model.fixedCosts === null) return null;
+  return (
+    <div className="space-y-2">
+      <label className="flex flex-wrap items-center gap-2 text-sm font-semibold text-sage-900">
+        Product for the demand assumption
+        <select className="select" value={product.id} onChange={(e) => setProductId(e.target.value)} aria-label="Product for the demand assumption">
+          {model.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+      </label>
+      <DemandExplorer
+        key={product.id}
+        idPrefix="whatif-demand"
+        productName={product.name}
+        basePrice={product.price}
+        baseUnits={product.units}
+        variableCost={product.variableCost}
+        otherContribution={contributionFromOthers(model.products, product.id)}
+        fixedCosts={model.fixedCosts}
+        onTry={(price, units) => {
+          dispatch({ type: 'scenario-set', productId: product.id, field: 'price', value: toInputText(price) });
+          dispatch({ type: 'scenario-set', productId: product.id, field: 'units', value: String(units) });
+        }}
+      />
+    </div>
   );
 }

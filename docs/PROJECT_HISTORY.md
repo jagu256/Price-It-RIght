@@ -110,6 +110,15 @@ The student expected "Export my business" to give a spreadsheet. The .json file 
 
 **Checks:** 223 tests in 14 files passed; build passed.
 
+### Feature 5 – Optional price-sensitive demand (9 Nov 2026)
+- New `src/lib/demand.ts`: "for every $1 change in price, sales change by X units (opposite direction)", with X a whole number ≥ 0 and units rounded down and never negative; best price found by checking every cent from $0 to where sales reach zero (no calculus shortcut); lowest and highest prices that reach a target.
+- One shared panel, off by default, in the What-If simulator (with "Try this price in the modified plan") and in *What Price Should I Charge?*. It has a profit-vs-price chart and a "best price under this assumption only" label. The "contribution from other products" sum moved into a tested library function (`contributionFromOthers`), so the screen no longer does that arithmetic itself.
+- Hand check reproduced: the Intermediate challenge's rule (400 − 20 × price, cost $2, fixed $1,300) gives 220 units and $240 profit at $9.
+
+**Mistakes caught:** two test expectations written by the AI were wrong, and the code was right. (1) It guessed $8.70 as the lowest price for a $200 profit; checking by hand gives $8.58 (228 units, $200.24). (2) It expected no sales at any price when none were expected at today's price; under the linear rule, lower prices win customers, so the best price is $3.50. A debugging run also showed that, because units are whole, the prices reaching a target are not one unbroken range ($13.35 works, $13.36 falls short, $13.40 works). The screen now says this instead of implying every price in between works.
+
+**Checks:** 242 tests in 15 files passed; build passed. At 375 px with both demand panels and the after-tax panel open: no sideways scrolling.
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

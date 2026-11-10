@@ -143,6 +143,11 @@ export function goalProgress(currentProfit: number, target: number): GoalProgres
   };
 }
 
+/** Total contribution margin of every product EXCEPT one (expected units), in dollars. */
+export function contributionFromOthers(products: ParsedProduct[], exceptId: string): number {
+  return products.filter((p) => p.id !== exceptId).reduce((s, p) => s + (toCents(p.price) - toCents(p.variableCost)) * p.units, 0) / 100;
+}
+
 /** Extra units of ONE product needed to earn `additionalCM` (other products unchanged). */
 export function extraUnitsOfProduct(additionalCM: number, product: ParsedProduct): number | null {
   const cmC = toCents(product.price) - toCents(product.variableCost);

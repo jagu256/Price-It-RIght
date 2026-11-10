@@ -7,7 +7,7 @@ Small-business pricing, inventory and profitability simulator for an **ACCT 4500
 ## Commands
 - `npm install` – install dependencies (first time)
 - `npm run dev` – local dev server (http://localhost:5173)
-- `npm test` – Vitest suite (223 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
+- `npm test` – Vitest suite (242 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
 - `npm run build` – type-check (`tsc -b`) + production build; must succeed before pushing
 - Deployment: Vercel builds automatically on every push to `main` (GitHub repo `jagu256/Price-It-RIght`, live at https://price-it-r-ight.vercel.app). Never push a failing build.
 
@@ -25,6 +25,7 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
   - `saveWork.ts` save file (schema version), import validation, localStorage wrapped in try/catch. Only the business is saved – never scenario/planner/challenges. UI: `components/SaveMyWork.tsx`; auto-save lives in `app/StoreContext.tsx`
   - `sensitivity.ts` ±10 % one-at-a-time sensitivity and degree of operating leverage (dashboard: `components/Sensitivity.tsx`)
   - `tax.ts` optional after-tax target (user-entered rate, pre-tax = target ÷ (1 − rate) rounded up, no tax on a loss). UI `components/AfterTaxTarget.tsx`; it feeds `SmartPricing` and `ProfitGoal` via a `linkedTarget` prop
+  - `demand.ts` OPTIONAL price-sensitive demand (off by default), best price by checking every cent – "best under this assumption only". UI `components/DemandExplorer.tsx` (What-If + SmartPricing)
   - `showMath.ts` "Show the math" explanations – built only from already-calculated results, never its own arithmetic (UI: `components/ShowMath.tsx`)
   - `importer.ts`, `templates.ts` Excel/CSV import and templates; `events.ts`, `challenges.ts`; `report.ts` + `reportPdf.ts`
   - `store.ts` single reducer for all app state; `types.ts` input shapes; `samples.ts` fictional sample businesses
@@ -58,4 +59,4 @@ Sage green / cream / white / pastel yellow / muted dark green; rounded cards, so
 - Fill in the README manual testing table (Actual Result / Pass-Fail) – only with real results.
 - Run real user testing, record feedback in the README section, and make at least one improvement based on it (required by the brief). Never invent feedback or results.
 - Vercel: remove the `price-it-right.ca` redirect unless the domain is actually owned and its DNS is set (A record @ → 216.198.79.1).
-- Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target (9 Nov 2026). Ideas discussed but not built yet: price-sensitive demand option, special-order / make-or-buy tool, Excel export, French toggle.
+- Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand (9 Nov 2026). Ideas discussed but not built yet: special-order / make-or-buy tool, Excel export, French toggle.

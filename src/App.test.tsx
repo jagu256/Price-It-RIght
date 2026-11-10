@@ -171,6 +171,47 @@ describe('after-tax target profit', () => {
   });
 });
 
+describe('price-sensitive demand (optional)', () => {
+  it('is off by default, finds the best price by checking every cent, and can try it in the What-If plan', async () => {
+    const { user } = setup('pricing', 'demo');
+    const lab = within(panel('pricing'));
+    const whatIf = within(lab.getByRole('heading', { name: /What-If Pricing Simulator/ }).closest('section')!);
+    expect(whatIf.queryByText('Best price under this assumption only')).not.toBeInTheDocument();
+    expect(whatIf.queryByLabelText(/For every \$1 change in price/)).not.toBeInTheDocument();
+
+    await user.click(whatIf.getByRole('checkbox', { name: /customers react to the price of Coffee/ }));
+    await user.type(whatIf.getByLabelText(/For every \$1 change in price/), '20');
+    const best = whatIf.getByTestId('whatif-demand-best');
+    // 300 coffees at $6, 20 fewer per $1: $11.50 sells 190 → (11.50 − 2) × 190 + $1,275 − $1,500 = $1,580
+    expect(best).toHaveTextContent('$11.50');
+    expect(best).toHaveTextContent('190 units');
+    expect(best).toHaveTextContent('$1,580');
+    expect(best).toHaveTextContent('checking every cent from $0 to $21');
+    expect(whatIf.getByRole('img', { name: /operating profit against the price of Coffee/ })).toBeInTheDocument();
+
+    await user.click(whatIf.getByRole('button', { name: /Try \$11\.50 \(190 units\) in the modified plan/ }));
+    expect(lab.getByLabelText('Modified price for Coffee')).toHaveValue('11.50');
+    expect(lab.getByLabelText('Modified expected sales for Coffee')).toHaveValue('190');
+    expect(lab.getByRole('rowheader', { name: 'Operating profit' }).closest('tr')).toHaveTextContent('$1,580');
+    // The business itself is unchanged until Apply Changes is confirmed.
+    expect(screen.getByLabelText('Selling price per unit for Coffee')).toHaveValue('6');
+  });
+
+  it('can also be switched on in the price assistant, and rejects a negative number', async () => {
+    const { user } = setup('pricing', 'demo');
+    const lab = within(panel('pricing'));
+    const assistant = within(lab.getByRole('heading', { name: /What Price Should I Charge/ }).closest('section')!);
+    await user.click(assistant.getByRole('checkbox', { name: /customers react to the price of Coffee/ }));
+    const x = assistant.getByLabelText(/For every \$1 change in price/);
+    await user.type(x, '-5');
+    expect(assistant.getByText(/the direction is always opposite to the price/)).toBeInTheDocument();
+    await user.clear(x);
+    await user.type(x, '20');
+    expect(assistant.getByTestId('sp-demand-best')).toHaveTextContent('$11.50');
+    expect(assistant.getByText(/Prices that reach your \$500 target under this assumption/)).toBeInTheDocument();
+  });
+});
+
 describe('save my work', () => {
   const jsonFile = (text: string, name = 'saved.json') => new File([text], name, { type: 'application/json' });
   const coffeeSales = () => screen.getByLabelText('Expected monthly sales for Coffee');

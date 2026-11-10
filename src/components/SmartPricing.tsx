@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useStore } from '../app/StoreContext';
-import { toCents } from '../lib/business';
 import { formatCAD, unitsLabel } from '../lib/format';
-import { requiredPrice } from '../lib/pricing';
+import { contributionFromOthers, requiredPrice } from '../lib/pricing';
 import { isWholeCents, requiredPriceMath, type RequiredPriceInput } from '../lib/showMath';
 import { formatRate } from '../lib/tax';
 import { parseAmount, parseMoney, parseUnits, toInputText } from '../lib/validation';
 import type { LinkedTarget } from './AfterTaxTarget';
+import DemandExplorer from './DemandExplorer';
 import ShowMath from './ShowMath';
 import { CellInput, ErrorList, Notice, SubHeader } from './ui';
 
@@ -31,7 +31,7 @@ export default function SmartPricing({ linkedTarget = null }: { linkedTarget?: L
   const errors = [targetR.ok ? undefined : targetR.error, unitsR.ok ? undefined : unitsR.error, vcR.ok ? undefined : vcR.error, shareR && !shareR.ok ? shareR.error : undefined];
 
   const others = products.filter((p) => p.id !== product.id);
-  const otherCM = others.reduce((s, p) => s + (toCents(p.price) - toCents(p.variableCost)) * p.units, 0) / 100;
+  const otherCM = contributionFromOthers(products, product.id);
   const ready = targetR.ok && unitsR.ok && vcR.ok && (!shareR || shareR.ok);
   const input: RequiredPriceInput | null =
     ready && targetR.ok && unitsR.ok && vcR.ok
@@ -128,6 +128,18 @@ export default function SmartPricing({ linkedTarget = null }: { linkedTarget?: L
             change when prices change, so check that customers would still buy {unitsR.ok ? unitsLabel(unitsR.value) : 'that many'} at this price.
           </Notice>
         </div>
+      )}
+      {input && (
+        <DemandExplorer
+          idPrefix="sp-demand"
+          productName={product.name}
+          basePrice={product.price}
+          baseUnits={input.units}
+          variableCost={input.variableCost}
+          otherContribution={input.otherContribution}
+          fixedCosts={input.fixedCosts}
+          target={input.targetProfit}
+        />
       )}
     </section>
   );
