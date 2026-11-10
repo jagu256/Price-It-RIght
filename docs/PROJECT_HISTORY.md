@@ -127,6 +127,14 @@ The student expected "Export my business" to give a spreadsheet. The .json file 
 
 **Checks:** 259 tests in 16 files passed; build passed. At 375 px the new section has no sideways scrolling.
 
+### Feature 7 – Excel export (9 Nov 2026)
+- New `src/lib/excelExport.ts` and a *Download my business as Excel* button in Business Report (the backup-file note in Save my work now points to it). Sheets: Products, Summary, Break-even, Inventory & shortages, Production plan. Numbers are number cells with CAD, % and unit formats; the writer library loads only on click. `fflate` 0.8.3 (already installed with read-excel-file) was added as a pinned dev dependency so the test can unzip the file and check the stored formats.
+- **Checks:** 267 tests in 17 files passed, including reading the generated file back; build passed with Vite's 800 kB size warning for the main file (824 kB, 235 kB gzipped) – a warning, not an error.
+
+### Not done yet (usage limit reached, 9 Nov 2026)
+- The independent verification of Features 3–6's hand-checked examples by a separate agent, and its README section.
+- Extras A–C (waiting for the student to check Features 1–7 first).
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

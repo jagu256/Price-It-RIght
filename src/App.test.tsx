@@ -575,4 +575,18 @@ describe('business report', () => {
     await waitFor(() => expect(pdfSaves).toEqual(['price-it-right-report-maple-leaf-cafe-demo.pdf:ok']));
     expect(rep.getByRole('status')).toHaveTextContent(/report was created/);
   });
+
+  it('downloads the business as an Excel file that reads back with the verified numbers', async () => {
+    const { user } = setup('report', 'demo');
+    const rep = within(panel('report'));
+    await user.click(rep.getByRole('button', { name: /Download my business as Excel/ }));
+    await waitFor(() => expect(downloads).toHaveLength(1));
+    expect(downloads[0].name).toBe('price-it-right-maple-leaf-cafe-demo.xlsx');
+    expect(rep.getByRole('status')).toHaveTextContent(/Excel file was created/);
+    const { default: readXlsxFile } = await import('read-excel-file/universal');
+    const book = (await readXlsxFile(downloads[0].blob)) as { sheet: string; data: unknown[][] }[];
+    expect(book.map((s) => s.sheet)).toEqual(['Products', 'Summary', 'Break-even', 'Inventory & shortages', 'Production plan']);
+    const profit = book[1].data.find((r) => r[0] === 'Projected operating profit')!;
+    expect(profit[1]).toBe(975);
+  });
 });

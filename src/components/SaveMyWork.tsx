@@ -106,7 +106,8 @@ export default function SaveMyWork() {
       </div>
 
       <p className="text-xs text-sage-600">
-        The backup is a Price It Right file (.json) for “Import a saved business” – it isn’t meant to be opened, and your computer may show it as a code file. It is not a spreadsheet.
+        The backup is a Price It Right file (.json) for “Import a saved business” – it isn’t meant to be opened, and your computer may show it as a code file. It is not a spreadsheet –
+        for that, use <a className="font-semibold underline" href="#report">📊 Business Report → Download my business as Excel</a>.
       </p>
       {message && <p className="text-sm font-semibold text-sage-800" role="status">{message}</p>}
       {problems.length > 0 && (

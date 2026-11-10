@@ -2,7 +2,9 @@ import { useState, type ReactNode } from 'react';
 import { useStore } from '../app/StoreContext';
 import { NeedsValidBusiness, Notice, SectionHeader } from '../components/ui';
 import { resolveScenario } from '../lib/pricing';
+import { buildExcelSheets, businessExcelBlob, excelFileName } from '../lib/excelExport';
 import { buildReport, type ReportData } from '../lib/report';
+import { downloadBlob } from '../lib/templates';
 
 export default function BusinessReport() {
   const { state, model } = useStore();
@@ -24,6 +26,18 @@ export default function BusinessReport() {
     }
   };
 
+  const downloadExcel = async () => {
+    const sheets = buildExcelSheets(model);
+    if (!sheets) return;
+    try {
+      setStatus('Creating your Excel file…');
+      downloadBlob(await businessExcelBlob(sheets), excelFileName(model.data.name));
+      setStatus('Your Excel file was created. Check your downloads folder.');
+    } catch {
+      setStatus('Sorry – the Excel file could not be created in this browser.');
+    }
+  };
+
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-10 sm:px-6">
       <SectionHeader emoji="📊" title="My Business Report" subtitle="A printable PDF summary of your business, created in your browser. All amounts in CAD." />
@@ -32,8 +46,12 @@ export default function BusinessReport() {
           <>
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" className="btn-primary px-7 py-4 text-lg" onClick={download}>📥 Download My Business Report</button>
+              <button type="button" className="btn-secondary px-6 py-4 text-lg" onClick={downloadExcel}>📊 Download my business as Excel</button>
               {status && <p className="text-sm font-semibold text-sage-700" role="status">{status}</p>}
             </div>
+            <p className="text-sm text-sage-700">
+              The Excel file has five sheets – Products, Summary, Break-even, Inventory &amp; shortages and Production plan – with real numbers in CAD you can check and add up.
+            </p>
             <Notice tone="info">Sales figures in the report are expected (forecast) amounts you entered – not actual transactions.</Notice>
             <Preview r={report} />
           </>
