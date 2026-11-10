@@ -6,6 +6,7 @@
  * stored as whole thousandths of that unit. Using whole numbers keeps the
  * "round down" step exact (e.g. 0.3 ÷ 0.1 is exactly 3, not 2.9999…).
  */
+import { getLanguage, locale, t, tx } from '../i18n/i18n';
 import type { BusinessId } from './businesses';
 import { cleanNumberText, type ParseResult } from './validation';
 
@@ -26,19 +27,19 @@ interface UnitInfo {
 }
 
 export const UNITS: Record<UnitId, UnitInfo> = {
-  g: { short: 'g', singular: 'gram', plural: 'grams', dimension: 'mass', factor: 1 },
-  kg: { short: 'kg', singular: 'kilogram', plural: 'kilograms', dimension: 'mass', factor: 1000 },
-  mL: { short: 'mL', singular: 'millilitre', plural: 'millilitres', dimension: 'volume', factor: 1 },
-  L: { short: 'L', singular: 'litre', plural: 'litres', dimension: 'volume', factor: 1000 },
-  pcs: { short: 'pcs', singular: 'piece', plural: 'pieces', dimension: 'count', factor: 1 },
+  g: { short: 'g', singular: tx('gram'), plural: tx('grams'), dimension: 'mass', factor: 1 },
+  kg: { short: 'kg', singular: tx('kilogram'), plural: tx('kilograms'), dimension: 'mass', factor: 1000 },
+  mL: { short: 'mL', singular: tx('millilitre'), plural: tx('millilitres'), dimension: 'volume', factor: 1 },
+  L: { short: 'L', singular: tx('litre'), plural: tx('litres'), dimension: 'volume', factor: 1000 },
+  pcs: { short: 'pcs', singular: tx('piece'), plural: tx('pieces'), dimension: 'count', factor: 1 },
 };
 
 export const UNIT_OPTIONS: { id: UnitId; label: string }[] = [
-  { id: 'g', label: 'grams (g)' },
-  { id: 'kg', label: 'kilograms (kg)' },
-  { id: 'mL', label: 'millilitres (mL)' },
-  { id: 'L', label: 'litres (L)' },
-  { id: 'pcs', label: 'pieces' },
+  { id: 'g', label: tx('grams (g)') },
+  { id: 'kg', label: tx('kilograms (kg)') },
+  { id: 'mL', label: tx('millilitres (mL)') },
+  { id: 'L', label: tx('litres (L)') },
+  { id: 'pcs', label: tx('pieces') },
 ];
 
 /** Converts a quantity to whole thousandths of its base unit (g, mL or pieces). */
@@ -68,7 +69,7 @@ export function parseQuantity(raw: string, kind: 'available' | 'required'): Pars
   if (raw.trim() === '') {
     return {
       ok: false,
-      error: kind === 'available' ? 'Please enter the quantity available.' : 'Please enter how much one product uses.',
+      error: kind === 'available' ? t('Please enter the quantity available.') : t('Please enter how much one product uses.'),
     };
   }
   const cleaned = cleanNumberText(raw);
@@ -80,25 +81,25 @@ export function parseQuantity(raw: string, kind: 'available' | 'required'): Pars
       ok: false,
       error:
         kind === 'available'
-          ? "Quantity available can't be negative. Enter 0 if you have none."
-          : "Quantity per product can't be negative.",
+          ? t("Quantity available can't be negative. Enter 0 if you have none.")
+          : t("Quantity per product can't be negative."),
     };
   }
   if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) {
-    return { ok: false, error: 'Please use numbers only, for example 2000 or 2.5.' };
+    return { ok: false, error: t('Please use numbers only, for example 2000 or 2.5.') };
   }
   const decimals = text.includes('.') ? text.split('.')[1].length : 0;
   if (decimals > 3) {
-    return { ok: false, error: 'Please use no more than 3 decimal places.' };
+    return { ok: false, error: t('Please use no more than 3 decimal places.') };
   }
   const value = Number(text);
   if (!Number.isFinite(value) || value > MAX_QUANTITY) {
-    return { ok: false, error: 'That number is larger than this estimator supports (max 1,000,000,000).' };
+    return { ok: false, error: t('That number is larger than this estimator supports (max 1,000,000,000).') };
   }
   if (kind === 'required' && value === 0) {
     return {
       ok: false,
-      error: 'Quantity per product must be more than 0. If a product doesn’t use this item, remove the item instead.',
+      error: t('Quantity per product must be more than 0. If a product doesn’t use this item, remove the item instead.'),
     };
   }
   return { ok: true, value };
@@ -144,7 +145,12 @@ export function calculateProduction(items: ParsedItem[]): ProductionResult {
 /* Display helpers                                                     */
 /* ------------------------------------------------------------------ */
 
-const quantityFormat = new Intl.NumberFormat('en-CA', { maximumFractionDigits: 3 });
+const quantityFormats = new Map<string, Intl.NumberFormat>();
+const quantityFormat = () => {
+  const loc = locale();
+  if (!quantityFormats.has(loc)) quantityFormats.set(loc, new Intl.NumberFormat(loc, { maximumFractionDigits: 3 }));
+  return quantityFormats.get(loc)!;
+};
 
 /**
  * Shows a base quantity in a friendly unit: 15,000 mL → "15 litres",
@@ -159,14 +165,16 @@ export function formatQuantity(base: number, dimension: Dimension, style: 'long'
     value /= 1000;
   } else unit = dimension === 'mass' ? 'g' : 'mL';
   const info = UNITS[unit];
-  const num = quantityFormat.format(value);
+  const num = quantityFormat().format(value);
   if (style === 'short') return `${num} ${info.short}`;
-  return `${num} ${value === 1 ? info.singular : info.plural}`;
+  // English: 1 is singular. French: anything under 2 is singular (« 1,25 kilogramme »).
+  const singular = getLanguage() === 'fr' ? Math.abs(value) < 2 : value === 1;
+  return `${num} ${t(singular ? info.singular : info.plural)}`;
 }
 
 export function joinNames(names: string[]): string {
   if (names.length <= 1) return names.join('');
-  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  return t('{first} and {last}', { first: names.slice(0, -1).join(', '), last: names[names.length - 1] });
 }
 
 /* ------------------------------------------------------------------ */
@@ -175,7 +183,7 @@ export function joinNames(names: string[]): string {
 
 export const BUSINESS_NOTES: Partial<Record<BusinessId, string>> = {
   nails:
-    'For a service business, the result is the number of services your consumable supplies can cover. It does not account for staff availability or appointment capacity.',
+    tx('For a service business, the result is the number of services your consumable supplies can cover. It does not account for staff availability or appointment capacity.'),
   clothing:
-    'Enter your finished products as inventory, with 1 piece required per item sold. Add packaging, such as shopping bags, as separate items.',
+    tx('Enter your finished products as inventory, with 1 piece required per item sold. Add packaging, such as shopping bags, as separate items.'),
 };

@@ -2,6 +2,7 @@
  * Product recipes: how much of each inventory item one product uses, and the
  * direct material cost that follows from inventory purchase costs.
  */
+import { t } from '../i18n/i18n';
 import { UNITS, formatQuantity, parseQuantity, toBase, type Dimension } from './inventory';
 import type { ParsedStockItem } from './stock';
 import type { RecipeLineInput } from './types';
@@ -37,11 +38,11 @@ export function evaluateRecipe(lines: RecipeLineInput[] | undefined, stockById: 
   for (const line of lines) {
     const name = recordNames.get(line.itemId);
     if (name === undefined) {
-      errors[line.id] = 'This inventory item no longer exists. Choose another item or remove the line.';
+      errors[line.id] = t('This inventory item no longer exists. Choose another item or remove the line.');
       continue;
     }
     if (seen.has(line.itemId)) {
-      errors[line.id] = `${name} is listed twice in this recipe. Combine them into one line.`;
+      errors[line.id] = t('{name} is listed twice in this recipe. Combine them into one line.', { name });
       continue;
     }
     seen.add(line.itemId);
@@ -52,11 +53,11 @@ export function evaluateRecipe(lines: RecipeLineInput[] | undefined, stockById: 
     }
     const item = stockById.get(line.itemId);
     if (!item) {
-      errors[line.id] = `Fix the inventory record for ${name} first.`;
+      errors[line.id] = t('Fix the inventory record for {name} first.', { name });
       continue;
     }
     if (UNITS[line.unit].dimension !== item.dimension) {
-      errors[line.id] = `${name} is measured in ${UNITS[item.unit].plural}, so this line can’t use ${UNITS[line.unit].plural}.`;
+      errors[line.id] = t('{name} is measured in {unit}, so this line can’t use {other}.', { name, unit: t(UNITS[item.unit].plural), other: t(UNITS[line.unit].plural) });
       continue;
     }
     parsed.push({ lineId: line.id, itemId: item.id, itemName: item.name, dimension: item.dimension, requiredBase: toBase(q.value, line.unit) });

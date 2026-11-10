@@ -5,6 +5,7 @@
  *
  * Order matters: inventory → recipes → material costs → product variable costs.
  */
+import { t, tx } from '../i18n/i18n';
 import { businessSummary, type BusinessSummary, type ProductNumbers } from './business';
 import { evaluateRecipe, materialCost, type MaterialCost, type RecipeEval } from './recipes';
 import { normaliseName, validateStock, type ParsedStockItem, type StockErrors } from './stock';
@@ -42,10 +43,10 @@ export interface BusinessModel {
 }
 
 const OTHER_LABELS: Record<keyof OtherCosts, string> = {
-  labour: 'variable labour cost',
-  packaging: 'packaging cost',
-  paymentFees: 'payment processing fee',
-  other: 'other variable cost',
+  labour: tx('variable labour cost'),
+  packaging: tx('packaging cost'),
+  paymentFees: tx('payment processing fee'),
+  other: tx('other variable cost'),
 };
 
 /** Optional extra variable costs: blank means $0 (they are optional extras). */
@@ -64,7 +65,7 @@ export function buildModel(data: BusinessData): BusinessModel {
   // 1. Inventory
   const stockResult = validateStock(data.inventory);
   const stockById = new Map(stockResult.items.map((s) => [s.id, s]));
-  const recordNames = new Map(data.inventory.map((r) => [r.id, r.name.trim() || 'Unnamed item']));
+  const recordNames = new Map(data.inventory.map((r) => [r.id, r.name.trim() || t('Unnamed item')]));
 
   // 2. Recipes and material costs
   const recipes: Record<string, RecipeEval> = {};
@@ -85,8 +86,8 @@ export function buildModel(data: BusinessData): BusinessModel {
   for (const p of data.products) {
     const e: ProductErrors = {};
     const key = normaliseName(p.name);
-    if (!key) e.name = 'Please enter a product name.';
-    else if ((nameCount.get(key) ?? 0) > 1) e.name = `Two products are called “${p.name.trim()}”. Please give each product a unique name.`;
+    if (!key) e.name = t('Please enter a product name.');
+    else if ((nameCount.get(key) ?? 0) > 1) e.name = t('Two products are called “{name}”. Please give each product a unique name.', { name: p.name.trim() });
 
     const price = parseMoney(p.price, 'sellingPrice');
     if (!price.ok) e.price = price.error;
@@ -104,9 +105,9 @@ export function buildModel(data: BusinessData): BusinessModel {
       // Itemized: Variable Cost = Direct Materials + Other Variable Costs.
       other = parseOtherCosts(p.otherCosts, e);
       const recipe = recipes[p.id];
-      if (recipe.status === 'missing') e.variableCost = 'Itemized costing needs a recipe. Add one in the Smart Inventory Hub, or switch to a manual cost.';
-      else if (recipe.status === 'invalid') e.variableCost = 'Fix the errors in this product’s recipe to calculate its itemized cost.';
-      else if (mat.total === null) e.variableCost = `Missing purchase cost for ${mat.missingCostItems.join(', ')}. Costs are never assumed to be $0.`;
+      if (recipe.status === 'missing') e.variableCost = t('Itemized costing needs a recipe. Add one in the Smart Inventory Hub, or switch to a manual cost.');
+      else if (recipe.status === 'invalid') e.variableCost = t('Fix the errors in this product’s recipe to calculate its itemized cost.');
+      else if (mat.total === null) e.variableCost = t('Missing purchase cost for {items}. Costs are never assumed to be $0.', { items: mat.missingCostItems.join(', ') });
       else variableCost = Math.round((mat.total + other) * 100) / 100; // rounded to the nearest cent
     }
 

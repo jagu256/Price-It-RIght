@@ -2,6 +2,7 @@
  * Inventory records: validation, duplicate detection, purchase costs and
  * unit changes. Builds on the units and quantity rules in inventory.ts.
  */
+import { t } from '../i18n/i18n';
 import { MAX_QUANTITY, UNITS, parseQuantity, toBase, type Dimension, type UnitId } from './inventory';
 import type { InventoryRecord } from './types';
 import { cleanNumberText } from './validation';
@@ -25,13 +26,13 @@ export function parseCost(raw: string): { ok: true; value: number | null } | { o
   const cleaned = cleanNumberText(raw);
   if ('error' in cleaned) return { ok: false, error: cleaned.error };
   let text = cleaned.text;
-  if (/^[-−–]/.test(text) || /^\$[-−–]/.test(text)) return { ok: false, error: "Cost can't be negative." };
+  if (/^[-−–]/.test(text) || /^\$[-−–]/.test(text)) return { ok: false, error: t("Cost can't be negative.") };
   if (text.startsWith('$')) text = text.slice(1);
-  if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) return { ok: false, error: 'Please use numbers only, for example 0.03.' };
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) return { ok: false, error: t('Please use numbers only, for example 0.03.') };
   const decimals = text.includes('.') ? text.split('.')[1].length : 0;
-  if (decimals > 6) return { ok: false, error: 'Please use no more than 6 decimal places.' };
+  if (decimals > 6) return { ok: false, error: t('Please use no more than 6 decimal places.') };
   const value = Number(text);
-  if (!Number.isFinite(value) || value > MAX_QUANTITY) return { ok: false, error: 'That cost is too large.' };
+  if (!Number.isFinite(value) || value > MAX_QUANTITY) return { ok: false, error: t('That cost is too large.') };
   return { ok: true, value };
 }
 
@@ -55,8 +56,8 @@ export function validateStock(records: InventoryRecord[]): StockValidation {
   for (const r of records) {
     const e: StockErrors = {};
     const key = normaliseName(r.name);
-    if (!key) e.name = 'Please enter an item name.';
-    else if ((nameCount.get(key) ?? 0) > 1) e.name = `Another item is also called “${r.name.trim()}”. Duplicates are not merged – rename or delete one.`;
+    if (!key) e.name = t('Please enter an item name.');
+    else if ((nameCount.get(key) ?? 0) > 1) e.name = t('Another item is also called “{name}”. Duplicates are not merged – rename or delete one.', { name: r.name.trim() });
 
     const q = parseQuantity(r.quantity, 'available');
     if (!q.ok) e.quantity = q.error;
@@ -144,9 +145,11 @@ const UNIT_ALIASES: Record<string, UnitId> = {
   ml: 'mL', millilitre: 'mL', millilitres: 'mL', milliliter: 'mL', milliliters: 'mL',
   l: 'L', litre: 'L', litres: 'L', liter: 'L', liters: 'L', lt: 'L', ltr: 'L',
   pcs: 'pcs', pc: 'pcs', piece: 'pcs', pieces: 'pcs', each: 'pcs', ea: 'pcs', unit: 'pcs', units: 'pcs', item: 'pcs', items: 'pcs',
+  // French (accents are removed before looking up): gramme, kilogramme, pièce, unité…
+  gramme: 'g', grammes: 'g', kilogramme: 'kg', kilogrammes: 'kg', unite: 'pcs', unites: 'pcs', article: 'pcs', articles: 'pcs',
 };
 
 export function parseUnitText(raw: string): UnitId | null {
-  const key = raw.trim().toLowerCase().replace(/\.$/, '');
+  const key = raw.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\.$/, '');
   return UNIT_ALIASES[key] ?? null;
 }

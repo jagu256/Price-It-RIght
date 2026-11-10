@@ -6,6 +6,7 @@
  * the user confirms → records are added. Problems are reported row by row,
  * and duplicate records are flagged, never silently merged.
  */
+import { t, tx } from '../i18n/i18n';
 import { UNITS, parseQuantity, type UnitId } from './inventory';
 import { normaliseName, parseCost, parseUnitText } from './stock';
 import type { InventoryRecord, RecipeLineInput } from './types';
@@ -37,11 +38,11 @@ export async function readSpreadsheet(file: File): Promise<ReadResult> {
   const isCsv = name.endsWith('.csv');
   const isXlsx = name.endsWith('.xlsx');
   if (!isCsv && !isXlsx) {
-    const hint = name.endsWith('.xls') ? ' Older .xls files: open them in Excel and save as .xlsx first.' : '';
-    return { ok: false, error: `Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.${hint}` };
+    const message = t('Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.');
+    return { ok: false, error: name.endsWith('.xls') ? `${message} ${t('Older .xls files: open them in Excel and save as .xlsx first.')}` : message };
   }
-  if (file.size === 0) return { ok: false, error: 'This file is empty.' };
-  if (file.size > MAX_FILE_BYTES) return { ok: false, error: 'This file is larger than 5 MB. Please upload a smaller file.' };
+  if (file.size === 0) return { ok: false, error: t('This file is empty.') };
+  if (file.size > MAX_FILE_BYTES) return { ok: false, error: t('This file is larger than 5 MB. Please upload a smaller file.') };
 
   try {
     let sheets: RawSheet[];
@@ -57,10 +58,10 @@ export async function readSpreadsheet(file: File): Promise<ReadResult> {
       sheets = workbook.map((s) => ({ name: s.sheet, rows: cleanRows(s.data as unknown[][]) }));
     }
     const withData = sheets.filter((s) => s.rows.length > 0);
-    if (withData.length === 0) return { ok: false, error: 'This file has no data in it.' };
+    if (withData.length === 0) return { ok: false, error: t('This file has no data in it.') };
     return { ok: true, sheets };
   } catch {
-    return { ok: false, error: 'We couldn’t read this file. Make sure it is a valid Excel (.xlsx) or CSV file.' };
+    return { ok: false, error: t('We couldn’t read this file. Make sure it is a valid Excel (.xlsx) or CSV file.') };
   }
 }
 
@@ -79,20 +80,27 @@ export type InventoryFieldKey = 'name' | 'quantity' | 'unit' | 'cost';
 export type RecipeFieldKey = 'product' | 'item' | 'quantity' | 'unit';
 
 export const INVENTORY_FIELDS: FieldSpec<InventoryFieldKey>[] = [
-  { key: 'name', label: 'Item name', required: true, synonyms: ['item name', 'item', 'name', 'inventory item', 'ingredient', 'material', 'description', 'product name', 'sku name'] },
-  { key: 'quantity', label: 'Available quantity', required: true, synonyms: ['available quantity', 'quantity available', 'quantity', 'qty', 'on hand', 'qty on hand', 'stock', 'in stock', 'available', 'amount', 'count'] },
-  { key: 'unit', label: 'Unit', required: true, synonyms: ['unit', 'units', 'uom', 'unit of measure', 'unit of measurement', 'measure', 'measurement'] },
-  { key: 'cost', label: 'Cost per unit (optional)', required: false, synonyms: ['cost per unit', 'unit cost', 'cost', 'price per unit', 'cost unit', 'purchase cost', 'unit price'] },
+  { key: 'name', label: tx('Item name'), required: true, synonyms: ['item name', 'item', 'name', 'inventory item', 'ingredient', 'material', 'description', 'product name', 'sku name', 'nom de l article', 'nom', 'article', 'matiere'] },
+  { key: 'quantity', label: tx('Available quantity'), required: true, synonyms: ['quantite disponible', 'available quantity', 'quantity available', 'quantity', 'qty', 'on hand', 'qty on hand', 'stock', 'in stock', 'available', 'amount', 'count'] },
+  { key: 'unit', label: tx('Unit'), required: true, synonyms: ['unit', 'units', 'uom', 'unit of measure', 'unit of measurement', 'measure', 'measurement', 'unite de mesure', 'unite', 'unites'] },
+  { key: 'cost', label: tx('Cost per unit (optional)'), required: false, synonyms: ['cost per unit', 'unit cost', 'cost', 'price per unit', 'cost unit', 'purchase cost', 'unit price', 'cout unitaire', 'cout par unite', 'cout', 'prix unitaire'] },
 ];
 
 export const RECIPE_FIELDS: FieldSpec<RecipeFieldKey>[] = [
-  { key: 'product', label: 'Product', required: true, synonyms: ['product', 'product name', 'menu item', 'finished product', 'service'] },
-  { key: 'item', label: 'Inventory item', required: true, synonyms: ['inventory item', 'item', 'ingredient', 'material', 'supply', 'component', 'item name'] },
-  { key: 'quantity', label: 'Quantity required', required: true, synonyms: ['quantity required', 'quantity', 'qty', 'amount', 'quantity per product', 'qty per unit', 'required'] },
-  { key: 'unit', label: 'Unit', required: true, synonyms: ['unit', 'units', 'uom', 'unit of measure', 'measure'] },
+  { key: 'product', label: tx('Product'), required: true, synonyms: ['product', 'product name', 'menu item', 'finished product', 'service', 'nom du produit', 'produit'] },
+  { key: 'item', label: tx('Inventory item'), required: true, synonyms: ['inventory item', 'item', 'ingredient', 'material', 'supply', 'component', 'item name', 'article en stock', 'article', 'matiere'] },
+  { key: 'quantity', label: tx('Quantity required'), required: true, synonyms: ['quantity required', 'quantity', 'qty', 'amount', 'quantity per product', 'qty per unit', 'required', 'quantite requise', 'quantite par produit', 'quantite'] },
+  { key: 'unit', label: tx('Unit'), required: true, synonyms: ['unit', 'units', 'uom', 'unit of measure', 'measure', 'unite de mesure', 'unite', 'unites'] },
 ];
 
-const normHeader = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+/** Lower case, no accents, no punctuation: "Quantité disponible" → "quantite disponible". */
+const normHeader = (h: string) =>
+  h
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 
 export type Mapping<K extends string> = Record<K, number | null>;
 
@@ -128,9 +136,9 @@ export function guessMapping<K extends string>(headers: string[], fields: FieldS
 
 export function mappingErrors<K extends string>(mapping: Mapping<K>, fields: FieldSpec<K>[]): string[] {
   const errors: string[] = [];
-  for (const f of fields) if (f.required && mapping[f.key] === null) errors.push(`Choose which column holds “${f.label}”.`);
+  for (const f of fields) if (f.required && mapping[f.key] === null) errors.push(t('Choose which column holds “{field}”.', { field: t(f.label) }));
   const cols = fields.map((f) => mapping[f.key]).filter((c): c is number => c !== null);
-  if (new Set(cols).size !== cols.length) errors.push('Each column can only be used for one field.');
+  if (new Set(cols).size !== cols.length) errors.push(t('Each column can only be used for one field.'));
   return errors;
 }
 
@@ -188,16 +196,16 @@ export function validateInventoryRows(
     const messages: string[] = [];
     const name = get(r.cells, 'name');
     const key = normaliseName(name);
-    if (!key) messages.push('Missing item name.');
+    if (!key) messages.push(t('Missing item name.'));
     else if ((counts.get(key) ?? 0) > 1) {
       const others = rows.filter((x) => x.rowNumber !== r.rowNumber && normaliseName(get(x.cells, 'name')) === key).map((x) => x.rowNumber);
-      messages.push(`Duplicate item “${name}” (also on row ${others.join(', ')}). Duplicates are not merged – keep one row.`);
-    } else if (existing.has(key)) messages.push(`“${name}” is already in your inventory.`);
+      messages.push(t('Duplicate item “{name}” (also on row {rows}). Duplicates are not merged – keep one row.', { name, rows: others.join(', ') }));
+    } else if (existing.has(key)) messages.push(t('“{name}” is already in your inventory.', { name }));
 
     const qtyText = get(r.cells, 'quantity');
     let quantity = '';
     if (qtyText === '') {
-      messages.push('Missing quantity.');
+      messages.push(t('Missing quantity.'));
       quantityFailures++;
     } else {
       const q = parseQuantity(qtyText, 'available');
@@ -210,10 +218,10 @@ export function validateInventoryRows(
 
     const unitText = get(r.cells, 'unit');
     let unit: UnitId | null = null;
-    if (unitText === '') messages.push('Missing unit.');
+    if (unitText === '') messages.push(t('Missing unit.'));
     else {
       unit = parseUnitText(unitText);
-      if (!unit) messages.push(`Unsupported unit “${unitText}”. Use g, kg, mL, L or pieces.`);
+      if (!unit) messages.push(t('Unsupported unit “{unit}”. Use g, kg, mL, L or pieces.', { unit: unitText }));
     }
 
     const costText = get(r.cells, 'cost');
@@ -221,7 +229,7 @@ export function validateInventoryRows(
     if (costText !== '') {
       const c = parseCost(costText);
       if (c.ok) cost = c.value === null ? '' : String(c.value);
-      else messages.push(`Cost: ${c.error}`);
+      else messages.push(t('Cost: {error}', { error: c.error }));
     }
 
     if (messages.length > 0 || !unit) problems.push({ rowNumber: r.rowNumber, messages });
@@ -274,9 +282,9 @@ export function readRecipeRows(
     const messages: string[] = [];
     const productName = get(r.cells, 'product');
     const itemName = get(r.cells, 'item');
-    if (!productName) messages.push('Missing product name.');
+    if (!productName) messages.push(t('Missing product name.'));
     else if (!productNames.has(normaliseName(productName))) unknownProducts.set(normaliseName(productName), productName);
-    if (!itemName) messages.push('Missing inventory item.');
+    if (!itemName) messages.push(t('Missing inventory item.'));
     else if (!itemNames.has(normaliseName(itemName))) unknownItems.set(normaliseName(itemName), itemName);
 
     let quantity = '';
@@ -286,8 +294,8 @@ export function readRecipeRows(
 
     const unitText = get(r.cells, 'unit');
     const unit = unitText ? parseUnitText(unitText) : null;
-    if (!unitText) messages.push('Missing unit.');
-    else if (!unit) messages.push(`Unsupported unit “${unitText}”. Use g, kg, mL, L or pieces.`);
+    if (!unitText) messages.push(t('Missing unit.'));
+    else if (!unit) messages.push(t('Unsupported unit “{unit}”. Use g, kg, mL, L or pieces.', { unit: unitText }));
     return { rowNumber: r.rowNumber, productName, itemName, quantity, unit, messages };
   });
   return { drafts, unknownProducts: [...unknownProducts.values()], unknownItems: [...unknownItems.values()], tooManyRows: false };
@@ -341,10 +349,10 @@ export function buildRecipeImport(
     }
     if (messages.length === 0 && productId && item && d.unit) {
       if (UNITS[d.unit].dimension !== UNITS[item.unit].dimension) {
-        messages.push(`${item.name} is measured in ${UNITS[item.unit].plural}, so it can’t use ${UNITS[d.unit].plural}.`);
+        messages.push(t('{name} is measured in {unit}, so it can’t use {other}.', { name: item.name, unit: t(UNITS[item.unit].plural), other: t(UNITS[d.unit].plural) }));
       }
       const key = `${productId}|${item.id}`;
-      if (seen.has(key)) messages.push(`${item.name} is listed twice for this product (also row ${seen.get(key)}).`);
+      if (seen.has(key)) messages.push(t('{name} is listed twice for this product (also row {row}).', { name: item.name, row: String(seen.get(key)) }));
       else seen.set(key, d.rowNumber);
     }
     if (messages.length > 0 || !productId || !item || !d.unit) {
