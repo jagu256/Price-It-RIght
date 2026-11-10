@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from 'recharts';
+import ChartContainer from '../components/ChartContainer';
 import { useStore } from '../app/StoreContext';
 import ShowMath from '../components/ShowMath';
 import { CellInput, ErrorList, Notice, SectionHeader, SignedMoney, StatusPill, SubHeader } from '../components/ui';
@@ -183,7 +184,7 @@ function ResourceRanking({ resource, setResource, bindingId }: { resource: strin
             </table>
           </div>
           <figure className="h-56" role="img" aria-label={`Bar chart of contribution margin per ${unit} of ${r.item.name}`}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer width="100%" height="100%">
               <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 8 }}>
                 <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" tickFormatter={(v) => formatCAD(v)} stroke="#3E5A40" tick={{ fontSize: 11 }} />
@@ -193,7 +194,7 @@ function ResourceRanking({ resource, setResource, bindingId }: { resource: strin
                   {data.map((d, i) => <Cell key={d.name} fill={d.value < 0 ? '#A8324F' : i === 0 ? '#3E5A40' : '#86A882'} />)}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </figure>
         </div>
       )}

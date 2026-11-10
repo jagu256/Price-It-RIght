@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { STORAGE_KEY, parseSavedBusiness, serializeBusiness } from './lib/saveWork';
@@ -30,9 +30,13 @@ vi.mock('./lib/templates', async (importOriginal) => ({
   downloadBlob: (blob: Blob, name: string) => void downloads.push({ name, blob }),
 }));
 
+// The page is large (every section stays mounted), so skip user-event's per-keystroke CSS
+// pointer-events check and the pause between keys. Assertions are unchanged.
+const FAST_USER = { pointerEventsCheck: PointerEventsCheckLevel.Never, delay: null } as const;
+
 function setup(hash = 'my-business', business: Parameters<typeof initialAppState>[0] = 'coffee', options: Parameters<typeof userEvent.setup>[0] = {}) {
   window.location.hash = hash;
-  const user = userEvent.setup(options);
+  const user = userEvent.setup({ ...FAST_USER, ...options });
   const view = render(<App initial={initialAppState(business)} />);
   return { user, unmount: view.unmount };
 }
@@ -43,7 +47,12 @@ const go = async (id: string) => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 };
-const confirmDialog = () => screen.getByRole('alertdialog');
+/** The confirmation dialog. Found directly: role searches over the whole (large) page are slow in the test browser. */
+const confirmDialog = () => {
+  const d = document.querySelector<HTMLElement>('[role="alertdialog"]');
+  if (!d) throw new Error('No confirmation dialog is open.');
+  return d;
+};
 
 afterEach(() => {
   window.location.hash = '';
@@ -128,7 +137,7 @@ describe('sensitivity analysis', () => {
     expect(section.getByRole('region', { name: 'The math for degree of operating leverage' })).toHaveTextContent('$2,475 ÷ $975 = 2.54');
 
     await go('my-business');
-    const fixed = screen.getByLabelText('Monthly fixed costs (whole business)');
+    const fixed = within(panel('my-business')).getByLabelText('Monthly fixed costs (whole business)');
     await user.clear(fixed);
     await user.type(fixed, '3000');
     await go('dashboard');
@@ -194,7 +203,7 @@ describe('price-sensitive demand (optional)', () => {
     expect(lab.getByLabelText('Modified expected sales for Coffee')).toHaveValue('190');
     expect(lab.getByRole('rowheader', { name: 'Operating profit' }).closest('tr')).toHaveTextContent('$1,580');
     // The business itself is unchanged until Apply Changes is confirmed.
-    expect(screen.getByLabelText('Selling price per unit for Coffee')).toHaveValue('6');
+    expect(within(panel('my-business')).getByLabelText('Selling price per unit for Coffee')).toHaveValue('6');
   });
 
   it('can also be switched on in the price assistant, and rejects a negative number', async () => {
@@ -266,9 +275,41 @@ describe('decisions', () => {
   });
 });
 
+describe('12-month projection', () => {
+  it('starts at 12 normal months, then shows seasonal results, best/worst and loss months', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const dash = within(panel('dashboard'));
+    const proj = within(dash.getByRole('heading', { name: /12-month projection/ }).closest('section')!);
+    // Default: 12 × $975 = $11,700.
+    expect(proj.getByText('Annual operating profit').parentElement).toHaveTextContent('$11,700');
+    expect(proj.getByText('Months below break-even').parentElement).toHaveTextContent('None');
+
+    const setLevel = async (month: string, value: string) => {
+      const f = proj.getByLabelText(`Sales level for ${month} (%)`);
+      await user.clear(f);
+      await user.type(f, value);
+    };
+    await setLevel('January', '60'); // revenue $2,340, CM $1,485 → −$15
+    await setLevel('July', '130'); // CM $3,217.50 → $1,717.50
+    const janRow = proj.getByRole('rowheader', { name: /January/ }).closest('tr')!;
+    expect(janRow).toHaveTextContent('$2,340');
+    expect(janRow).toHaveTextContent('−$15');
+    expect(janRow).toHaveTextContent('Below break-even');
+    expect(proj.getByText('Best month').parentElement).toHaveTextContent('July');
+    expect(proj.getByText('Worst month').parentElement).toHaveTextContent('January');
+    // Year = 10 × $975 − $15 + $1,717.50 = $11,452.50
+    expect(proj.getByRole('rowheader', { name: /Year \(sum of the 12 months\)/ }).closest('tr')).toHaveTextContent('$11,452.50');
+
+    // Invalid input pauses the projection instead of using 0.
+    await setLevel('March', 'abc');
+    expect(proj.getByText(/March sales level: Please enter the sales level as a number/)).toBeInTheDocument();
+    expect(proj.queryByText('Annual operating profit')).not.toBeInTheDocument();
+  });
+});
+
 describe('save my work', () => {
   const jsonFile = (text: string, name = 'saved.json') => new File([text], name, { type: 'application/json' });
-  const coffeeSales = () => screen.getByLabelText('Expected monthly sales for Coffee');
+  const coffeeSales = () => within(panel('my-business')).getByLabelText('Expected monthly sales for Coffee');
   const demoFileText = () => serializeBusiness(initialAppState('demo').business, '2026-11-09T18:00:00.000Z');
 
   it('auto-saves changes on this device and restores them when the app is opened again', async () => {
@@ -288,7 +329,7 @@ describe('save my work', () => {
     window.location.hash = 'my-business';
     render(<App />); // "open it again" – no starting data given
     expect(coffeeSales()).toHaveValue('9');
-    expect(screen.getByText(/the business you saved on this device was restored/)).toBeInTheDocument();
+    expect(within(panel('my-business')).getByText(/the business you saved on this device was restored/)).toBeInTheDocument();
   });
 
   it('still works, and says saving is off, when the browser blocks storage', async () => {
@@ -299,26 +340,26 @@ describe('save my work', () => {
       throw new DOMException('blocked', 'SecurityError');
     });
     window.location.hash = 'my-business';
-    const user = userEvent.setup();
+    const user = userEvent.setup(FAST_USER);
     render(<App />);
-    expect(screen.getByText('Saving is off')).toBeInTheDocument();
+    expect(within(panel('my-business')).getByText('Saving is off')).toBeInTheDocument();
     await user.clear(coffeeSales());
     await user.type(coffeeSales(), '10');
     expect(coffeeSales()).toHaveValue('10');
-    expect(screen.getByText('Saving is off')).toBeInTheDocument();
+    expect(within(panel('my-business')).getByText('Saving is off')).toBeInTheDocument();
   });
 
   it('opens with the example, and says so, when the saved copy is damaged', () => {
     window.localStorage.setItem(STORAGE_KEY, '{"app":"price-it-right","schemaVersion":1,"business":{"oops"');
     window.location.hash = 'my-business';
     render(<App />);
-    expect(screen.getByText(/could not be read, so the Coffee Shop example was loaded/)).toBeInTheDocument();
+    expect(within(panel('my-business')).getByText(/could not be read, so the Coffee Shop example was loaded/)).toBeInTheDocument();
     expect(coffeeSales()).toHaveValue('300');
   });
 
   it('exports a file that can be read back', async () => {
     const { user } = setup('my-business', 'demo');
-    await user.click(screen.getByRole('button', { name: /Export my business/ }));
+    await user.click(within(panel('my-business')).getByRole('button', { name: /Export my business/ }));
     expect(downloads).toHaveLength(1);
     expect(downloads[0].name).toBe('price-it-right-maple-leaf-cafe-demo.json');
     const back = parseSavedBusiness(await downloads[0].blob.text());
@@ -339,7 +380,7 @@ describe('save my work', () => {
     await user.upload(input, jsonFile(JSON.stringify(broken)));
     await waitFor(() => expect(mb.getByRole('alert')).toHaveTextContent('Inventory item 1 has an unknown unit'));
     expect(mb.getByRole('alert')).toHaveTextContent('Product 2 is missing: price');
-    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(document.querySelector('[role="alertdialog"]')).toBeNull();
     expect(mb.getByDisplayValue('Latte')).toBeInTheDocument(); // still the coffee shop sample
   });
 
@@ -372,9 +413,9 @@ describe('save my work', () => {
     state.business.fixedCosts = '999';
     window.localStorage.setItem(STORAGE_KEY, serializeBusiness(state.business, '2026-11-09T18:00:00.000Z'));
     window.location.hash = 'my-business';
-    const user = userEvent.setup();
+    const user = userEvent.setup(FAST_USER);
     render(<App initial={state} />);
-    return { user, mb: within(panel('my-business')), fixed: () => screen.getByLabelText('Monthly fixed costs (whole business)') };
+    return { user, mb: within(panel('my-business')), fixed: () => within(panel('my-business')).getByLabelText('Monthly fixed costs (whole business)') };
   };
 
   it('“Start fresh” keeps everything when cancelled', async () => {
@@ -420,7 +461,7 @@ describe('products', () => {
 
   it('sorts by highest contribution margin per unit', async () => {
     const { user } = setup();
-    await user.selectOptions(screen.getByLabelText('Sort by'), 'cmPerUnit');
+    await user.selectOptions(within(panel('my-business')).getByLabelText('Sort by'), 'cmPerUnit');
     const names = within(panel('my-business')).getAllByLabelText(/^Product name/).map((i) => (i as HTMLInputElement).value);
     // Latte and Sandwich both earn $5 per unit (tie keeps order), then Coffee $4, Muffin $2.50.
     expect(names).toEqual(['Latte', 'Sandwich', 'Coffee', 'Muffin']);
@@ -428,10 +469,10 @@ describe('products', () => {
 
   it('invalid input shows a message and pauses results instead of using zero', async () => {
     const { user } = setup();
-    const price = screen.getByLabelText('Selling price per unit for Coffee');
+    const price = within(panel('my-business')).getByLabelText('Selling price per unit for Coffee');
     await user.clear(price);
     await user.type(price, 'abc');
-    expect(screen.getByText('Please use numbers only, for example 6 or 6.50.')).toBeInTheDocument();
+    expect(within(panel('my-business')).getByText('Please use numbers only, for example 6 or 6.50.')).toBeInTheDocument();
     expect(price).toHaveValue('abc');
     await go('dashboard');
     expect(within(panel('dashboard')).getByText('Some business numbers need attention')).toBeInTheDocument();
@@ -439,12 +480,12 @@ describe('products', () => {
 
   it('asks before switching business when there is unsaved work', async () => {
     const { user } = setup();
-    await user.clear(screen.getByLabelText('Expected monthly sales for Coffee'));
-    await user.type(screen.getByLabelText('Expected monthly sales for Coffee'), '999');
-    await user.click(screen.getByRole('radio', { name: /Bakery/ }));
+    await user.clear(within(panel('my-business')).getByLabelText('Expected monthly sales for Coffee'));
+    await user.type(within(panel('my-business')).getByLabelText('Expected monthly sales for Coffee'), '999');
+    await user.click(within(panel('my-business')).getByRole('radio', { name: /Bakery/ }));
     await user.click(within(confirmDialog()).getByRole('button', { name: 'Cancel' }));
-    expect(screen.getByLabelText('Expected monthly sales for Coffee')).toHaveValue('999');
-    await user.click(screen.getByRole('radio', { name: /Bakery/ }));
+    expect(within(panel('my-business')).getByLabelText('Expected monthly sales for Coffee')).toHaveValue('999');
+    await user.click(within(panel('my-business')).getByRole('radio', { name: /Bakery/ }));
     await user.click(within(confirmDialog()).getByRole('button', { name: 'Replace my work' }));
     expect(within(panel('my-business')).getByDisplayValue('Sourdough loaf')).toBeInTheDocument();
   });
@@ -470,7 +511,7 @@ describe('pricing lab', () => {
     await user.type(field(), '7');
     await user.click(lab.getByRole('button', { name: 'Apply Changes' }));
     await user.click(within(confirmDialog()).getByRole('button', { name: 'Apply changes' }));
-    expect(screen.getByLabelText('Selling price per unit for Coffee')).toHaveValue('7');
+    expect(within(panel('my-business')).getByLabelText('Selling price per unit for Coffee')).toHaveValue('7');
   });
 
   it('calculates the minimum price for a target profit', async () => {
@@ -554,7 +595,7 @@ describe('production planner', () => {
 describe('business challenge', () => {
   it('awards success only for a valid plan that meets the goal', async () => {
     const { user } = setup('challenge');
-    const ch = within(screen.getByRole('tabpanel', { name: 'Stop the Losses' }));
+    const ch = within(within(panel('challenge')).getByRole('tabpanel', { name: 'Stop the Losses' }));
     const price = ch.getByLabelText('Selling price per coffee', { selector: 'input[type="text"]' });
     await user.clear(price);
     await user.type(price, '9'); // outside the allowed $3–$8 range

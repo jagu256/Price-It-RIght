@@ -1,4 +1,5 @@
-import { Bar, BarChart, CartesianGrid, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
+import ChartContainer from './ChartContainer';
 import type { BusinessSummary } from '../lib/business';
 import { formatCAD, formatCompactCAD, formatPercent, formatSignedCAD } from '../lib/format';
 import { formatLeverage, operatingLeverage, sensitivity, tornadoOrder } from '../lib/sensitivity';
@@ -65,7 +66,7 @@ export default function Sensitivity({ s }: { s: BusinessSummary }) {
           </p>
         </figcaption>
         <div className="mt-3 h-64" role="img" aria-label={`Tornado chart of the change in operating profit when each input moves by ${PERCENT} percent`}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ChartContainer width="100%" height="100%">
             <BarChart data={chart} layout="vertical" stackOffset="sign" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
               <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" horizontal={false} />
               <XAxis type="number" tickFormatter={formatCompactCAD} stroke="#3E5A40" tick={{ fontSize: 11 }} />
@@ -76,7 +77,7 @@ export default function Sensitivity({ s }: { s: BusinessSummary }) {
               <Bar dataKey="down" name={`Input −${PERCENT}%`} stackId="t" fill="#C9A227" radius={[4, 4, 4, 4]} />
               <Bar dataKey="up" name={`Input +${PERCENT}%`} stackId="t" fill="#4F7150" radius={[4, 4, 4, 4]} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </figure>
 

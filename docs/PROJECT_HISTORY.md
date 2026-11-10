@@ -131,6 +131,22 @@ The student expected "Export my business" to give a spreadsheet. The .json file 
 - New `src/lib/excelExport.ts` and a *Download my business as Excel* button in Business Report (the backup-file note in Save my work now points to it). Sheets: Products, Summary, Break-even, Inventory & shortages, Production plan. Numbers are number cells with CAD, % and unit formats; the writer library loads only on click. `fflate` 0.8.3 (already installed with read-excel-file) was added as a pinned dev dependency so the test can unzip the file and check the stored formats.
 - **Checks:** 267 tests in 17 files passed, including reading the generated file back; build passed with Vite's 800 kB size warning for the main file (824 kB, 235 kB gzipped) – a warning, not an error.
 
+### Extra A – 12-month projection with seasonality (9 Nov 2026)
+- New `src/lib/projection.ts` and a 📅 panel on the Profit Dashboard: a sales level and fixed costs per month; monthly revenue, CM and operating profit; annual totals (sum of the months, tested over 200 random patterns); best/worst month; months below break-even; chart and table. Settings are an experiment and not saved.
+- **AI mistake caught:** a test written by the AI claimed December (150 %) would be the best month. Working it by hand showed July (130 %) is better by $5, because December's fixed costs were $500 higher. The test was corrected, and the example is kept in the README because it shows why monthly fixed costs matter.
+
+**Slow tests investigated (not an app speed problem):** after Extra A, four click-through tests took 16–21 s and went over the 15 s limit. Measuring rather than guessing showed:
+- Drawing each screen takes only 6–146 ms in the test browser.
+- The time went into the testing library's "find by label" searches across the whole page (6.8 s for one search). They grew with every new screen, because every section stays mounted.
+
+Two fixes:
+1. Charts are now drawn only on the screen being viewed (`app/visibility.tsx`, `components/ChartContainer.tsx`). Charts hold no inputs, so nothing is lost, and typing no longer redraws charts on hidden screens.
+2. The tests search within the screen they mean, and find the confirmation dialog directly.
+
+No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
+
+**Checks:** 281 tests in 18 files passed; build passed.
+
 ### Not done yet (usage limit reached, 9 Nov 2026)
 - The independent verification of Features 3–6's hand-checked examples by a separate agent, and its README section.
 - Extras A–C (waiting for the student to check Features 1–7 first).

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { CartesianGrid, Line, LineChart, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Line, LineChart, ReferenceDot, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
+import ChartContainer from './ChartContainer';
 import { bestPrice, parseUnitsPerDollar, pricesForTarget, profitCurve, type DemandAssumption, type ProfitContext } from '../lib/demand';
 import { formatCAD, formatCompactCAD, formatNumber, unitsLabel } from '../lib/format';
 import { Field } from './SmartPricing';
@@ -112,7 +113,7 @@ function Results({ a, ctx, target, onTry, idPrefix, productName }: Props & { a: 
       <figure>
         <figcaption className="text-sm font-semibold text-sage-900">Operating profit at different prices of {productName} (other products unchanged)</figcaption>
         <div className="mt-2 h-64" role="img" aria-label={`Line chart of operating profit against the price of ${productName}`}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ChartContainer width="100%" height="100%">
             <LineChart data={curve} margin={{ top: 16, right: 16, bottom: 20, left: 8 }}>
               <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" />
               <XAxis dataKey="price" type="number" domain={[0, 'dataMax']} tickFormatter={(v) => formatCAD(v)} stroke="#3E5A40" tick={{ fontSize: 11 }} label={{ value: `Price of ${productName}`, position: 'insideBottom', offset: -12, fill: '#3E5A40', fontSize: 12 }} />
@@ -123,7 +124,7 @@ function Results({ a, ctx, target, onTry, idPrefix, productName }: Props & { a: 
               <Line type="linear" dataKey="profit" name="profit" stroke="#4F7150" strokeWidth={3} dot={false} />
               <ReferenceDot x={best.price} y={best.profit} r={7} fill="#FAEDA8" stroke="#304633" strokeWidth={2.5} label={{ value: 'Best', position: 'top', fill: '#304633', fontSize: 12, fontWeight: 700 }} />
             </LineChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </figure>
     </div>

@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { ConfirmProvider } from './app/Confirm';
 import { useRoute, type SectionId } from './app/routes';
 import { StoreProvider } from './app/StoreContext';
+import { SectionVisibleContext } from './app/visibility';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import type { AppState } from './lib/store';
@@ -17,12 +18,13 @@ import ProfitDashboard from './sections/ProfitDashboard';
 
 /**
  * Every section stays mounted (just hidden), so moving between sections never
- * loses anything typed – and all sections share one store.
+ * loses anything typed – and all sections share one store. Hidden sections
+ * skip drawing their charts (see app/visibility.tsx).
  */
 function Panel({ id, route, children }: { id: SectionId; route: SectionId; children: ReactNode }) {
   return (
     <div id={`panel-${id}`} hidden={route !== id}>
-      {children}
+      <SectionVisibleContext.Provider value={route === id}>{children}</SectionVisibleContext.Provider>
     </div>
   );
 }

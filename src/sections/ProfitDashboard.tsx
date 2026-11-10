@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ReferenceDot, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
+import ChartContainer from '../components/ChartContainer';
 import { useStore } from '../app/StoreContext';
 import { CoinsIcon, PieIcon, ShieldIcon, TagIcon, TrendDownIcon, TrendIcon } from '../components/Icons';
 import PriceSlider from '../components/PriceSlider';
 import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
+import SeasonalProjection from '../components/SeasonalProjection';
 import Sensitivity from '../components/Sensitivity';
 import ShowMath from '../components/ShowMath';
 import { NeedsValidBusiness, Notice, SectionHeader, SubHeader } from '../components/ui';
@@ -78,6 +80,7 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
       <Charts s={s} products={products} />
       <BreakEven s={s} products={products} />
       <Sensitivity s={s} />
+      <SeasonalProjection />
       <SingleProductBreakEven products={products} fixedCosts={s.fixedCosts} />
     </>
   );
@@ -108,7 +111,7 @@ function Charts({ s, products }: { s: BusinessSummary; products: ParsedProduct[]
             </p>
           </figcaption>
           <div className="mt-4 h-72" role="img" aria-label="Line chart of revenue and total costs at different levels of sales activity">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer width="100%" height="100%">
               <LineChart data={line} margin={{ top: 16, right: 16, bottom: 20, left: 8 }}>
                 <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
                 <XAxis dataKey="pct" type="number" domain={[0, maxPct]} ticks={line.filter((_, i) => i % 2 === 0).map((d) => d.pct)} tickFormatter={(v) => `${v}%`} stroke={AXIS} tick={{ fontSize: 12 }} label={{ value: 'Sales activity (% of expected sales)', position: 'insideBottom', offset: -12, fill: AXIS, fontSize: 12 }} />
@@ -122,7 +125,7 @@ function Charts({ s, products }: { s: BusinessSummary; products: ParsedProduct[]
                   <ReferenceDot x={beFactor * 100} y={be.revenueExact} r={7} fill="#FAEDA8" stroke="#304633" strokeWidth={2.5} label={{ value: 'Break-even', position: 'top', fill: '#304633', fontSize: 12, fontWeight: 700 }} />
                 )}
               </LineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </figure>
 
@@ -132,7 +135,7 @@ function Charts({ s, products }: { s: BusinessSummary; products: ParsedProduct[]
             <p className="mt-1 text-sm text-sage-700">Total contribution margin each product is expected to earn (before fixed costs).</p>
           </figcaption>
           <div className="mt-4 h-72" role="img" aria-label="Bar chart of total contribution margin by product">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer width="100%" height="100%">
               <BarChart data={bars} layout="vertical" margin={{ top: 8, right: 24, bottom: 8, left: 8 }}>
                 <CartesianGrid stroke={GRID} strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" tickFormatter={formatCompactCAD} stroke={AXIS} tick={{ fontSize: 12 }} domain={[(min: number) => Math.min(0, min), (max: number) => Math.max(0, max)]} />
@@ -145,7 +148,7 @@ function Charts({ s, products }: { s: BusinessSummary; products: ParsedProduct[]
                   ))}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </figure>
 
@@ -159,7 +162,7 @@ function Charts({ s, products }: { s: BusinessSummary; products: ParsedProduct[]
           ) : (
             <div className="mt-4 grid items-center gap-4 sm:grid-cols-[1fr_auto]">
               <div className="h-56" role="img" aria-label="Donut chart of revenue share by product">
-                <ResponsiveContainer width="100%" height="100%">
+                <ChartContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={pie} dataKey="value" nameKey="name" innerRadius="55%" outerRadius="90%" paddingAngle={2} stroke="#fff">
                       {pie.map((d, i) => (
@@ -168,7 +171,7 @@ function Charts({ s, products }: { s: BusinessSummary; products: ParsedProduct[]
                     </Pie>
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string) => [`${formatCAD(v)} (${formatPercent((v / s.totalRevenue) * 100)})`, n]} />
                   </PieChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </div>
               <ul className="space-y-1.5 text-sm">
                 {pie.map((d, i) => (

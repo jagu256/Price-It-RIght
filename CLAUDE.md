@@ -7,7 +7,7 @@ Small-business pricing, inventory and profitability simulator for an **ACCT 4500
 ## Commands
 - `npm install` – install dependencies (first time)
 - `npm run dev` – local dev server (http://localhost:5173)
-- `npm test` – Vitest suite (267 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
+- `npm test` – Vitest suite (281 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
 - `npm run build` – type-check (`tsc -b`) + production build; must succeed before pushing
 - Deployment: Vercel builds automatically on every push to `main` (GitHub repo `jagu256/Price-It-RIght`, live at https://price-it-r-ight.vercel.app). Never push a failing build.
 
@@ -27,12 +27,13 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
   - `tax.ts` optional after-tax target (user-entered rate, pre-tax = target ÷ (1 − rate) rounded up, no tax on a loss). UI `components/AfterTaxTarget.tsx`; it feeds `SmartPricing` and `ProfitGoal` via a `linkedTarget` prop
   - `demand.ts` OPTIONAL price-sensitive demand (off by default), best price by checking every cent – "best under this assumption only". UI `components/DemandExplorer.tsx` (What-If + SmartPricing)
   - `decisions.ts` special order (incremental profit; achievable only if every item the product uses covers regular demand + order) and make-or-buy (relevant costs; unavoidable fixed costs irrelevant). UI `sections/Decisions.tsx`
+  - `projection.ts` 12-month projection (monthly sales level + fixed costs; annual = sum of months). UI `components/SeasonalProjection.tsx` on the dashboard
   - `showMath.ts` "Show the math" explanations – built only from already-calculated results, never its own arithmetic (UI: `components/ShowMath.tsx`)
   - `importer.ts`, `templates.ts` Excel/CSV import and templates; `events.ts`, `challenges.ts`; `report.ts` + `reportPdf.ts`
   - `store.ts` single reducer for all app state; `types.ts` input shapes; `samples.ts` fictional sample businesses
 - `src/app/` – store context, hash routing (`#dashboard` etc.), confirmation dialog
 - `src/sections/` – the 8 sections (incl. 🧭 Decisions) + Home; `src/components/` – shared UI (`ui.tsx` has common pieces)
-- All sections stay mounted (hidden) so inputs are never lost when switching tabs.
+- All sections stay mounted (hidden) so inputs are never lost when switching tabs. Charts must use `components/ChartContainer.tsx` (not Recharts' ResponsiveContainer) so hidden sections skip drawing them. In `App.test.tsx`, query within a panel (`within(panel(...))`), not `screen` – whole-page label/role queries take several seconds on this large DOM.
 
 ## Rules that must not be broken (they are part of the grading)
 - **Accuracy first.** Money is calculated in whole cents; inventory in whole thousandths of g/mL/piece; BigInt where products can be large. No NaN/Infinity, no division by zero – show "N/A"/"Not Available" with an explanation.

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
+import ChartContainer from '../components/ChartContainer';
 import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
 import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } from '../components/AfterTaxTarget';
@@ -199,7 +200,7 @@ function WhatIfSimulator() {
         <figure className="card p-4 sm:p-6">
           <figcaption className="font-display text-lg font-bold text-sage-900">Scenario comparison</figcaption>
           <div className="mt-3 h-72" role="img" aria-label="Bar chart comparing the current and modified plans">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer width="100%" height="100%">
               <BarChart data={rows.map((r) => ({ name: r.label, Current: r.a, Modified: r.b ?? 0 }))} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
                 <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" stroke="#3E5A40" tick={{ fontSize: 11 }} interval={0} />
@@ -209,7 +210,7 @@ function WhatIfSimulator() {
                 <Bar dataKey="Current" fill="#86A882" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="Modified" fill="#C9A227" radius={[6, 6, 0, 0]} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </figure>
       )}
