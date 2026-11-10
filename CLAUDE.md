@@ -7,7 +7,7 @@ Small-business pricing, inventory and profitability simulator for an **ACCT 4500
 ## Commands
 - `npm install` – install dependencies (first time)
 - `npm run dev` – local dev server (http://localhost:5173)
-- `npm test` – Vitest suite (290 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
+- `npm test` – Vitest suite (307 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
 - `npm run build` – type-check (`tsc -b`) + production build; must succeed before pushing
 - Deployment: Vercel builds automatically on every push to `main` (GitHub repo `jagu256/Price-It-RIght`, live at https://price-it-r-ight.vercel.app). Never push a failing build.
 
@@ -31,6 +31,7 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
   - `showMath.ts` "Show the math" explanations – built only from already-calculated results, never its own arithmetic (UI: `components/ShowMath.tsx`)
   - `importer.ts`, `templates.ts` Excel/CSV import and templates; `events.ts`, `challenges.ts`; `report.ts` + `reportPdf.ts`
   - `store.ts` single reducer for all app state; `types.ts` input shapes; `samples.ts` fictional sample businesses
+- `src/i18n/` – English / Français. ALL UI text goes through `t('English text', {vars})` (or `tx()` for lists translated when shown, `plural()` for counts); the French is in ONE file, `fr.ts`. Every new `t()` text needs a French entry or `dictionary.test.ts` fails; `App.fr.test.tsx` checks every screen has no missing French. Never translate the user's own data, and never base logic on displayed text (use keys).
 - `src/app/` – store context, hash routing (`#dashboard` etc.), confirmation dialog
 - `src/sections/` – the 8 sections (incl. 🧭 Decisions) + Home; `src/components/` – shared UI (`ui.tsx` has common pieces)
 - All sections stay mounted (hidden) so inputs are never lost when switching tabs. Charts must use `components/ChartContainer.tsx` (not Recharts' ResponsiveContainer) so hidden sections skip drawing them. In `App.test.tsx`, query within a panel (`within(panel(...))`), not `screen` – whole-page label/role queries take several seconds on this large DOM.
@@ -61,4 +62,5 @@ Sage green / cream / white / pastel yellow / muted dark green; rounded cards, so
 - Fill in the README manual testing table (Actual Result / Pass-Fail) – only with real results.
 - Run real user testing, record feedback in the README section, and make at least one improvement based on it (required by the brief). Never invent feedback or results.
 - Vercel: remove the `price-it-right.ca` redirect unless the domain is actually owned and its DNS is set (A record @ → 216.198.79.1).
-- Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand, Decisions, Excel export (9 Nov 2026). Still to do: independent verification of the new hand checks; extras: French toggle.
+- Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand, Decisions, Excel export, 12-month projection, Best mix optimizer, French toggle (9 Nov 2026).
+- Have a French speaker review the translations listed in README → Language.

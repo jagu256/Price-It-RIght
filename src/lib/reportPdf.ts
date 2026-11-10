@@ -4,6 +4,7 @@
  */
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { t } from '../i18n/i18n';
 import { formatCAD } from './format';
 import type { ReportData } from './report';
 
@@ -11,9 +12,12 @@ import type { ReportData } from './report';
 /* PDF layout                                                          */
 /* ------------------------------------------------------------------ */
 
-/** jsPDF's built-in fonts only cover basic Latin characters. */
+/** jsPDF's built-in fonts only cover basic Latin characters (including French accents). */
 export const pdfText = (s: string) =>
   s
+    .replace(/[\u202F\u2009]/g, ' ') // narrow spaces some browsers use in French numbers
+    .replace(/œ/g, 'oe')
+    .replace(/Œ/g, 'OE')
     .replace(/[−–—]/g, '-')
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
@@ -71,22 +75,22 @@ export function renderReportPdf(r: ReportData): jsPDF {
   // Title block
   doc.setFillColor(...GREEN).rect(0, 0, W, 86, 'F');
   doc.setFont('helvetica', 'bold').setFontSize(20).setTextColor(251, 247, 236).text('Price It Right', M, 40);
-  doc.setFont('helvetica', 'normal').setFontSize(11).text('Business Report - Set your price. Know your costs. Maximize your profit.', M, 62);
+  doc.setFont('helvetica', 'normal').setFontSize(11).text(pdfText(`${t('Business Report')} - ${t('Set your price. Know your costs. Maximize your profit.')}`), M, 62);
   y = 116;
   doc.setTextColor(...INK).setFont('helvetica', 'bold').setFontSize(14).text(pdfText(r.businessName), M, y);
   y += 18;
-  paragraph(`Category: ${r.category}   |   Generated: ${r.generated}   |   All amounts in CAD`);
-  if (r.isDemo) paragraph('This report uses fictional demo data.', 9);
+  paragraph(t('Category: {category}   |   Generated: {date}   |   All amounts in CAD', { category: r.category, date: r.generated }));
+  if (r.isDemo) paragraph(t('This report uses fictional demo data.'), 9);
 
-  heading('Products (expected monthly sales)');
-  table(['Product', 'Price', 'Variable cost', 'Expected units', 'Revenue', 'Contribution', 'CM ratio'], r.products, [1, 2, 3, 4, 5, 6]);
+  heading(t('Products (expected monthly sales)'));
+  table([t('Product'), t('Price'), t('Variable cost'), t('Expected units'), t('Revenue'), t('Contribution'), t('CM ratio')], r.products, [1, 2, 3, 4, 5, 6]);
 
-  heading('Business at a glance');
-  table(['Measure', 'Amount (CAD)'], r.totals, [1]);
+  heading(t('Business at a glance'));
+  table([t('Measure'), t('Amount (CAD)')], r.totals, [1]);
 
   // Simple bar chart of contribution margin by product
   if (r.chart.length > 0) {
-    heading('Contribution margin by product');
+    heading(t('Contribution margin by product'));
     const barH = 16;
     const gap = 8;
     const labelW = 130;
@@ -106,32 +110,32 @@ export function renderReportPdf(r: ReportData): jsPDF {
     y += 8;
   }
 
-  heading('Break-even analysis');
-  r.breakEven.forEach((t) => paragraph(t));
+  heading(t('Break-even analysis'));
+  r.breakEven.forEach((line) => paragraph(line));
 
-  heading('Inventory summary (expected sales)');
-  if (r.inventory.length > 0) table(['Item', 'Available', 'Required', 'Remaining', 'Status'], r.inventory, [1, 2, 3]);
+  heading(t('Inventory summary (expected sales)'));
+  if (r.inventory.length > 0) table([t('Item'), t('Available'), t('Required'), t('Remaining'), t('Status')], r.inventory, [1, 2, 3]);
   if (r.shortages.length > 0) {
-    paragraph('Inventory shortages:', 10);
-    r.shortages.forEach((t) => paragraph(`- ${t}`, 9));
+    paragraph(t('Inventory shortages:'), 10);
+    r.shortages.forEach((line) => paragraph(`- ${line}`, 9));
   }
 
-  heading('Production planning');
-  r.production.forEach((t) => paragraph(t));
+  heading(t('Production planning'));
+  r.production.forEach((line) => paragraph(line));
 
   if (r.scenario) {
-    heading('Scenario comparison');
-    table(['Metric', 'Current plan', 'Modified plan', 'Difference'], r.scenario, [1, 2, 3]);
+    heading(t('Scenario comparison'));
+    table([t('Metric'), t('Current plan'), t('Modified plan'), t('Difference')], r.scenario, [1, 2, 3]);
   }
 
-  heading('Accounting assumptions and limitations');
-  r.assumptions.forEach((t) => paragraph(`- ${t}`, 9));
+  heading(t('Accounting assumptions and limitations'));
+  r.assumptions.forEach((line) => paragraph(`- ${line}`, 9));
 
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
     doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(120, 130, 120);
-    doc.text(`Price It Right - educational decision-support tool - page ${i} of ${pages}`, M, H - 24);
+    doc.text(pdfText(t('Price It Right - educational decision-support tool - page {page} of {pages}', { page: i, pages })), M, H - 24);
   }
   return doc;
 }

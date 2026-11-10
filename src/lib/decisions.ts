@@ -17,6 +17,7 @@
  *
  * Money is worked in whole cents.
  */
+import { t } from '../i18n/i18n';
 import { toCents } from './business';
 import type { Dimension } from './inventory';
 import type { BusinessModel, ParsedProduct } from './model';
@@ -97,8 +98,8 @@ export type OrderInventoryCheck =
  * product's expected units, with the lost regular units taken off this product.
  */
 export function specialOrderInventory(model: BusinessModel, productId: string, orderUnits: number, lostRegularUnits: number): OrderInventoryCheck {
-  if (model.data.inventory.length === 0) return { status: 'not-checked', reason: 'No inventory has been entered, so the order could not be checked against stock.' };
-  if (Object.keys(model.stockErrors).length > 0) return { status: 'not-checked', reason: 'Some inventory records have errors, so the order could not be checked against stock.' };
+  if (model.data.inventory.length === 0) return { status: 'not-checked', reason: t('No inventory has been entered, so the order could not be checked against stock.') };
+  if (Object.keys(model.stockErrors).length > 0) return { status: 'not-checked', reason: t('Some inventory records have errors, so the order could not be checked against stock.') };
   const recipe = model.recipes[productId];
   if (!recipe || recipe.status !== 'complete') return { status: 'no-recipe' };
 

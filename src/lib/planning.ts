@@ -9,6 +9,7 @@
  *   Remaining          = Available − Required
  *   Shortage           = MAX(0, Required − Available)
  */
+import { tx } from '../i18n/i18n';
 import { businessSummary, toCents, type BusinessSummary } from './business';
 import { calculateProduction, type Dimension, type ProductionResult } from './inventory';
 import type { ParsedProduct } from './model';
@@ -163,7 +164,7 @@ export interface ResourceRanking {
 
 /** "per kg", "per L" or "per piece" – the unit used for CM-per-resource figures. */
 export function resourceUnitLabel(dimension: Dimension): string {
-  return dimension === 'mass' ? 'kg' : dimension === 'volume' ? 'L' : 'piece';
+  return dimension === 'mass' ? tx('kg') : dimension === 'volume' ? tx('L') : tx('piece');
 }
 
 export function contributionPerResource(

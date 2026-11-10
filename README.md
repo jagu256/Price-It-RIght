@@ -18,11 +18,12 @@ It is an **educational decision-support tool**: every result depends on the assu
 7. [Inventory upload instructions](#inventory-upload-instructions)
 8. [Product recipe instructions](#product-recipe-instructions)
 9. [Production planning methodology](#production-planning-methodology)
-10. [Installation](#installation)
-11. [Testing](#testing)
-12. [Known limitations](#known-limitations)
-13. [AI-assisted development disclosure](#ai-assisted-development-disclosure)
-14. [Deployment](#deployment-github--vercel)
+10. [Language: English / Français](#language-english--français)
+11. [Installation](#installation)
+12. [Testing](#testing)
+13. [Known limitations](#known-limitations)
+14. [AI-assisted development disclosure](#ai-assisted-development-disclosure)
+15. [Deployment](#deployment-github--vercel)
 
 ---
 
@@ -57,7 +58,8 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **🎮 Business Challenge** | **Can You Save Your Business?** Beginner, Intermediate and Expert fictional scenarios with clear success conditions. Kept separate from your own data. |
 | **💾 Save my work** (My Business) | Your business (name, fixed costs, products, inventory and recipes) is **saved automatically in this browser** and restored when you come back. **📤 Export my business (backup file)** downloads a `.json` backup – a Price It Right file for re-importing, not a spreadsheet (your computer may show it as a code file); **📥 Import a saved business** checks the file fully, lists any problems in plain language, and asks before replacing your current work; **🧹 Start fresh** (with confirmation) removes the saved copy and reloads the Coffee Shop example. If the browser blocks storage, the app keeps working and says **"Saving is off"**. A privacy note explains that the data stays on this device only. |
 | **🧮 Show the math** (everywhere) | A small **Show the math** button on every main number: the six dashboard cards, sales-mix break-even, margin of safety, the one-product break-even calculator, the What-If modified plan, the minimum calculated price, the profit goal gap, and the Production Planner's modified plan. It shows the formula in words, then the same formula with your own numbers, e.g. *Operating profit = total contribution margin − fixed costs* → *$2,475 − $1,500 = $975*. |
-| **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. |
+| **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. **📊 Download my business as Excel** gives an .xlsx file with five sheets of real number cells. |
+| **🇫🇷 EN / FR** (header) | Switches the whole app – screens, messages, Show the math, the PDF report and the Excel file – between English and **French (Canada)**. Amounts use fr-CA formats (`1 800 $`, `63,5 %`, `6,50 $`) and a French decimal comma can be typed (`6,50`). The choice is remembered in this browser. |
 
 ## Main user workflows
 
@@ -286,6 +288,29 @@ Imported data is a **snapshot**, not a live inventory feed.
    - *Suggested plan.* Fill demand in order of CM per unit of the scarce item, using whatever stock remains each time, respecting every item and demand, and skipping products with CM ≤ 0. This is a **heuristic: it is labelled "suggested", not proven optimal**. No optimisation algorithm is claimed.
 6. **Plan profit:** units sold = min(planned, demand). Variable costs and revenue apply to units sold.
 
+## Language: English / Français
+
+- **One dictionary.** Every piece of on-screen text is written in English in the code and wrapped in `t('…')`. The French for each one lives in a single file, `src/i18n/fr.ts` (English → French). `src/i18n/i18n.ts` holds the small translator (`t`, `plural`, the current language and fr-CA number locale).
+- **Nothing can be forgotten silently.** `dictionary.test.ts` scans the source for every `t('…')` text and fails if one has no French, if a French entry is empty, or if its `{placeholders}` don't match the English. `App.fr.test.tsx` also opens every screen in French and fails if any text was asked for that the dictionary doesn't have.
+- **Same numbers in both languages.** Only words and formats change. All calculations stay in whole cents; tests check the French report and Excel file against the English figures (demo café: `3 900 $`, `975 $`, break-even 455 units / `2 363,64 $`, DOL `2,54`).
+- **Formats:** fr-CA puts the dollar sign after the amount with a space (`1 800 $`), uses a decimal comma (`6,50 $`, `63,5 %`) and writes dates as `9 novembre 2026`. Inputs accept `6,50` or `6.50` in French; in English a comma is still read as a thousands separator, as before.
+- **What is not translated:** the user's own data (business, product and item names) is kept exactly as typed. The fictional sample businesses are translated when they are loaded. Imports recognise French column headings and units (e.g. `Nom de l’article`, `grammes`, `unités`).
+- **Remembered choice:** saved in this browser's storage under `price-it-right:language` (wrapped in try/catch; if storage is blocked the app simply starts in English).
+- **Accounting terms used:** contribution margin = *marge sur coûts variables (MCV)*; operating profit = *bénéfice d’exploitation*; break-even = *seuil de rentabilité*; margin of safety = *marge de sécurité*; fixed / variable costs = *coûts fixes / variables*; relevant cost = *coût pertinent*; opportunity cost = *coût de renonciation*; revenue = *chiffre d’affaires*.
+
+**Translations to review (the AI was not sure; please have a French-speaking team member check):**
+
+| English | French used | Why it's uncertain |
+|---|---|---|
+| Degree of operating leverage | Coefficient de levier d’exploitation | *Levier d’exploitation* alone is also common in Québec textbooks |
+| Spreadsheet | chiffrier | Québec usage; France says *tableur* |
+| N/A | S.O. (sans objet) | Correct in Québec, but *N.D.* (non disponible) may fit some places better |
+| Pricing Lab / Smart Inventory Hub | Labo des prix / Centre des stocks | Feature names – a free choice |
+| Hoodie | Kangourou | Québec word; *chandail à capuchon* is also used |
+| Cotton pads | Tampons d’ouate | Québec usage |
+| Food (category) / Tops | Repas / Hauts | Category names in the fictional samples |
+| {name}s to bake (challenge) | {name} : quantité à cuire | Reworded to avoid English-style plurals |
+
 ## Installation
 
 1. Install **Node.js** (LTS) from <https://nodejs.org>.
@@ -328,6 +353,9 @@ npm run test:watch  # re-run while editing
 | `optimizer.test.ts` | **Agrees with an independent brute-force search** (written separately; tries every whole-unit plan) on 300 random problems, on the Expert challenge bakery (all 151 × 121 × 201 plans) and on the demo café; plans always fit inventory and demand; beats or equals the heuristic; a search stopped by its limit is labelled not proven but still fits; no-recipe products left at demand and reported; $0-margin products set to 0; no stock → 0 |
 | `showMath.test.ts` | "Show the math": the demo café's explanations (profit $2,475 − $1,500 = $975, revenue, variable costs, CM, CM ratio, break-even 455 units and $2,363.64, margin of safety); **each explanation's result equals the figure the dashboard displays**; losses and negative numbers; $0 revenue (N/A, no NaN); rounded weighted CM note; one-product break-even; required price ($7.75) with its rounding step and profit check; profit goal gap |
 | `accounting.test.ts`, `validation.test.ts`, `explain.test.ts`, `chartData.test.ts`, `inventory.test.ts` | The original single-product calculator, input validation and explanations (kept and still used) |
+| `dictionary.test.ts` | Every `t('…')` text in the source has French; none empty; placeholders match |
+| `frenchOutputs.test.ts` | The report in French (`9 novembre 2026`, `3 900 $` … `975 $`, `63,5 %`, `455 unités`, `2 363,64 $`) with the same figures as English; PDF text keeps accents and swaps narrow spaces and `œ`; Excel sheet names in French (≤ 31 characters) with the same number cells; after-tax target `1 250 $`; decimal comma in a tax rate |
+| `App.fr.test.tsx` | The app in French: dashboard (`3 900 $`, `2 475 $`, `975 $`, `63,5 %`) and its Show the math (`2 475 $ − 1 500 $ = 975 $`); sensitivity `1 365 $` and DOL `2,54`; decimal comma accepted and invalid input kept as typed; switching back to English and remembering the choice; report preview; Best mix and Decisions in French; **every screen opened with no missing translation** |
 | `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; Best mix (proven-optimal label, feasible, at least as much profit as "keep my mix" and the suggested plan; the heuristic keeps its "not proven optimal" label); 12-month projection ($11,700 default, January −$15 "below break-even", best July / worst January, year $11,452.50, invalid level pauses results); Decisions (special order +$15 when stock covers it, "not achievable" with "Sugar: 100 grams short" for a larger order, +$5 after giving up 10 regular sales; make-or-buy "Make it", $4,800 vs $5,000, unavoidable fixed costs marked irrelevant); price-sensitive demand (off by default; best price $11.50 / 190 units / $1,580 for demo Coffee; "Try" fills the What-If plan without changing the business; also in the price assistant; negative X rejected); after-tax target ($1,250 pre-tax, $195 tax, $780 after tax, price tool $6.92 and goal tracker −$275 using the pre-tax target, invalid rate shown and tools back on their own targets); sensitivity table, DOL 2.54 and its math, then "Not meaningful" after raising fixed costs to a loss; Save my work (auto-save and restore after "reopening" the app, storage blocked → "Saving is off", damaged saved copy, export read back, bad files rejected with friendly errors and nothing changed, import asks first, Start fresh asks first, privacy note); Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
 
 **Automated test record (development environment, Vitest 3.2.7, Node 22):**
@@ -343,6 +371,7 @@ npm run test:watch  # re-run while editing
 - 9 November 2026, after adding the Excel export: **267 tests in 17 files passed**. `npm run build` completed (with Vite's "chunk larger than 800 kB" warning for the main file, 824 kB / 235 kB gzipped).
 - 9 November 2026, after adding the 12-month projection: **281 tests in 18 files passed**. `npm run build` completed (same size warning).
 - 9 November 2026, after adding the exact product-mix optimizer: **290 tests in 19 files passed**. `npm run build` completed (same size warning).
+- 9 November 2026, after adding French (English / Français toggle): **307 tests in 22 files passed**. `npm run build` completed (same size warning; the main file is now 1,012 kB / 288 kB gzipped because it includes the French dictionary).
 
 Re-run `npm test` yourself to confirm.
 
@@ -427,9 +456,14 @@ Re-run `npm test` yourself to confirm.
 | 72 | Seasonal months | January 60 %, July 130 % | January −$15 "Below break-even"; best July, worst January; year $11,452.50 | | |
 | 73 | Monthly fixed costs | December 150 % and fixed costs 2000 | December $1,712.50 – still below July | | |
 | 74 | Totals add up | Add the 12 operating-profit cells by hand | Equals the "Year" row | | |
+| 75 | Invalid month | March sales level "abc" | Message naming March; projection pauses (not treated as 0) | | |
 | 76 | Best mix | Demo → 🏆 Production Planner → *🧮 Best mix (exact search)* | Green "proven optimal for these numbers" note; modified plan "✅ Feasible"; its operating profit ≥ *Keep my mix* and *Suggested plan* | | |
 | 77 | Best mix vs Expert challenge | Compare with your best answer in 🎮 Expert | Best mix earns at least as much (enter the same products/stock in My Business to check) | | |
-| 75 | Invalid month | March sales level "abc" | Message naming March; projection pauses (not treated as 0) | | |
+| 78 | French toggle | Click **FR** in the header, then open every section | All text in French; dashboard shows `3 900 $`, `975 $`, `63,5 %` | | |
+| 79 | Remembered language | Choose FR, close and reopen the app | It opens in French; click **EN** to go back | | |
+| 80 | Decimal comma | In French, type `6,50` as a price, then `abc` | `6,50` accepted; `abc` shows a French message and results pause | | |
+| 81 | French PDF and Excel | In French, download the report and the Excel file | French headings, accents shown correctly, same amounts as in English; Excel sheets named Produits, Sommaire… | | |
+| 82 | French at phone width | FR, phone width (≈375 px), every section | No sideways scrolling; long French words wrap | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
@@ -480,7 +514,8 @@ On 2 November 2026 a separate checking step (a second AI agent that had not seen
 - **Rounding:** itemized variable costs are rounded to the nearest cent per unit before multiplying by volume.
 - **Sensitivity analysis** is fixed at ±10 % and moves one input at a time; it does not model inputs changing together, step costs, or demand reacting to price. DOL only describes small changes around the current sales level.
 - **Show the math** covers the main figures only. It does not explain every table cell, the charts, the inventory figures, the challenges or the PDF report, and it gives no explanation when a break-even point does not exist (the screen already says why). With many products the revenue and variable-cost explanations become long lists.
-- **PDF fonts** use standard Latin characters, so emojis and some symbols are left out of the PDF.
+- **PDF fonts** use standard Latin characters, so emojis and some symbols are left out of the PDF (French accents are kept; `œ` is written `oe`).
+- **French translations were written by an AI** and checked by tests for completeness, not for style. A French-speaking person should review them (see the list under *Language*). The user's own data is never translated, and the Excel money format code stays the English-Canada one (Excel shows it in the reader's own regional format).
 - **Previews:** some preview environments block file downloads (templates and PDF). They work when the app runs locally or on Vercel.
 
 ## AI-assisted development disclosure

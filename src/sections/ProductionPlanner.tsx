@@ -3,8 +3,9 @@ import { Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis } from 'recha
 import ChartContainer from '../components/ChartContainer';
 import { useStore } from '../app/StoreContext';
 import ShowMath from '../components/ShowMath';
-import { CellInput, ErrorList, Notice, SectionHeader, SignedMoney, StatusPill, SubHeader } from '../components/ui';
-import { formatCAD, formatSignedCAD } from '../lib/format';
+import { CellInput, ErrorList, Notice, Rich, SectionHeader, SignedMoney, StatusPill, SubHeader } from '../components/ui';
+import { plural, t } from '../i18n/i18n';
+import { formatCAD, formatNumber, formatPercent, formatSignedCAD } from '../lib/format';
 import { UNITS, formatQuantity, parseQuantity, toBase } from '../lib/inventory';
 import {
   checkPlan,
@@ -28,11 +29,11 @@ export default function ProductionPlanner() {
   const anyRecipe = Object.values(model.recipes).some((r) => r.status === 'complete');
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
-      <SectionHeader emoji="🏆" title="What Should I Produce More Of?" subtitle="Discover which products make the best use of your limited inventory." />
+      <SectionHeader emoji="🏆" title={t('What Should I Produce More Of?')} subtitle={t('Discover which products make the best use of your limited inventory.')} />
       {!model.summary ? (
-        <Notice tone="error">Fix the highlighted numbers in 🏠 My Business first.</Notice>
+        <Notice tone="error">{t('Fix the highlighted numbers in 🏠 My Business first.')}</Notice>
       ) : !stockOk || !anyRecipe ? (
-        <Notice tone="warn" title="Inventory and recipes needed">Add valid inventory and at least one product recipe in the 📦 Smart Inventory Hub to plan production.</Notice>
+        <Notice tone="warn" title={t('Inventory and recipes needed')}>{t('Add valid inventory and at least one product recipe in the 📦 Smart Inventory Hub to plan production.')}</Notice>
       ) : (
         <Planner />
       )}
@@ -83,11 +84,11 @@ function Planner() {
       <ResourceRanking resource={resource} setResource={setResourceId} bindingId={binding?.itemId ?? null} />
 
       <section aria-labelledby="sim-title" className="space-y-4">
-        <SubHeader id="sim-title" emoji="🧪" title="Production Plan Simulator" subtitle="Change planned production and try extra (hypothetical) inventory. Your business plan is not changed." />
+        <SubHeader id="sim-title" emoji="🧪" title={t('Production Plan Simulator')} subtitle={t('Change planned production and try extra (hypothetical) inventory. Your business plan is not changed.')} />
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn-small" onClick={() => dispatch({ type: 'planner-reset' })}>↺ Expected demand (original)</button>
-          <button type="button" className="btn-small" onClick={() => fill(proportionalPlan(model.products, model.recipes, model.stock).plan)}>⚖️ Keep my mix, fit inventory</button>
-          <button type="button" className="btn-small" onClick={() => fill(suggestedPlan(model.products, model.recipes, model.stock, resource))}>💡 Suggested plan</button>
+          <button type="button" className="btn-small" onClick={() => dispatch({ type: 'planner-reset' })}>↺ {t('Expected demand (original)')}</button>
+          <button type="button" className="btn-small" onClick={() => fill(proportionalPlan(model.products, model.recipes, model.stock).plan)}>⚖️ {t('Keep my mix, fit inventory')}</button>
+          <button type="button" className="btn-small" onClick={() => fill(suggestedPlan(model.products, model.recipes, model.stock, resource))}>💡 {t('Suggested plan')}</button>
           <button
             type="button"
             className="btn-small"
@@ -97,32 +98,33 @@ function Planner() {
               fill(r.plan);
             }}
           >
-            🧮 Best mix (exact search)
+            🧮 {t('Best mix (exact search)')}
           </button>
         </div>
         <p className="text-xs text-sage-600">
-          “Keep my mix” scales every product down by the same percentage until inventory fits. “Suggested plan” fills demand in order of contribution per unit of
-          the selected scarce item while respecting every item – a rule of thumb, <strong>not proven optimal</strong>. When several items are limited, other plans may earn more.
-          “Best mix” searches every possible whole-unit plan (skipping only groups it can prove can’t do better) for the most total contribution margin within all your
-          inventory and expected demand.
+          <Rich
+            text={t(
+              '“Keep my mix” scales every product down by the same percentage until inventory fits. “Suggested plan” fills demand in order of contribution per unit of the selected scarce item while respecting every item – a rule of thumb, **not proven optimal**. When several items are limited, other plans may earn more. “Best mix” searches every possible whole-unit plan (skipping only groups it can prove can’t do better) for the most total contribution margin within all your inventory and expected demand.',
+            )}
+          />
         </p>
         {best && <BestMixNote r={best} />}
 
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="card overflow-x-auto p-2 sm:p-4">
             <table className="data-table min-w-[26rem]">
-              <caption className="mb-2 text-left font-semibold text-sage-900">Planned production per month</caption>
-              <thead><tr><th scope="col">Product</th><th scope="col" className="text-right">Demand</th><th scope="col">Planned</th></tr></thead>
+              <caption className="mb-2 text-left font-semibold text-sage-900">{t('Planned production per month')}</caption>
+              <thead><tr><th scope="col">{t('Product')}</th><th scope="col" className="text-right">{t('Demand')}</th><th scope="col">{t('Planned')}</th></tr></thead>
               <tbody>
                 {model.products.map((p) => (
                   <tr key={p.id}>
                     <th scope="row" className="font-semibold">
                       {p.name}
-                      {model.recipes[p.id]?.status !== 'complete' && <span className="block text-xs font-normal text-butter-700">No recipe – inventory not checked</span>}
+                      {model.recipes[p.id]?.status !== 'complete' && <span className="block text-xs font-normal text-butter-700">{t('No recipe – inventory not checked')}</span>}
                       <ErrorList messages={[unitErrors[p.id]]} />
                     </th>
-                    <td className="text-right">{p.units.toLocaleString('en-CA')}</td>
-                    <td><CellInput id={`plan-${p.id}`} label={`Planned production of ${p.name}`} inputMode="numeric" value={state.planner.units[p.id] ?? String(p.units)} invalid={!!unitErrors[p.id]} onChange={(v) => dispatch({ type: 'planner-set-units', productId: p.id, value: v })} /></td>
+                    <td className="text-right">{formatNumber(p.units)}</td>
+                    <td><CellInput id={`plan-${p.id}`} label={t('Planned production of {name}', { name: p.name })} inputMode="numeric" value={state.planner.units[p.id] ?? String(p.units)} invalid={!!unitErrors[p.id]} onChange={(v) => dispatch({ type: 'planner-set-units', productId: p.id, value: v })} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -130,8 +132,8 @@ function Planner() {
           </div>
           <div className="card overflow-x-auto p-2 sm:p-4">
             <table className="data-table min-w-[26rem]">
-              <caption className="mb-2 text-left font-semibold text-sage-900">What if I had more inventory? (hypothetical)</caption>
-              <thead><tr><th scope="col">Item</th><th scope="col" className="text-right">Have</th><th scope="col">Extra</th></tr></thead>
+              <caption className="mb-2 text-left font-semibold text-sage-900">{t('What if I had more inventory? (hypothetical)')}</caption>
+              <thead><tr><th scope="col">{t('Item')}</th><th scope="col" className="text-right">{t('Have')}</th><th scope="col">{t('Extra')}</th></tr></thead>
               <tbody>
                 {model.stock.map((s) => (
                   <tr key={s.id}>
@@ -139,7 +141,7 @@ function Planner() {
                     <td className="text-right">{formatQuantity(s.availableBase, s.dimension, 'short')}</td>
                     <td>
                       <div className="flex items-center gap-1.5">
-                        <CellInput id={`extra-${s.id}`} label={`Extra ${s.name} in ${UNITS[s.unit].plural}`} placeholder="0" value={state.planner.extra[s.id] ?? ''} invalid={!!extraErrors[s.id]} onChange={(v) => dispatch({ type: 'planner-set-extra', itemId: s.id, value: v })} />
+                        <CellInput id={`extra-${s.id}`} label={t('Extra {name} in {unit}', { name: s.name, unit: t(UNITS[s.unit].plural) })} placeholder="0" value={state.planner.extra[s.id] ?? ''} invalid={!!extraErrors[s.id]} onChange={(v) => dispatch({ type: 'planner-set-extra', itemId: s.id, value: v })} />
                         <span className="text-xs text-sage-600">{UNITS[s.unit].short}</span>
                       </div>
                     </td>
@@ -150,11 +152,10 @@ function Planner() {
           </div>
         </div>
         <Notice tone="info">
-          Buying inventory is a cash payment, not an expense. Its cost is recognised (as part of variable cost per unit) only when products are sold, so extra
-          inventory here does not reduce operating profit by itself.
+          {t('Buying inventory is a cash payment, not an expense. Its cost is recognised (as part of variable cost per unit) only when products are sold, so extra inventory here does not reduce operating profit by itself.')}
         </Notice>
 
-        {modified && modifiedCheck ? <Comparison original={original} originalCheck={originalCheck} modified={modified} modifiedCheck={modifiedCheck} /> : <Notice tone="error">Fix the highlighted values to compare plans.</Notice>}
+        {modified && modifiedCheck ? <Comparison original={original} originalCheck={originalCheck} modified={modified} modifiedCheck={modifiedCheck} /> : <Notice tone="error">{t('Fix the highlighted values to compare plans.')}</Notice>}
       </section>
 
       {modifiedCheck && <Alerts check={modifiedCheck} plan={plan} />}
@@ -165,22 +166,27 @@ function Planner() {
 /** Says exactly what the exact search proved – "proven optimal" only when the whole search finished. */
 function BestMixNote({ r }: { r: OptimizerResult }) {
   return r.status === 'proven-optimal' ? (
-    <Notice tone="success" title="Best mix – proven optimal for these numbers" role="status">
+    <Notice tone="success" title={t('Best mix – proven optimal for these numbers')} role="status">
       <p>
-        No other whole-unit plan within your current inventory and expected demand earns more than {formatCAD(r.optimizedCM)} of contribution margin from products with
-        recipes (checked with {r.nodes.toLocaleString('en-CA')} search steps). Fixed costs are the same for every plan, so this is also the highest operating profit.
+        {t('No other whole-unit plan within your current inventory and expected demand earns more than {cm} of contribution margin from products with recipes (checked with {steps} search steps). Fixed costs are the same for every plan, so this is also the highest operating profit.', {
+          cm: formatCAD(r.optimizedCM),
+          steps: formatNumber(r.nodes),
+        })}
       </p>
       <p className="mt-1">
-        It is only as good as your numbers: it assumes demand, prices, costs and recipes are right, and it ignores the hypothetical extra inventory below. There may be
-        other plans that tie.
-        {r.unchecked.length > 0 && ` ${r.unchecked.join(', ')} ${r.unchecked.length === 1 ? 'has' : 'have'} no recipe, so ${r.unchecked.length === 1 ? 'it was' : 'they were'} left at expected demand and not checked.`}
-        {r.zeroMargin.length > 0 && ` ${r.zeroMargin.join(', ')} earn${r.zeroMargin.length === 1 ? 's' : ''} no contribution per unit, so ${r.zeroMargin.length === 1 ? 'it is' : 'they are'} set to 0.`}
+        {t('It is only as good as your numbers: it assumes demand, prices, costs and recipes are right, and it ignores the hypothetical extra inventory below. There may be other plans that tie.')}
+        {r.unchecked.length > 0 &&
+          ' ' + plural(r.unchecked.length, '{names} has no recipe, so it was left at expected demand and not checked.', '{names} have no recipe, so they were left at expected demand and not checked.', { names: r.unchecked.join(', ') })}
+        {r.zeroMargin.length > 0 &&
+          ' ' + plural(r.zeroMargin.length, '{names} earns no contribution per unit, so it is set to 0.', '{names} earn no contribution per unit, so they are set to 0.', { names: r.zeroMargin.join(', ') })}
       </p>
     </Notice>
   ) : (
-    <Notice tone="warn" title="Suggested mix – NOT proven optimal" role="status">
-      The search stopped after {r.nodes.toLocaleString('en-CA')} steps before it could check every possibility, so this is the best plan found so far ({formatCAD(r.optimizedCM)}{' '}
-      of contribution margin). A better plan may exist.
+    <Notice tone="warn" title={t('Suggested mix – NOT proven optimal')} role="status">
+      {t('The search stopped after {steps} steps before it could check every possibility, so this is the best plan found so far ({cm} of contribution margin). A better plan may exist.', {
+        steps: formatNumber(r.nodes),
+        cm: formatCAD(r.optimizedCM),
+      })}
     </Notice>
   );
 }
@@ -189,27 +195,27 @@ function ResourceRanking({ resource, setResource, bindingId }: { resource: strin
   const { model } = useStore();
   const r = resource ? contributionPerResource(resource, model.products, model.recipes, model.stock) : null;
   if (!r) return null;
-  const unit = resourceUnitLabel(r.item.dimension);
+  const unit = t(resourceUnitLabel(r.item.dimension));
   const data = r.ranking.map((x) => ({ name: x.name, value: x.cmPerResourceUnit }));
   const [a, b] = r.ranking;
 
   return (
     <section aria-labelledby="rank-title" className="card space-y-4 p-5 sm:p-8">
-      <SubHeader id="rank-title" emoji="🥇" title="Contribution margin per unit of a scarce resource" subtitle="CM per unit ÷ amount of the scarce item used. When ONE item limits production, this shows which products use it best." />
+      <SubHeader id="rank-title" emoji="🥇" title={t('Contribution margin per unit of a scarce resource')} subtitle={t('CM per unit ÷ amount of the scarce item used. When ONE item limits production, this shows which products use it best.')} />
       <label className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-        Scarce inventory item
+        {t('Scarce inventory item')}
         <select className="select" value={resource ?? ''} onChange={(e) => setResource(e.target.value)}>
-          {model.stock.map((s) => <option key={s.id} value={s.id}>{s.name}{s.id === bindingId ? ' (most constrained)' : ''}</option>)}
+          {model.stock.map((s) => <option key={s.id} value={s.id}>{s.name}{s.id === bindingId ? ` ${t('(most constrained)')}` : ''}</option>)}
         </select>
       </label>
       {r.ranking.length === 0 ? (
-        <p className="text-sage-700">No product with a complete recipe uses {r.item.name}.</p>
+        <p className="text-sage-700">{t('No product with a complete recipe uses {name}.', { name: r.item.name })}</p>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           <div className="overflow-x-auto">
             <table className="data-table min-w-[28rem]">
-              <caption className="sr-only">Contribution per unit of {r.item.name}</caption>
-              <thead><tr><th scope="col">Product</th><th scope="col" className="text-right">CM / unit</th><th scope="col" className="text-right">{r.item.name} used</th><th scope="col" className="text-right">CM per {unit}</th></tr></thead>
+              <caption className="sr-only">{t('Contribution per unit of {name}', { name: r.item.name })}</caption>
+              <thead><tr><th scope="col">{t('Product')}</th><th scope="col" className="text-right">{t('CM / unit')}</th><th scope="col" className="text-right">{t('{name} used', { name: r.item.name })}</th><th scope="col" className="text-right">{t('CM per {unit}', { unit })}</th></tr></thead>
               <tbody>
                 {r.ranking.map((x) => (
                   <tr key={x.productId}>
@@ -222,13 +228,13 @@ function ResourceRanking({ resource, setResource, bindingId }: { resource: strin
               </tbody>
             </table>
           </div>
-          <figure className="h-56" role="img" aria-label={`Bar chart of contribution margin per ${unit} of ${r.item.name}`}>
+          <figure className="h-56" role="img" aria-label={t('Bar chart of contribution margin per {unit} of {name}', { unit, name: r.item.name })}>
             <ChartContainer width="100%" height="100%">
               <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 8 }}>
                 <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" tickFormatter={(v) => formatCAD(v)} stroke="#3E5A40" tick={{ fontSize: 11 }} />
                 <YAxis type="category" dataKey="name" width={90} stroke="#3E5A40" tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(v: number) => [formatCAD(v), `CM per ${unit} of ${r.item.name}`]} contentStyle={{ borderRadius: 16 }} />
+                <Tooltip formatter={(v: number) => [formatCAD(v), t('CM per {unit} of {name}', { unit, name: r.item.name })]} contentStyle={{ borderRadius: 16 }} />
                 <Bar dataKey="value" radius={[6, 6, 6, 6]}>
                   {data.map((d, i) => <Cell key={d.name} fill={d.value < 0 ? '#A8324F' : i === 0 ? '#3E5A40' : '#86A882'} />)}
                 </Bar>
@@ -239,60 +245,65 @@ function ResourceRanking({ resource, setResource, bindingId }: { resource: strin
       )}
       {a && b && a.cmPerResourceUnit > b.cmPerResourceUnit && a.cmPerResourceUnit > 0 && (
         <Notice tone="idea">
-          {a.name} generates more contribution margin per {unit} of {r.item.name} than {b.name}. If {r.item.name} is the only limiting resource, prioritizing {a.name} may
-          generate more contribution, subject to customer demand and other constraints.
+          {t('{a} generates more contribution margin per {unit} of {item} than {b}. If {item} is the only limiting resource, prioritizing {a} may generate more contribution, subject to customer demand and other constraints.', {
+            a: a.name,
+            b: b.name,
+            unit,
+            item: r.item.name,
+          })}
         </Notice>
       )}
       <p className="text-xs text-sage-600">
-        The product with the highest CM per unit is not automatically the best one to prioritise. With several limited items, simple rankings may not give the best overall plan.
-        {r.notUsing.length > 0 && ` Not using ${r.item.name}: ${r.notUsing.join(', ')}.`}
-        {r.unknown.length > 0 && ` No recipe: ${r.unknown.join(', ')}.`}
+        {t('The product with the highest CM per unit is not automatically the best one to prioritise. With several limited items, simple rankings may not give the best overall plan.')}
+        {r.notUsing.length > 0 && ' ' + t('Not using {item}: {names}.', { item: r.item.name, names: r.notUsing.join(', ') })}
+        {r.unknown.length > 0 && ' ' + t('No recipe: {names}.', { names: r.unknown.join(', ') })}
       </p>
     </section>
   );
 }
 
 function Comparison({ original, originalCheck, modified, modifiedCheck }: { original: PlanFinancials; originalCheck: PlanCheck; modified: PlanFinancials; modifiedCheck: PlanCheck }) {
-  const rows: [string, number, number][] = [
-    ['Revenue (units sold)', original.summary.totalRevenue, modified.summary.totalRevenue],
-    ['Variable costs', original.summary.totalVariableCosts, modified.summary.totalVariableCosts],
-    ['Contribution margin', original.summary.totalCM, modified.summary.totalCM],
-    ['Operating profit', original.summary.operatingProfit, modified.summary.operatingProfit],
+  // The key (not the shown label) decides which row is bold and which is a cost.
+  const rows: { key: string; label: string; a: number; b: number }[] = [
+    { key: 'revenue', label: t('Revenue (units sold)'), a: original.summary.totalRevenue, b: modified.summary.totalRevenue },
+    { key: 'variable', label: t('Variable costs'), a: original.summary.totalVariableCosts, b: modified.summary.totalVariableCosts },
+    { key: 'cm', label: t('Contribution margin'), a: original.summary.totalCM, b: modified.summary.totalCM },
+    { key: 'profit', label: t('Operating profit'), a: original.summary.operatingProfit, b: modified.summary.operatingProfit },
   ];
-  const math = summaryMath(modified.summary, 'units sold (planned units, but never more than expected demand)');
-  const label = (c: PlanCheck) => (c.feasibility === 'feasible' ? '✅ Feasible' : c.feasibility === 'infeasible' ? '🔴 Not feasible – inventory short' : '🟡 Unverified – some products have no recipe');
+  const math = summaryMath(modified.summary, t('units sold (planned units, but never more than expected demand)'));
+  const label = (c: PlanCheck) => (c.feasibility === 'feasible' ? `✅ ${t('Feasible')}` : c.feasibility === 'infeasible' ? `🔴 ${t('Not feasible – inventory short')}` : `🟡 ${t('Unverified – some products have no recipe')}`);
   return (
     <div className="card overflow-x-auto p-4 sm:p-6" aria-live="polite">
       <table className="data-table min-w-[34rem]">
-        <caption className="mb-3 text-left font-display text-lg font-bold text-sage-900">Original plan vs. modified plan</caption>
-        <thead><tr><th scope="col">Metric</th><th scope="col" className="text-right">Original (expected demand)</th><th scope="col" className="text-right">Modified plan</th><th scope="col" className="text-right">Difference</th></tr></thead>
+        <caption className="mb-3 text-left font-display text-lg font-bold text-sage-900">{t('Original plan vs. modified plan')}</caption>
+        <thead><tr><th scope="col">{t('Metric')}</th><th scope="col" className="text-right">{t('Original (expected demand)')}</th><th scope="col" className="text-right">{t('Modified plan')}</th><th scope="col" className="text-right">{t('Difference')}</th></tr></thead>
         <tbody>
           <tr>
-            <th scope="row" className="font-semibold">Inventory check</th>
+            <th scope="row" className="font-semibold">{t('Inventory check')}</th>
             <td className="text-right text-xs font-bold">{label(originalCheck)}</td>
             <td className="text-right text-xs font-bold">{label(modifiedCheck)}</td>
             <td />
           </tr>
-          {rows.map(([l, a, b]) => (
-            <tr key={l} className={l === 'Operating profit' ? 'font-bold' : ''}>
+          {rows.map(({ key, label: l, a, b }) => (
+            <tr key={key} className={key === 'profit' ? 'font-bold' : ''}>
               <th scope="row" className="font-semibold">{l}</th>
               <td className={`text-right ${originalCheck.feasibility === 'infeasible' ? 'text-sage-400 line-through decoration-loss-600/60' : ''}`}>{formatCAD(a)}</td>
               <td className={`text-right ${modifiedCheck.feasibility === 'infeasible' ? 'text-sage-400 line-through decoration-loss-600/60' : ''}`}>{formatCAD(b)}</td>
-              <td className="text-right"><SignedMoney value={l === 'Variable costs' ? a - b : b - a} text={formatSignedCAD(b - a)} /></td>
+              <td className="text-right"><SignedMoney value={key === 'variable' ? a - b : b - a} text={formatSignedCAD(b - a)} /></td>
             </tr>
           ))}
         </tbody>
       </table>
       {(originalCheck.feasibility === 'infeasible' || modifiedCheck.feasibility === 'infeasible') && (
-        <p className="mt-3 text-sm font-semibold text-loss-700">Crossed-out figures belong to a plan your inventory can’t support – they are not achievable sales.</p>
+        <p className="mt-3 text-sm font-semibold text-loss-700">{t('Crossed-out figures belong to a plan your inventory can’t support – they are not achievable sales.')}</p>
       )}
       {modified.unsold.length > 0 && (
         <p className="mt-2 text-sm text-butter-700">
-          Planned above demand: {modified.unsold.map((u) => `${u.units} ${u.name}`).join(', ')}. Unsold units are not counted as revenue.
+          {t('Planned above demand: {list}. Unsold units are not counted as revenue.', { list: modified.unsold.map((u) => `${formatNumber(u.units)} ${u.name}`).join(', ') })}
         </p>
       )}
-      <ShowMath label="the modified production plan" items={[math.revenue, math.variableCosts, math.contributionMargin, math.operatingProfit]} />
-      {modifiedCheck.feasibility === 'infeasible' && <p className="mt-2 text-xs font-semibold text-loss-700">The math describes a plan your inventory can’t support, so its profit is not achievable.</p>}
+      <ShowMath label={t('the modified production plan')} items={[math.revenue, math.variableCosts, math.contributionMargin, math.operatingProfit]} />
+      {modifiedCheck.feasibility === 'infeasible' && <p className="mt-2 text-xs font-semibold text-loss-700">{t('The math describes a plan your inventory can’t support, so its profit is not achievable.')}</p>}
     </div>
   );
 }
@@ -303,7 +314,7 @@ function Alerts({ check, plan }: { check: PlanCheck; plan: Plan }) {
   const affected = model.products.filter((p) => (plan[p.id] ?? 0) > 0 && model.recipes[p.id]?.lines.some((l) => shortItems.some((s) => s.itemId === l.itemId)));
   return (
     <section aria-labelledby="alerts-title" className="space-y-4">
-      <SubHeader id="alerts-title" emoji="🚦" title="Inventory alerts (modified plan)" />
+      <SubHeader id="alerts-title" emoji="🚦" title={t('Inventory alerts (modified plan)')} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {check.items.map((i) => (
           <div key={i.itemId} className="card space-y-2 p-4">
@@ -312,15 +323,15 @@ function Alerts({ check, plan }: { check: PlanCheck; plan: Plan }) {
               <StatusPill status={i.status} />
             </div>
             <p className="text-sm text-sage-700">
-              Needs {formatQuantity(i.requiredBase, i.dimension, 'short')} of {formatQuantity(i.availableBase, i.dimension, 'short')}
-              {i.usage !== null && Number.isFinite(i.usage) ? ` (${Math.round(i.usage * 100)} %)` : ''}
+              {t('Needs {required} of {available}', { required: formatQuantity(i.requiredBase, i.dimension, 'short'), available: formatQuantity(i.availableBase, i.dimension, 'short') })}
+              {i.usage !== null && Number.isFinite(i.usage) ? ` (${formatPercent(Math.round(i.usage * 100))})` : ''}
             </p>
-            {i.shortageBase > 0 && <p className="text-sm font-semibold text-loss-700">An additional {formatQuantity(i.shortageBase, i.dimension)} of {i.name} would be required.</p>}
+            {i.shortageBase > 0 && <p className="text-sm font-semibold text-loss-700">{t('An additional {qty} of {name} would be required.', { qty: formatQuantity(i.shortageBase, i.dimension), name: i.name })}</p>}
           </div>
         ))}
       </div>
       {affected.map((p) => (
-        <Notice key={p.id} tone="error">Your current inventory is insufficient to produce the planned quantity of {p.name}.</Notice>
+        <Notice key={p.id} tone="error">{t('Your current inventory is insufficient to produce the planned quantity of {name}.', { name: p.name })}</Notice>
       ))}
     </section>
   );

@@ -153,9 +153,17 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 290 tests in 19 files passed; build passed.
 
-### Not done yet (usage limit reached, 9 Nov 2026)
-- The independent verification of Features 3–6's hand-checked examples by a separate agent, and its README section.
-- Extra B (French toggle) – in progress after A and C.
+### Extra B – French toggle (English / Français) (9 Nov 2026)
+- **Design:** every UI text is English inside `t('…')`; the French lives in ONE file, `src/i18n/fr.ts` (≈1,200 entries). `src/i18n/i18n.ts` is the translator (`t`, `tx` for lists translated when shown, `plural` with the French rule that 0 and 1 are singular). `app/language.tsx` redraws the whole app when the language changes; the choice is kept in localStorage (`price-it-right:language`, try/catch).
+- **Formats:** `format.ts` now follows the language (fr-CA: `1 800 $`, `63,5 %`, `9 novembre 2026`); in French a decimal comma (`6,50`) is accepted. Calculations are unchanged and still in whole cents.
+- **Built in five parts** (local commits): language switch + Home/My Business; Profit Dashboard, explanations and Show the math; Pricing Lab; Smart Inventory Hub + importer (French headings and units) + templates; Production Planner, Decisions, Challenges, Business Report, PDF and Excel.
+- **Language-dependent logic removed:** a few screens compared displayed English text to decide things (What-If rows, a surprise-event warning colour, a recipe check). They now use internal keys, so behaviour is identical in both languages.
+- **Challenges** keep their text as getters (`get label() { return t('…') }`) so it is translated when read, not when the file loads.
+- The user's own data is never translated; fictional samples are translated when loaded.
+- **Tests:** `dictionary.test.ts` (every `t('…')` in the source has French, placeholders match), `frenchOutputs.test.ts` (report, PDF text, Excel in French with the same numbers), `App.fr.test.tsx` (French click-throughs and a check that every screen has no missing translation – it caught one: the planner's "kg" unit label).
+- **Uncertain translations** are listed in the README for a French speaker to review.
+
+**Checks:** 307 tests in 22 files passed; build passed (main file 1,012 kB / 288 kB gzipped – Vite's size warning, not an error). At 375 px every section in French has no sideways scrolling (checked in the browser).
 
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:

@@ -81,6 +81,27 @@ describe('en français', () => {
     expect(document.documentElement.lang).toBe('fr-CA');
   });
 
+  it('shows the business report preview in French with the same figures', () => {
+    setupFrench('report');
+    const rep = within(panel('report'));
+    expect(rep.getByRole('button', { name: /Télécharger le rapport de mon entreprise/ })).toBeInTheDocument();
+    const preview = rep.getByRole('article', { name: 'Aperçu du rapport' });
+    expect(within(preview).getByRole('heading', { name: 'Analyse du seuil de rentabilité' })).toBeInTheDocument();
+    expect(preview.textContent!.replace(/[  ]/g, ' ')).toContain('455 unités au total');
+  });
+
+  it('runs the exact Best mix search and a make-or-buy decision in French', async () => {
+    const { user } = setupFrench('planner');
+    const planner = within(panel('planner'));
+    await user.click(planner.getByRole('button', { name: /Meilleure composition/ }));
+    expect(planner.getByText(/optimalité prouvée pour ces chiffres/)).toBeInTheDocument();
+
+    await go('decisions');
+    const dec = within(panel('decisions'));
+    expect(dec.getByRole('heading', { name: /Fabriquer ou acheter/ })).toBeInTheDocument();
+    expect([...missingFrench]).toEqual([]);
+  });
+
   it('every screen shows only translated text (nothing asked for is missing from the dictionary)', async () => {
     setupFrench('home');
     for (const s of SECTIONS) await go(s.id);

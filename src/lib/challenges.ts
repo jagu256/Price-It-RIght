@@ -3,8 +3,10 @@
  * separate from the user's own business. Success is only awarded for valid
  * inputs within the allowed ranges and (for Expert) feasible production plans.
  */
+import { t } from '../i18n/i18n';
 import { calculate } from './accounting';
 import { businessSummary, toCents } from './business';
+import { formatCAD, formatNumber } from './format';
 import { toBase } from './inventory';
 
 export type Level = 'beginner' | 'intermediate' | 'expert';
@@ -45,17 +47,18 @@ function rangeErrors(inputs: RangeInput[], values: Record<string, number>): stri
   const errors: string[] = [];
   for (const i of inputs) {
     const v = values[i.key];
-    if (v === undefined || !Number.isFinite(v)) errors.push(`${i.label}: please enter a number.`);
-    else if (v < i.min || v > i.max) errors.push(`${i.label} must be between ${i.prefix ?? ''}${i.min}${i.suffix ?? ''} and ${i.prefix ?? ''}${i.max}${i.suffix ?? ''}.`);
+    const show = (x: number) => (i.prefix === '$' ? formatCAD(x) : `${formatNumber(x)}${i.suffix ?? ''}`);
+    if (v === undefined || !Number.isFinite(v)) errors.push(t('{label}: please enter a number.', { label: i.label }));
+    else if (v < i.min || v > i.max) errors.push(t('{label} must be between {min} and {max}.', { label: i.label, min: show(i.min), max: show(i.max) }));
   }
   return errors;
 }
 
 /* Beginner ----------------------------------------------------------- */
 const beginnerInputs: RangeInput[] = [
-  { key: 'price', label: 'Selling price per coffee', min: 3, max: 8, step: 0.05, start: 4.5, prefix: '$', help: 'You can charge between $3 and $8.' },
-  { key: 'variableCost', label: 'Variable cost per coffee', min: 2, max: 2.5, step: 0.05, start: 2.5, prefix: '$', help: 'A new supplier could cut costs by up to $0.50.' },
-  { key: 'units', label: 'Coffees sold per month', min: 300, max: 450, step: 1, start: 400, help: 'Marketing could bring up to 50 more customers.' },
+  { key: 'price', get label() { return t('Selling price per coffee'); }, min: 3, max: 8, step: 0.05, start: 4.5, prefix: '$', get help() { return t('You can charge between $3 and $8.'); } },
+  { key: 'variableCost', get label() { return t('Variable cost per coffee'); }, min: 2, max: 2.5, step: 0.05, start: 2.5, prefix: '$', get help() { return t('A new supplier could cut costs by up to $0.50.'); } },
+  { key: 'units', get label() { return t('Coffees sold per month'); }, min: 300, max: 450, step: 1, start: 400, get help() { return t('Marketing could bring up to 50 more customers.'); } },
 ];
 
 /* Intermediate ------------------------------------------------------- */
@@ -63,8 +66,8 @@ const beginnerInputs: RangeInput[] = [
 export const intermediateDemand = (price: number) => Math.max(0, Math.floor(400 - 20 * price + 1e-9));
 
 const intermediateInputs: RangeInput[] = [
-  { key: 'price', label: 'Selling price per coffee', min: 3, max: 12, step: 0.05, start: 5, prefix: '$', help: 'Customers react to price: every $1 above $5 loses 20 customers per month.' },
-  { key: 'variableCost', label: 'Variable cost per coffee', min: 1.8, max: 2, step: 0.05, start: 2, prefix: '$', help: 'Switching to a bulk supplier could save up to $0.20 per coffee.' },
+  { key: 'price', get label() { return t('Selling price per coffee'); }, min: 3, max: 12, step: 0.05, start: 5, prefix: '$', get help() { return t('Customers react to price: every $1 above $5 loses 20 customers per month.'); } },
+  { key: 'variableCost', get label() { return t('Variable cost per coffee'); }, min: 1.8, max: 2, step: 0.05, start: 2, prefix: '$', get help() { return t('Switching to a bulk supplier could save up to $0.20 per coffee.'); } },
 ];
 
 /* Expert ------------------------------------------------------------- */
@@ -81,26 +84,35 @@ export const EXPERT = {
 
 const expertInputs: RangeInput[] = EXPERT.products.map((p) => ({
   key: p.key,
-  label: `${p.name}s to bake`,
+  get label() {
+    return t('{name}s to bake', { name: t(p.name) });
+  },
   min: 0,
   max: p.demand,
   step: 1,
   start: p.start,
-  help: `Demand: up to ${p.demand}. Uses ${p.flour} g flour and ${p.butter} g butter each. CM $${(p.price - p.variableCost).toFixed(2)} each.`,
+  get help() {
+    return t('Demand: up to {demand}. Uses {flour} g flour and {butter} g butter each. CM {cm} each.', {
+      demand: formatNumber(p.demand),
+      flour: formatNumber(p.flour),
+      butter: formatNumber(p.butter),
+      cm: formatCAD(Math.round((p.price - p.variableCost) * 100) / 100),
+    });
+  },
 }));
 
 export const CHALLENGES: Challenge[] = [
   {
     level: 'beginner',
-    title: 'Stop the Losses',
-    business: 'Bean There Coffee (fictional)',
-    background: 'Bean There sells 400 coffees a month at $4.50. Each coffee costs $2.50 to make and fixed costs are $1,000 a month.',
-    objective: 'Change price, costs or sales to reach break-even.',
-    successCondition: 'Monthly operating profit of $0 or more, using values within the allowed ranges.',
+    get title() { return t('Stop the Losses'); },
+    get business() { return t('Bean There Coffee (fictional)'); },
+    get background() { return t('Bean There sells 400 coffees a month at $4.50. Each coffee costs $2.50 to make and fixed costs are $1,000 a month.'); },
+    get objective() { return t('Change price, costs or sales to reach break-even.'); },
+    get successCondition() { return t('Monthly operating profit of $0 or more, using values within the allowed ranges.'); },
     inputs: beginnerInputs,
     evaluate: (v) => {
       const errors = rangeErrors(beginnerInputs, v);
-      if (!Number.isInteger(v.units)) errors.push('Coffees sold must be a whole number.');
+      if (!Number.isInteger(v.units)) errors.push(t('Coffees sold must be a whole number.'));
       if (errors.length) return { valid: false, errors, profit: null, success: false, facts: [] };
       const r = calculate({ sellingPrice: v.price, variableCost: v.variableCost, fixedCosts: 1000, units: v.units });
       return {
@@ -109,19 +121,19 @@ export const CHALLENGES: Challenge[] = [
         profit: r.operatingProfit,
         success: toCents(r.operatingProfit) >= 0,
         facts: [
-          { label: 'Revenue', value: r.revenue, kind: 'money' },
-          { label: 'Total costs', value: r.totalCosts, kind: 'money' },
+          { get label() { return t('Revenue'); }, value: r.revenue, kind: 'money' },
+          { get label() { return t('Total costs'); }, value: r.totalCosts, kind: 'money' },
         ],
       };
     },
   },
   {
     level: 'intermediate',
-    title: 'Hit the Profit Target',
-    business: 'Daily Grind Café (fictional)',
-    background: 'Daily Grind sells 300 coffees a month at $5. Each costs $2 and fixed costs are $1,300, so the café is losing $400 per month. Customers are price-sensitive.',
-    objective: 'Your coffee shop is losing $400 per month. Can you reach a monthly operating profit of $200?',
-    successCondition: 'Monthly operating profit of at least $200. Sales follow the demand rule, so a higher price means fewer customers.',
+    get title() { return t('Hit the Profit Target'); },
+    get business() { return t('Daily Grind Café (fictional)'); },
+    get background() { return t('Daily Grind sells 300 coffees a month at $5. Each costs $2 and fixed costs are $1,300, so the café is losing $400 per month. Customers are price-sensitive.'); },
+    get objective() { return t('Your coffee shop is losing $400 per month. Can you reach a monthly operating profit of $200?'); },
+    get successCondition() { return t('Monthly operating profit of at least $200. Sales follow the demand rule, so a higher price means fewer customers.'); },
     inputs: intermediateInputs,
     evaluate: (v) => {
       const errors = rangeErrors(intermediateInputs, v);
@@ -134,23 +146,29 @@ export const CHALLENGES: Challenge[] = [
         profit: r.operatingProfit,
         success: toCents(r.operatingProfit) >= 20_000,
         facts: [
-          { label: 'Customers (from demand rule)', value: units, kind: 'units' },
-          { label: 'Revenue', value: r.revenue, kind: 'money' },
+          { get label() { return t('Customers (from demand rule)'); }, value: units, kind: 'units' },
+          { get label() { return t('Revenue'); }, value: r.revenue, kind: 'money' },
         ],
       };
     },
   },
   {
     level: 'expert',
-    title: 'Bake Within Your Limits',
-    business: 'Maple & Moss Bakery (fictional)',
-    background: `The bakery has only ${EXPERT.flourAvailable / 1000} kg of flour and ${EXPERT.butterAvailable / 1000} kg of butter this month, and fixed costs of $${EXPERT.fixedCosts}. The current plan is losing money.`,
-    objective: 'Choose how many of each product to bake so the plan fits your inventory and at least breaks even.',
-    successCondition: 'Uses no more flour or butter than available, bakes no more than demand, and earns an operating profit of $0 or more.',
+    get title() { return t('Bake Within Your Limits'); },
+    get business() { return t('Maple & Moss Bakery (fictional)'); },
+    get background() {
+      return t('The bakery has only {flour} kg of flour and {butter} kg of butter this month, and fixed costs of {fixed}. The current plan is losing money.', {
+        flour: formatNumber(EXPERT.flourAvailable / 1000),
+        butter: formatNumber(EXPERT.butterAvailable / 1000),
+        fixed: formatCAD(EXPERT.fixedCosts),
+      });
+    },
+    get objective() { return t('Choose how many of each product to bake so the plan fits your inventory and at least breaks even.'); },
+    get successCondition() { return t('Uses no more flour or butter than available, bakes no more than demand, and earns an operating profit of $0 or more.'); },
     inputs: expertInputs,
     evaluate: (v) => {
       const errors = rangeErrors(expertInputs, v);
-      for (const i of expertInputs) if (Number.isFinite(v[i.key]) && !Number.isInteger(v[i.key])) errors.push(`${i.label} must be a whole number.`);
+      for (const i of expertInputs) if (Number.isFinite(v[i.key]) && !Number.isInteger(v[i.key])) errors.push(t('{label} must be a whole number.', { label: i.label }));
       if (errors.length) return { valid: false, errors, profit: null, success: false, facts: [] };
       const flour = EXPERT.products.reduce((s, p) => s + v[p.key] * toBase(p.flour, 'g'), 0);
       const butter = EXPERT.products.reduce((s, p) => s + v[p.key] * toBase(p.butter, 'g'), 0);
@@ -161,8 +179,8 @@ export const CHALLENGES: Challenge[] = [
         EXPERT.fixedCosts,
       );
       const feasibilityErrors = [
-        ...(flourOk ? [] : [`Not enough flour: this plan needs ${flour / 1000} g but only ${EXPERT.flourAvailable} g is available.`]),
-        ...(butterOk ? [] : [`Not enough butter: this plan needs ${butter / 1000} g but only ${EXPERT.butterAvailable} g is available.`]),
+        ...(flourOk ? [] : [t('Not enough flour: this plan needs {need} g but only {have} g is available.', { need: formatNumber(flour / 1000), have: formatNumber(EXPERT.flourAvailable) })]),
+        ...(butterOk ? [] : [t('Not enough butter: this plan needs {need} g but only {have} g is available.', { need: formatNumber(butter / 1000), have: formatNumber(EXPERT.butterAvailable) })]),
       ];
       return {
         valid: feasibilityErrors.length === 0,
@@ -171,9 +189,9 @@ export const CHALLENGES: Challenge[] = [
         // An infeasible plan never counts as success.
         success: feasibilityErrors.length === 0 && toCents(s.operatingProfit) >= 0,
         facts: [
-          { label: 'Flour used (g)', value: flour / 1000, kind: 'units' },
-          { label: 'Butter used (g)', value: butter / 1000, kind: 'units' },
-          { label: 'Total contribution margin', value: s.totalCM, kind: 'money' },
+          { get label() { return t('Flour used (g)'); }, value: flour / 1000, kind: 'units' },
+          { get label() { return t('Butter used (g)'); }, value: butter / 1000, kind: 'units' },
+          { get label() { return t('Total contribution margin'); }, value: s.totalCM, kind: 'money' },
         ],
       };
     },
