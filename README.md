@@ -481,6 +481,26 @@ On 2 November 2026 a separate checking step (a second AI agent that had not seen
 
 **No discrepancies were found.** The checker noted that other whole-unit break-even splits are also defensible (e.g. 454 units exactly covering fixed costs). The app's 455-unit split rounds the total up and keeps the mix most closely. Following its other notes, the dashboard now states that the margin of safety uses the *theoretical* break-even revenue.
 
+#### Second independent check – new features (9 November 2026)
+A separate AI agent that had **not seen the code or tests** was given only the problem statements and rules. It recalculated each example from first principles in exact integer cents and fractions (Node.js with BigInt; Python is not installed on this machine). The app's own functions were then run on the same inputs. The checker's script is kept outside the repository.
+
+| # | Scenario | Independent value | App value | Match |
+|---|---|---|---|---|
+| 1 | Demo café totals | Revenue $3,900; VC $1,425; CM $2,475; profit $975; CM ratio 63.46 % | Same | ✅ |
+| 1 | Sales-mix break-even | Weighted CM $3.30; 454.5454… → **455** units; split 182/91/61/121 (profit $2.50 ≥ 0); revenue $2,363.64; MOS $1,536.36 (39.39 %) | Same | ✅ |
+| 2 | Sensitivity ±10 % | Prices +$390 → $1,365 / −$390 → $585; VC −$142.50 → $832.50 / +$142.50 → $1,117.50; volume +$247.50 → $1,222.50 (+25.38 %) / $727.50; fixed −$150 → $825 / $1,125 | Same | ✅ |
+| 2 | Degree of operating leverage | 2,475 ÷ 975 = 2.54 | 2.54 | ✅ |
+| 3 | After-tax target | $1,000 at 20 % → $1,250 (tax $250); at 30 % → $1,428.58 (tax $428.57, after tax $1,000.01); $975 at 20 % → tax $195, after tax $780 | Same | ✅ |
+| 4 | Price-sensitive demand | $9 → 220 units, $240; best $11 → 180 units, $320 (no ties); ≥ $200 from $8.58 to $13.40 | Same | ✅ |
+| 4 | Prices in between | $13.36 gives only $199.52 (units stuck at 132) – not every cent in the range qualifies | The app reports only the lowest and highest price and says prices in between can fall short | ✅ |
+| 5 | Special order | (4 − 2) × 100 − 50 − (6 − 2) × 20 = **+$70**, accept | +$70, accept | ✅ |
+| 6 | Make or buy | $4,800 vs $5,000 → make, saves $200; with $600 opportunity cost $5,100 → buy, saves $100 | Same | ✅ |
+| 7 | 12-month projection | 12 × $975 = $11,700; January 60 % → revenue $2,340, CM $1,485, **−$15**; July 130 % → $1,717.50; year $11,452.50; with December 150 % and $2,000 fixed → $1,712.50, best July, year $12,190 | Same | ✅ |
+| 8 | Inventory capacity | 25 coffees, milk limiting; 15,000 mL short for 100 | 25, milk | ✅ |
+| 9 | Best mix (brute force, all 3,672,471 plans) | Max CM $650, profit $100, plan 100 muffins / 0 croissants / 200 cookies (unique) | Proven optimal, $650, same plan, $100 | ✅ |
+
+**No discrepancies were found.** The checker's one extra observation (the $13.36 gap inside the ≥ $200 price range) is already how the app behaves. It is why the app shows only the lowest and highest prices that reach a target. The app's milk-shortage figure for 100 coffees was checked in the 2 November verification above.
+
 > **For the project team:** also check a few results yourselves, by hand or in Excel, and record them in the manual testing table above.
 
 ## Real user testing and feedback

@@ -165,7 +165,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 307 tests in 22 files passed; build passed (main file 1,012 kB / 288 kB gzipped – Vite's size warning, not an error). At 375 px every section in French has no sideways scrolling (checked in the browser).
 
-## Recommendations discussed (9 Nov 2026) – not yet built
+### Independent verification of the new features (9 Nov 2026)
+- As the brief asked, a separate agent with no access to the code recalculated nine scenarios from the problem statements alone, in exact integer arithmetic: café totals and break-even, sensitivity and DOL, after-tax target, price-sensitive demand, special order, make-or-buy, 12-month projection, capacity, and the Best mix brute force. A temporary script ran the app's own functions on the same inputs and was then deleted.
+- **Every figure matched** (table in README → Independent verification). The checker also pointed out that $13.36 falls short of $200 profit inside the $8.58–$13.40 range. The app already allows for this: it reports only the lowest and highest qualifying price.
+- **Final checks:** 307 tests in 22 files passed; build passed.
+
+## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
 2. Fill in the manual testing table.
