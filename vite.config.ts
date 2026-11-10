@@ -12,5 +12,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: false,
+    // Click-through tests render the whole app and type key by key, which takes
+    // 4–5 s on slower computers. The default 5 s limit is only a guard against
+    // tests that hang; a wrong result still fails at once.
+    testTimeout: 15_000,
   },
 });

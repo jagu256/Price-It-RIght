@@ -54,6 +54,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **📦 Smart Inventory Hub** | Upload **Excel (.xlsx) or CSV** by file picker or drag-and-drop. Includes worksheet choice, preview, column mapping you confirm, row-by-row validation, and replace or add. Downloadable template. Editable inventory table with unit conversion, purchase costs and 🟢/🟡/🔴 status. **🔗 Connect Your Products to Inventory**: recipes typed in or uploaded, with matching for unknown names. **🧾 Know Your Product Costs**: material costing, using manual or itemized cost. **📦 How Much Can You Produce?**: single-product capacity and shared-inventory check. |
 | **🏆 Production Planner** | **What Should I Produce More Of?** shows CM per unit of the scarce resource, with a chart and explanation. Production Plan Simulator: adjust planned units and hypothetical extra inventory, then compare the original and modified plans. Includes a "keep my mix" constrained plan, a labelled **suggested** plan, and inventory alerts. |
 | **🎮 Business Challenge** | **Can You Save Your Business?** Beginner, Intermediate and Expert fictional scenarios with clear success conditions. Kept separate from your own data. |
+| **💾 Save my work** (My Business) | Your business (name, fixed costs, products, inventory and recipes) is **saved automatically in this browser** and restored when you come back. **📤 Export my business** downloads a `.json` file; **📥 Import a saved business** checks the file fully, lists any problems in plain language, and asks before replacing your current work; **🧹 Start fresh** (with confirmation) removes the saved copy and reloads the Coffee Shop example. If the browser blocks storage, the app keeps working and says **"Saving is off"**. A privacy note explains that the data stays on this device only. |
 | **🧮 Show the math** (everywhere) | A small **Show the math** button on every main number: the six dashboard cards, sales-mix break-even, margin of safety, the one-product break-even calculator, the What-If modified plan, the minimum calculated price, the profit goal gap, and the Production Planner's modified plan. It shows the formula in words, then the same formula with your own numbers, e.g. *Operating profit = total contribution margin − fixed costs* → *$2,475 − $1,500 = $975*. |
 | **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. |
 
@@ -67,7 +68,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 6. **Plan production:** Production Planner → see which product uses the scarce item best → adjust the plan → check feasibility and profit.
 7. **Report:** Business Report → *Download My Business Report*.
 
-Every section shares one application state, so values stay consistent and nothing is lost when moving between sections. Nothing is saved after the page is closed or refreshed.
+Every section shares one application state, so values stay consistent and nothing is lost when moving between sections. The business itself (not experiments) is saved on this device automatically – see *Save my work* in the features table.
 
 ## Accounting calculations
 
@@ -82,6 +83,7 @@ All calculations are plain, independently tested TypeScript functions in [`src/l
 | `recipes.ts` | Recipes and material cost |
 | `planning.ts` | Shared inventory, shortages, CM per scarce resource, constrained and suggested plans |
 | `pricing.ts` | Scenarios, required price, profit goals |
+| `saveWork.ts` | Save my work: the save-file format (with a schema version), full validation of imported files, and safe reading/writing of browser storage |
 | `showMath.ts` | "Show the math": turns an already-calculated result into the formula in words plus the formula with the user's numbers |
 | `importer.ts`, `templates.ts` | Excel/CSV import and templates |
 | `events.ts`, `challenges.ts` | Surprise events and challenges |
@@ -247,15 +249,17 @@ npm run test:watch  # re-run while editing
 | `inventoryPlanning.test.ts` | Required inventory example; **shared-inventory scenario worked by hand**; shortages; low stock; extra inventory; CM per litre; material costs; constrained and suggested plans; unsold units; zero inventory; tied limiting items; demand limits; recipes (missing, invalid units, deleted items); costing without double counting; missing costs; inventory validation and duplicates; unit changes; all sample businesses; store actions (add, duplicate, delete, scenario reset/apply) |
 | `importer.test.ts` | CSV and real Excel files (multiple sheets); unsupported, empty, oversized and damaged files; column guessing; required and duplicate mappings; missing values; negative and invalid numbers; unsupported units; duplicates flagged on both rows; existing names; wrong-mapping warning; row limit; **downloaded templates import cleanly**; recipe import with unknown-name matching; incompatible units; duplicate recipe lines |
 | `pricingEvents.test.ts` | Scenario comparison and invalid scenario values; required price (single, multi-product, rounding up, zero sales, already met, below VC); profit goals; extra units per product; mix plan for target; all five surprise events; all three challenges (success only for valid, feasible plans); report contents; PDF generation |
+| `saveWork.test.ts` | Save my work: the file contains only the business plus app name, **schema version** and date; the demo café round-trips with the same verified results ($975 profit, same milk and butter shortages); fresh, non-clashing ids; typed text kept as typed (invalid stays invalid, never 0); experiments and unknown fields dropped; friendly errors for empty, non-JSON, wrong-app, too-large, newer-version and damaged files and for each broken field; long error lists shortened; storage that is missing, blocked or full never throws; damaged saved copy reported; loading clears experiments and counts as the user's own work |
 | `showMath.test.ts` | "Show the math": the demo café's explanations (profit $2,475 − $1,500 = $975, revenue, variable costs, CM, CM ratio, break-even 455 units and $2,363.64, margin of safety); **each explanation's result equals the figure the dashboard displays**; losses and negative numbers; $0 revenue (N/A, no NaN); rounded weighted CM note; one-product break-even; required price ($7.75) with its rounding step and profit check; profit goal gap |
 | `accounting.test.ts`, `validation.test.ts`, `explain.test.ts`, `chartData.test.ts`, `inventory.test.ts` | The original single-product calculator, input validation and explanations (kept and still used) |
-| `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
+| `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; Save my work (auto-save and restore after "reopening" the app, storage blocked → "Saving is off", damaged saved copy, export read back, bad files rejected with friendly errors and nothing changed, import asks first, Start fresh asks first, privacy note); Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
 
 **Automated test record (development environment, Vitest 3.2.7, Node 22):**
 - 2 November 2026, original single-product version: 61 tests passed.
 - 2 November 2026, with the Inventory & Sales Estimator: 98 tests passed.
 - 2 November 2026, this upgraded version: **156 tests in 10 files passed**. `npm run build` completed without errors.
 - 9 November 2026, after adding "Show the math" (Vitest 3.2.7, Node 26): **171 tests in 11 files passed**. `npm run build` completed without errors.
+- 9 November 2026, after adding "Save my work": **196 tests in 12 files passed**. `npm run build` completed without errors.
 
 Re-run `npm test` yourself to confirm.
 
@@ -295,6 +299,16 @@ Re-run `npm test` yourself to confirm.
 | 27 | Show the math – follows changes | Change Coffee price to $7 in My Business, reopen the profit math | Numbers in the explanation change with the card ($2,775 − $1,500 = $1,275) | | |
 | 28 | Show the math – required price | Demo → Pricing Lab → target $1,500 → *Show the math* | $2 + ($1,500 + $1,500 − $1,275) ÷ 300 = $7.75, plus a profit check ending in $1,500 | | |
 | 29 | Show the math – phone | Open several explanations on a phone | Text wraps inside the card; no sideways page scrolling | | |
+| 30 | Auto-save | My Business → change fixed costs to 1750 → refresh the page | 1750 is still there; "Welcome back – the business you saved on this device was restored" | | |
+| 31 | Untouched example not saved | *Start fresh*, then look at the Save my work card | "nothing to save yet"; refresh shows the Coffee Shop example | | |
+| 32 | Experiments not saved | Change a price in the Pricing Lab What-If (don't apply) → refresh | Business restored; the What-If modified plan is back to "No changes yet" | | |
+| 33 | Export | Demo → My Business → *Export my business* | File `price-it-right-maple-leaf-cafe-demo.json` downloads | | |
+| 34 | Import (good file) | *Start fresh* → *Import a saved business* → choose the file from row 33 → *Replace my work* | Asks first (shows 4 products); after confirming, dashboard profit is $975 | | |
+| 35 | Import cancelled | Import the same file → *Cancel* | Current business unchanged | | |
+| 36 | Import (bad file) | Import a .json file that wasn't made by this app (or a text file renamed to .json) | Red box "This file was not imported – your current business is unchanged" with a plain reason; no crash | | |
+| 37 | Start fresh | Change something → *Start fresh* → *Cancel*, then again → *Start fresh* | Cancel keeps the change; confirming loads the Coffee Shop example and removes the saved copy | | |
+| 38 | Saving off | Open the site in a private/incognito window that blocks storage (depends on the browser) | Yellow "Saving is off" message; everything else still works | | |
+| 39 | Privacy note | Read the Save my work card | Says data stays on this device only; nothing sent to a server | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
@@ -332,7 +346,9 @@ On 2 November 2026 a separate checking step (a second AI agent that had not seen
 
 ## Known limitations
 
-- **No saving.** Data lives only in the open browser tab; refreshing resets to the sample. (This is by design: no database or accounts.)
+- **Saving is per browser, per device.** The business is kept in this browser's storage (no database or accounts), so it does not follow you to another device or browser unless you export and import a file. Clearing browser data, or some private windows, remove it. Only one business is saved at a time. Pricing Lab / Production Planner experiments, surprise events and challenge progress are not saved, by design.
+- **Save files are not encrypted.** Anyone with the .json file can open it in a text editor. Don't put confidential data in the app.
+- **Imported files are checked for structure, not for sense.** A typed value like `abc` imports exactly as typed and then shows the usual validation message (it is never turned into 0). Recipe lines that point at an inventory item missing from the file are kept and flagged, as elsewhere in the app.
 - **Constant sales mix and linear costs.** Break-even and goal plans assume a fixed mix; costs don't change with volume (no step costs or volume discounts). Demand doesn't react to price automatically.
 - **Production planning is a scenario tool, not an optimiser.** The "suggested plan" is a labelled heuristic; with several scarce items it may not be the most profitable feasible plan. No integer-programming optimiser is included.
 - **Recipes:** one fixed recipe per product. There is no waste, spoilage, expiry, batch sizes or labour/time constraints (for services, staff and appointment capacity are not modelled).

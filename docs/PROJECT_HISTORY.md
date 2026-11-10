@@ -79,6 +79,20 @@ Work moved from claude.ai to Claude Code. The repository was cloned fresh from G
 
 **Checks:** 171 tests in 11 files passed (156 unchanged + 13 unit + 2 click-through); build passed. Looked at in a browser at phone width (375 px) with nine explanations open: no sideways scrolling. `npm audit` reports 3 advisories in the test tool (Vitest) only, not in the published site; left as is because the fix is a major-version upgrade.
 
+### Feature 2 – Save my work (9 Nov 2026)
+- New `src/lib/saveWork.ts` (pure, tested): save-file format with an app name and **schema version 1**; full validation of imported files with plain-language errors; fresh internal ids on import; browser-storage read/write/clear wrapped in try/catch so blocked or full storage never crashes the app.
+- Auto-save of the business only (name, fixed costs, products, inventory, recipes). An unchanged example is not saved. Experiments and challenge progress are never saved. The saved business is restored on reload, and the app says so; a damaged saved copy is reported and the example loads instead.
+- On My Business: *Export my business* (.json), *Import a saved business* (asks before replacing), *Start fresh* (asks first), a "Saving is off" warning when storage is blocked, and a privacy note. The footer now says data is saved on this device only.
+- A restored or imported business counts as the user's own work, so the existing "switch business" and "load demo" confirmations still protect it.
+
+**Problems found and fixed during development:**
+- On this computer's Node version (26), the simulated test browser has no `localStorage` (Node switches its own off without a file). The test setup now provides an in-memory one, like the earlier file-reading fix. Real browsers are unaffected.
+- The first version stored a new "saved at" time after every keystroke, which made the whole app draw itself twice per change. It now only redraws when the save status changes, so the card no longer shows the save time.
+- Measured on this computer, an existing click-through test ("asks before switching business") went from 3.9 s to 4.5 s, and with all files running together it passed the 5 s "probably stuck" limit. The limit was raised to 15 s in `vite.config.ts`; no test or expected value was weakened. One new test was split into two shorter ones.
+- One test expectation written by the AI was wrong (it assumed the Coffee Shop example's fixed costs are $800; they are $1,500). The test was corrected; the app was right.
+
+**Checks:** 196 tests in 12 files passed (171 earlier + 16 unit + 9 click-through); build passed. In a browser: typing $1,750 saved immediately with schema version 1 and only the business; after a page reload $1,750 and the "restored" message were back; at 375 px the Save card fits with no sideways scrolling.
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

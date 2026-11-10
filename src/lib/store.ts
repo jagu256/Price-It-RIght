@@ -61,7 +61,9 @@ export type Action =
   | { type: 'planner-set-extra'; itemId: string; value: string }
   | { type: 'planner-fill'; units: Record<string, number> }
   | { type: 'planner-reset' }
-  | { type: 'replace-business'; business: BusinessData };
+  | { type: 'replace-business'; business: BusinessData }
+  /** A business restored from this device or imported from a save file. Experiments start empty. */
+  | { type: 'load-business'; business: BusinessData; nextId: number };
 
 function idMaker(state: { nextId: number }) {
   let n = state.nextId;
@@ -75,6 +77,15 @@ export function initialAppState(business: BusinessId | 'demo' = 'coffee'): AppSt
   const ids = idMaker({ nextId: 1 });
   const data = sampleBusiness(business, ids.newId);
   return { business: data, baseline: JSON.stringify(data), scenario: emptyScenario(), planner: emptyPlanner(), nextId: ids.next() };
+}
+
+/**
+ * State for a business the user saved earlier (auto-save or an imported file).
+ * Its baseline is empty, so it always counts as the user's own work: the app
+ * asks before replacing it and keeps auto-saving it.
+ */
+export function savedAppState(business: BusinessData, nextId: number): AppState {
+  return { business, baseline: '', scenario: emptyScenario(), planner: emptyPlanner(), nextId };
 }
 
 /** True when the user has changed the business since it was loaded. */
@@ -258,6 +269,8 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case 'replace-business':
       return withBusiness(state, action.business);
+    case 'load-business':
+      return savedAppState(action.business, action.nextId);
     default:
       return state;
   }

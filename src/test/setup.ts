@@ -23,6 +23,22 @@ if (typeof Blob !== 'undefined' && typeof FileReader !== 'undefined') {
   if (!Blob.prototype.arrayBuffer) Blob.prototype.arrayBuffer = function () { return read(this, 'buffer') as Promise<ArrayBuffer>; };
 }
 
+// Newer Node versions (25+) hide jsdom's localStorage behind their own, which is
+// switched off unless a file is given. Every real browser has localStorage, so the
+// simulated browser gets a simple in-memory one (cleared after each test).
+if (typeof window !== 'undefined' && !window.localStorage) {
+  class MemoryStorage {
+    private data = new Map<string, string>();
+    get length() { return this.data.size; }
+    key(i: number) { return [...this.data.keys()][i] ?? null; }
+    getItem(k: string) { return this.data.has(k) ? this.data.get(k)! : null; }
+    setItem(k: string, v: string) { this.data.set(k, String(v)); }
+    removeItem(k: string) { this.data.delete(k); }
+    clear() { this.data.clear(); }
+  }
+  Object.defineProperty(window, 'localStorage', { value: new MemoryStorage(), configurable: true });
+}
+
 // jsdom does not implement scrolling. (Some tests run without a browser window.)
 if (typeof window !== 'undefined') {
   window.HTMLElement.prototype.scrollIntoView = function () {};

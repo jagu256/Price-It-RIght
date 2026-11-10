@@ -15,7 +15,7 @@ export default function Footer() {
             An educational decision-support tool for an ACCT 4500 group project. Results depend entirely on the assumptions you enter. Example and demo data are
             fictional and are not industry benchmarks. Not financial advice.
           </p>
-          <p>Everything runs in your browser. Uploaded files and numbers are not saved or sent anywhere – please don’t enter confidential information.</p>
+          <p>Everything runs in your browser. Your business is saved on this device only and is never sent anywhere – please don’t enter confidential information.</p>
           <p>Built with AI assistance (Claude by Anthropic) and reviewed by the project team.</p>
         </div>
       </div>

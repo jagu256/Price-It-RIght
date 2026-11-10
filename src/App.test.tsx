@@ -2,6 +2,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
+import { STORAGE_KEY, parseSavedBusiness, serializeBusiness } from './lib/saveWork';
 import { initialAppState } from './lib/store';
 
 // Wrap the PDF renderer so the test can see the save call without a real download.
@@ -22,11 +23,18 @@ vi.mock('./lib/reportPdf', async (importOriginal) => {
   };
 });
 
+// Capture downloads (the test browser can't save files) so tests can read them back.
+const downloads: { name: string; blob: Blob }[] = [];
+vi.mock('./lib/templates', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./lib/templates')>()),
+  downloadBlob: (blob: Blob, name: string) => void downloads.push({ name, blob }),
+}));
+
 function setup(hash = 'my-business', business: Parameters<typeof initialAppState>[0] = 'coffee', options: Parameters<typeof userEvent.setup>[0] = {}) {
   window.location.hash = hash;
   const user = userEvent.setup(options);
-  render(<App initial={initialAppState(business)} />);
-  return { user };
+  const view = render(<App initial={initialAppState(business)} />);
+  return { user, unmount: view.unmount };
 }
 const panel = (id: string) => document.getElementById(`panel-${id}`)! as HTMLElement;
 const go = async (id: string) => {
@@ -39,6 +47,8 @@ const confirmDialog = () => screen.getByRole('alertdialog');
 
 afterEach(() => {
   window.location.hash = '';
+  window.localStorage.clear();
+  downloads.length = 0;
   vi.restoreAllMocks();
 });
 
@@ -97,6 +107,139 @@ describe('show the math', () => {
     await user.type(target, '1500');
     await user.click(lab.getByRole('button', { name: 'Show the math for the minimum calculated price' }));
     expect(lab.getByRole('region', { name: 'The math for the minimum calculated price' })).toHaveTextContent('$2 + ($1,500 + $1,500 − $1,275) ÷ 300 = $7.75');
+  });
+});
+
+describe('save my work', () => {
+  const jsonFile = (text: string, name = 'saved.json') => new File([text], name, { type: 'application/json' });
+  const coffeeSales = () => screen.getByLabelText('Expected monthly sales for Coffee');
+  const demoFileText = () => serializeBusiness(initialAppState('demo').business, '2026-11-09T18:00:00.000Z');
+
+  it('auto-saves changes on this device and restores them when the app is opened again', async () => {
+    const { user, unmount } = setup();
+    const mb = within(panel('my-business'));
+    expect(mb.getByText(/nothing to save yet/)).toBeInTheDocument();
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
+
+    await user.clear(coffeeSales());
+    await user.type(coffeeSales(), '9');
+    expect(mb.getByText(/Saved on this device\. Every change is saved/)).toBeInTheDocument();
+    const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(stored.schemaVersion).toBe(1);
+    expect(Object.keys(stored)).toEqual(['app', 'schemaVersion', 'savedAt', 'business']); // no experiments or challenge progress
+
+    unmount(); // "close the tab"
+    window.location.hash = 'my-business';
+    render(<App />); // "open it again" – no starting data given
+    expect(coffeeSales()).toHaveValue('9');
+    expect(screen.getByText(/the business you saved on this device was restored/)).toBeInTheDocument();
+  });
+
+  it('still works, and says saving is off, when the browser blocks storage', async () => {
+    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+    vi.spyOn(window.localStorage, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+    window.location.hash = 'my-business';
+    const user = userEvent.setup();
+    render(<App />);
+    expect(screen.getByText('Saving is off')).toBeInTheDocument();
+    await user.clear(coffeeSales());
+    await user.type(coffeeSales(), '10');
+    expect(coffeeSales()).toHaveValue('10');
+    expect(screen.getByText('Saving is off')).toBeInTheDocument();
+  });
+
+  it('opens with the example, and says so, when the saved copy is damaged', () => {
+    window.localStorage.setItem(STORAGE_KEY, '{"app":"price-it-right","schemaVersion":1,"business":{"oops"');
+    window.location.hash = 'my-business';
+    render(<App />);
+    expect(screen.getByText(/could not be read, so the Coffee Shop example was loaded/)).toBeInTheDocument();
+    expect(coffeeSales()).toHaveValue('300');
+  });
+
+  it('exports a file that can be read back', async () => {
+    const { user } = setup('my-business', 'demo');
+    await user.click(screen.getByRole('button', { name: /Export my business/ }));
+    expect(downloads).toHaveLength(1);
+    expect(downloads[0].name).toBe('price-it-right-maple-leaf-cafe-demo.json');
+    const back = parseSavedBusiness(await downloads[0].blob.text());
+    expect(back.ok && back.business.products.map((p) => p.name)).toEqual(['Coffee', 'Muffin', 'Sandwich', 'Cookie']);
+  });
+
+  it('shows friendly errors for a bad file and leaves the business unchanged', async () => {
+    const { user } = setup();
+    const mb = within(panel('my-business'));
+    const input = mb.getByLabelText('Choose a saved business file');
+    await user.upload(input, jsonFile('this is not json'));
+    await waitFor(() => expect(mb.getByRole('alert')).toHaveTextContent(/could not be read/));
+    expect(mb.getByRole('alert')).toHaveTextContent('your current business is unchanged');
+
+    const broken = JSON.parse(demoFileText());
+    broken.business.inventory[0].unit = 'cups';
+    delete broken.business.products[1].price;
+    await user.upload(input, jsonFile(JSON.stringify(broken)));
+    await waitFor(() => expect(mb.getByRole('alert')).toHaveTextContent('Inventory item 1 has an unknown unit'));
+    expect(mb.getByRole('alert')).toHaveTextContent('Product 2 is missing: price');
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(mb.getByDisplayValue('Latte')).toBeInTheDocument(); // still the coffee shop sample
+  });
+
+  it('asks before an imported business replaces the current one', async () => {
+    const { user } = setup();
+    const mb = within(panel('my-business'));
+    const input = mb.getByLabelText('Choose a saved business file');
+    const good = jsonFile(demoFileText(), 'cafe.json');
+
+    await user.upload(input, good);
+    await waitFor(() => expect(confirmDialog()).toHaveTextContent(/4 products, \d+ inventory items and \d+ recipes/));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Cancel' }));
+    expect(mb.getByDisplayValue('Latte')).toBeInTheDocument();
+
+    await user.upload(input, good);
+    await waitFor(() => expect(confirmDialog()).toBeInTheDocument());
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Replace my work' }));
+    expect(mb.getByDisplayValue('Cookie')).toBeInTheDocument();
+    expect(mb.queryByDisplayValue('Latte')).not.toBeInTheDocument();
+    expect(mb.getByText(/Imported “Maple Leaf Café \(demo\)” from cafe\.json/)).toBeInTheDocument();
+    await go('dashboard');
+    expect(within(panel('dashboard')).getByRole('heading', { name: 'Projected Operating Profit' }).closest('article')).toHaveTextContent('$975');
+    // The imported business is now the one saved on this device.
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY)!).business.name).toBe('Maple Leaf Café (demo)');
+  });
+
+  /** Opens the app with a changed business that is already saved on this device. */
+  const setupWithSavedWork = () => {
+    const state = initialAppState('coffee');
+    state.business.fixedCosts = '999';
+    window.localStorage.setItem(STORAGE_KEY, serializeBusiness(state.business, '2026-11-09T18:00:00.000Z'));
+    window.location.hash = 'my-business';
+    const user = userEvent.setup();
+    render(<App initial={state} />);
+    return { user, mb: within(panel('my-business')), fixed: () => screen.getByLabelText('Monthly fixed costs (whole business)') };
+  };
+
+  it('“Start fresh” keeps everything when cancelled', async () => {
+    const { user, mb, fixed } = setupWithSavedWork();
+    await user.click(mb.getByRole('button', { name: /Start fresh/ }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Cancel' }));
+    expect(fixed()).toHaveValue('999');
+    expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+  });
+
+  it('“Start fresh” loads the example and removes the saved copy once confirmed', async () => {
+    const { user, mb, fixed } = setupWithSavedWork();
+    await user.click(mb.getByRole('button', { name: /Start fresh/ }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Start fresh' }));
+    expect(fixed()).toHaveValue('1500'); // the fictional Coffee Shop example
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it('shows the privacy note', () => {
+    setup();
+    expect(within(panel('my-business')).getByText(/your data stays on this device only/)).toBeInTheDocument();
   });
 });
 

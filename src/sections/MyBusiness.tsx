@@ -3,6 +3,7 @@ import { useStore } from '../app/StoreContext';
 import BusinessPicker from '../components/BusinessPicker';
 import InfoTip from '../components/InfoTip';
 import ProductCollection from '../components/ProductCollection';
+import SaveMyWork from '../components/SaveMyWork';
 import { Notice, SectionHeader } from '../components/ui';
 import { getBusiness, type BusinessId } from '../lib/businesses';
 import { hasUnsavedWork } from '../lib/store';
@@ -89,6 +90,7 @@ export default function MyBusiness() {
       </section>
 
       <ProductCollection />
+      <SaveMyWork />
     </div>
   );
 }
