@@ -91,7 +91,7 @@ export default function SaveMyWork() {
       )}
 
       <div className="flex flex-wrap gap-3">
-        <button type="button" className="btn-primary" onClick={exportFile}>📤 Export my business</button>
+        <button type="button" className="btn-primary" onClick={exportFile}>📤 Export my business (backup file)</button>
         <button type="button" className="btn-secondary" onClick={() => fileInput.current?.click()}>📥 Import a saved business</button>
         <button type="button" className="btn-secondary" onClick={startFresh}>🧹 Start fresh</button>
         <input
@@ -105,6 +105,9 @@ export default function SaveMyWork() {
         />
       </div>
 
+      <p className="text-xs text-sage-600">
+        The backup is a Price It Right file (.json) for “Import a saved business” – it isn’t meant to be opened, and your computer may show it as a code file. It is not a spreadsheet.
+      </p>
       {message && <p className="text-sm font-semibold text-sage-800" role="status">{message}</p>}
       {problems.length > 0 && (
         <Notice tone="error" title="This file was not imported – your current business is unchanged" role="alert">
