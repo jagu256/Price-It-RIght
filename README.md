@@ -50,7 +50,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **Home** | Name, tagline and description. **🚀 Start My Business** and **✨ Try a Demo Business** (a complete fictional café). Four-step guide. **📚 Understand Your Numbers** explains ten concepts. |
 | **🏠 My Business** | Choose ☕ Coffee Shop, 🧁 Bakery, 💅 Nail Salon, 👕 Clothing Store or ✨ Custom (fictional samples). The app asks for confirmation before replacing your work. Enter the business name and monthly fixed costs once. **🛒 My Product Collection** is an editable table: add, edit, duplicate or delete (with confirmation), optional category, sorting, and per-product revenue, variable costs, CM per unit, total CM and CM ratio. |
 | **💰 Profit Dashboard** | **Your Business at a Glance**: six summary cards with explanations. *Three ways to look at profit*: expected, inventory-constrained and scenario. Charts: **A** revenue vs. total costs (with the break-even point), **B** contribution by product, **C** revenue breakdown. Sales-mix break-even with a whole-unit split per product, plus an interactive single-product break-even calculator. **🌪️ Sensitivity analysis**: operating profit when selling prices, variable costs, sales volume (same mix) or fixed costs move ±10 % one at a time, as a table and a tornado chart, plus the **degree of operating leverage** (or "Not meaningful" with an explanation when there is no profit). |
-| **🎯 Pricing Lab** | **What-If Pricing Simulator** comparing the current and modified plans, with Apply Changes (confirmed), Reset Scenario and Compare Results. **💡 What Price Should I Charge?** finds the minimum price for a target profit. **Profit Goal Tracker** shows progress, the gap, and the plan needed (same mix, your own mix, or one product). **🎲 Surprise Me!** offers five hypothetical events; you can accept, modify or reset each. |
+| **🎯 Pricing Lab** | **What-If Pricing Simulator** comparing the current and modified plans, with Apply Changes (confirmed), Reset Scenario and Compare Results. **🧾 After-tax target profit (optional)**: enter the profit you want after income tax and your own tax rate; the app shows the required pre-tax profit, the estimated tax and after-tax profit, and feeds the pre-tax figure into the next two tools (a simplified estimate, not tax advice). **💡 What Price Should I Charge?** finds the minimum price for a target profit. **Profit Goal Tracker** shows progress, the gap, and the plan needed (same mix, your own mix, or one product). **🎲 Surprise Me!** offers five hypothetical events; you can accept, modify or reset each. |
 | **📦 Smart Inventory Hub** | Upload **Excel (.xlsx) or CSV** by file picker or drag-and-drop. Includes worksheet choice, preview, column mapping you confirm, row-by-row validation, and replace or add. Downloadable template. Editable inventory table with unit conversion, purchase costs and 🟢/🟡/🔴 status. **🔗 Connect Your Products to Inventory**: recipes typed in or uploaded, with matching for unknown names. **🧾 Know Your Product Costs**: material costing, using manual or itemized cost. **📦 How Much Can You Produce?**: single-product capacity and shared-inventory check. |
 | **🏆 Production Planner** | **What Should I Produce More Of?** shows CM per unit of the scarce resource, with a chart and explanation. Production Plan Simulator: adjust planned units and hypothetical extra inventory, then compare the original and modified plans. Includes a "keep my mix" constrained plan, a labelled **suggested** plan, and inventory alerts. |
 | **🎮 Business Challenge** | **Can You Save Your Business?** Beginner, Intermediate and Expert fictional scenarios with clear success conditions. Kept separate from your own data. |
@@ -85,6 +85,7 @@ All calculations are plain, independently tested TypeScript functions in [`src/l
 | `pricing.ts` | Scenarios, required price, profit goals |
 | `saveWork.ts` | Save my work: the save-file format (with a schema version), full validation of imported files, and safe reading/writing of browser storage |
 | `sensitivity.ts` | ±10 % sensitivity analysis and degree of operating leverage |
+| `tax.ts` | Optional after-tax target: tax-rate validation, required pre-tax profit, estimated tax (none on a loss) |
 | `showMath.ts` | "Show the math": turns an already-calculated result into the formula in words plus the formula with the user's numbers |
 | `importer.ts`, `templates.ts` | Excel/CSV import and templates |
 | `events.ts`, `challenges.ts` | Surprise events and challenges |
@@ -162,6 +163,12 @@ The explanations do **no calculating of their own**. Each one receives a result 
 
 Total CM ÷ total units is the same number as Σ (mix share × CM per unit); the explanation uses the first form because both figures are already on the dashboard. Negative figures are put in brackets, e.g. −$300 − (−$200) = −$100. When a figure is not available (for example the CM ratio with $0 revenue) the explanation says why instead of showing a number.
 
+### After-tax target profit (simplified, not tax advice)
+- **Required pre-tax operating profit** = target after-tax profit ÷ (1 − tax rate), **rounded up** to the next cent so the after-tax target is met. Hand check: $1,000 after tax at 20 % → $1,000 ÷ 0.8 = **$1,250**.
+- **Estimated tax** = operating profit × tax rate, rounded to the nearest cent. **No tax on a loss** (or on $0). After-tax operating profit = operating profit − estimated tax. Demo café at 20 %: $975 − $195 = $780.
+- The tax rate is typed by the user (0–100 %, up to 2 decimals); no rate is built in. At 100 % a positive target is **Not Available** (nothing is left after tax), so there is no division by zero. A target of $0 or a loss needs no gross-up.
+- When switched on, *What Price Should I Charge?* and the *Profit Goal Tracker* use the pre-tax figure as their target (their target box becomes read-only and says where it came from). Demo café, Coffee, $1,000 after tax at 20 %: $2 + ($1,500 + $1,250 − $1,275) ÷ 300 = $6.9167 → **$6.92**.
+
 ### Inventory and costing
 | Measure | Formula |
 |---|---|
@@ -195,6 +202,7 @@ Total CM ÷ total units is the same number as Σ (mix share × CM per unit); the
 - **Buying inventory is a cash outflow, not an expense.** Its cost is recognised through variable cost per unit when products are sold, so hypothetical extra inventory does not reduce operating profit by itself.
 - **Inventory turnover is not calculated**, because it needs beginning/ending inventory values and cost-of-goods-sold records. It is only defined in the learning section.
 - Surprise events and challenges are **fictional, hypothetical scenarios**, not forecasts.
+- **After-tax target** treats operating profit as taxable income at one flat, user-entered rate. Interest, deductions, losses carried forward, instalments and sales taxes (GST/HST/PST) are ignored. It is labelled a simplified estimate, not tax advice, and it is an experiment: it is not saved.
 - **Sensitivity analysis** changes one input at a time by exactly 10 % of its current total. "Sales volume" keeps the sales mix and allows fractions of units, so it is a quick estimate; real changes often happen together (e.g. a higher price may reduce sales).
 - **Show the math** displays money rounded to the cent and percentages to one decimal, like the rest of the app. Where a displayed step is rounded (e.g. a weighted-average CM of $2.67), a note says the unrounded figure is used for the next step.
 
@@ -267,9 +275,10 @@ npm run test:watch  # re-run while editing
 | `pricingEvents.test.ts` | Scenario comparison and invalid scenario values; required price (single, multi-product, rounding up, zero sales, already met, below VC); profit goals; extra units per product; mix plan for target; all five surprise events; all three challenges (success only for valid, feasible plans); report contents; PDF generation |
 | `saveWork.test.ts` | Save my work: the file contains only the business plus app name, **schema version** and date; the demo café round-trips with the same verified results ($975 profit, same milk and butter shortages); fresh, non-clashing ids; typed text kept as typed (invalid stays invalid, never 0); experiments and unknown fields dropped; friendly errors for empty, non-JSON, wrong-app, too-large, newer-version and damaged files and for each broken field; long error lists shortened; storage that is missing, blocked or full never throws; damaged saved copy reported; loading clears experiments and counts as the user's own work |
 | `sensitivity.test.ts` | **All five hand-checked answers**: prices +10 % → +$390 → $1,365; variable costs +10 % → −$142.50 → $832.50; volume +10 % → +$247.50 → $1,222.50 (+25.4 % = DOL × 10 %); fixed costs +10 % → −$150 → $825; DOL 2.54. Also: −10 % is the exact opposite; tornado order; explanations; half-cent rounding; a loss (DOL not meaningful); zero profit (no division by zero); no sales (no NaN); other percentages |
+| `tax.test.ts` | Tax rate input (0–100, %, decimals; blank/negative/letters/over 100/too many decimals rejected, never turned into 0); **hand check $1,000 at 20 % → $1,250**; 0 % rate; rounding up ($1,000 at 30 % → $1,428.58); after-tax always reaches the target over a grid of 72 targets × rates; no tax on a loss or $0; 100 % → Not Available; demo profit $975 at 20 % → tax $195, after tax $780; tax rounding; explanations |
 | `showMath.test.ts` | "Show the math": the demo café's explanations (profit $2,475 − $1,500 = $975, revenue, variable costs, CM, CM ratio, break-even 455 units and $2,363.64, margin of safety); **each explanation's result equals the figure the dashboard displays**; losses and negative numbers; $0 revenue (N/A, no NaN); rounded weighted CM note; one-product break-even; required price ($7.75) with its rounding step and profit check; profit goal gap |
 | `accounting.test.ts`, `validation.test.ts`, `explain.test.ts`, `chartData.test.ts`, `inventory.test.ts` | The original single-product calculator, input validation and explanations (kept and still used) |
-| `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; sensitivity table, DOL 2.54 and its math, then "Not meaningful" after raising fixed costs to a loss; Save my work (auto-save and restore after "reopening" the app, storage blocked → "Saving is off", damaged saved copy, export read back, bad files rejected with friendly errors and nothing changed, import asks first, Start fresh asks first, privacy note); Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
+| `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; after-tax target ($1,250 pre-tax, $195 tax, $780 after tax, price tool $6.92 and goal tracker −$275 using the pre-tax target, invalid rate shown and tools back on their own targets); sensitivity table, DOL 2.54 and its math, then "Not meaningful" after raising fixed costs to a loss; Save my work (auto-save and restore after "reopening" the app, storage blocked → "Saving is off", damaged saved copy, export read back, bad files rejected with friendly errors and nothing changed, import asks first, Start fresh asks first, privacy note); Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
 
 **Automated test record (development environment, Vitest 3.2.7, Node 22):**
 - 2 November 2026, original single-product version: 61 tests passed.
@@ -278,6 +287,7 @@ npm run test:watch  # re-run while editing
 - 9 November 2026, after adding "Show the math" (Vitest 3.2.7, Node 26): **171 tests in 11 files passed**. `npm run build` completed without errors.
 - 9 November 2026, after adding "Save my work": **196 tests in 12 files passed**. `npm run build` completed without errors.
 - 9 November 2026, after adding sensitivity analysis + DOL: **210 tests in 13 files passed**. `npm run build` completed without errors.
+- 9 November 2026, after adding the after-tax target: **223 tests in 14 files passed**. `npm run build` completed without errors.
 
 Re-run `npm test` yourself to confirm.
 
@@ -334,6 +344,13 @@ Re-run `npm test` yourself to confirm.
 | 44 | DOL | Same section → *Show the math* under DOL | 2.54; "$2,475 ÷ $975 = 2.54"; check line says 25.4 % = 2.54 × 10 % | | |
 | 45 | DOL not meaningful | Demo, change fixed costs to 3000 | DOL shows "Not meaningful" with the operating-loss explanation | | |
 | 46 | Tornado chart | Same section, also on a phone | Prices bar longest at the top; no sideways page scrolling | | |
+| 47 | After-tax target | Demo → Pricing Lab → tick *Plan with an after-tax target* → target 1000, rate 20 | Required pre-tax operating profit $1,250; *Show the math*: $1,000 ÷ (1 − 20%) = $1,250 | | |
+| 48 | Tax on current profit | Same | Estimated tax $195; after-tax operating profit $780 | | |
+| 49 | Feeds the tools | Same, scroll down | Price tool target shows 1250 (pre-tax), Coffee minimum price $6.92; goal tracker target 1250, difference −$275 | | |
+| 50 | No tax on a loss | Target −200, rate 20 | Required pre-tax profit −$200 (no gross-up) | | |
+| 51 | Invalid rate | Rate 120, then abc | Clear message; not treated as 0; tools go back to their own targets | | |
+| 52 | 100 % rate | Rate 100, target 1000 | "Not Available" with an explanation | | |
+| 53 | Off by default | Reload, open Pricing Lab | After-tax panel unticked; existing results unchanged | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
@@ -380,7 +397,7 @@ On 2 November 2026 a separate checking step (a second AI agent that had not seen
 - **Units:** weight (g, kg), volume (mL, L) and pieces only. There are no imperial units and no conversion between weight and volume. Quantities allow up to 3 decimals, costs up to 6 decimals and money up to 2; each value is capped at 1,000,000,000.
 - **Imports:** .xlsx and .csv only (not .xls), first worksheet row as headings (optional), up to 5 MB / 2,000 rows. Formulas in Excel are read as their saved values.
 - **Inventory is a snapshot**; there is no purchasing, reorder points, lead times or inventory turnover.
-- **Taxes:** no income tax, GST/PST/HST, interest or financing costs. Operating profit is not net income.
+- **Taxes:** only the optional after-tax target estimates income tax, at one flat user-entered rate on operating profit. There is no GST/PST/HST, interest, deductions, loss carry-forward or financing costs anywhere. Operating profit is not net income.
 - **Rounding:** itemized variable costs are rounded to the nearest cent per unit before multiplying by volume.
 - **Sensitivity analysis** is fixed at ±10 % and moves one input at a time; it does not model inputs changing together, step costs, or demand reacting to price. DOL only describes small changes around the current sales level.
 - **Show the math** covers the main figures only. It does not explain every table cell, the charts, the inventory figures, the challenges or the PDF report, and it gives no explanation when a break-even point does not exist (the screen already says why). With many products the revenue and variable-cost explanations become long lists.

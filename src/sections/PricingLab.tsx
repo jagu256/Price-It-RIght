@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
+import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } from '../components/AfterTaxTarget';
 import ProfitGoal from '../components/ProfitGoal';
 import ShowMath from '../components/ShowMath';
 import SmartPricing from '../components/SmartPricing';
@@ -15,13 +16,17 @@ import { toInputText } from '../lib/validation';
 
 export default function PricingLab() {
   const { model } = useStore();
+  // The optional after-tax target is an experiment: it lives here, is not saved, and only sets the targets below.
+  const [taxPlan, setTaxPlan] = useState<TaxPlanInput>(EMPTY_TAX_PLAN);
+  const linked = model.summary ? linkedTargetFrom(taxPlan) : null;
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <SectionHeader emoji="🎯" title="Pricing Lab" subtitle="Experiment with prices and discover how your decisions affect profit." />
       <NeedsValidBusiness ready={!!model.summary}>
         <WhatIfSimulator />
-        <SmartPricing />
-        <ProfitGoal />
+        <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />
+        <SmartPricing linkedTarget={linked} />
+        <ProfitGoal linkedTarget={linked} />
         <SurpriseEvents />
       </NeedsValidBusiness>
     </div>

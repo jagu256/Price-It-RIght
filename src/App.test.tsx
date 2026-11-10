@@ -139,6 +139,38 @@ describe('sensitivity analysis', () => {
   });
 });
 
+describe('after-tax target profit', () => {
+  it('turns an after-tax target into a pre-tax target and feeds it to the price and goal tools', async () => {
+    const { user } = setup('pricing', 'demo');
+    const lab = within(panel('pricing'));
+    expect(lab.queryByLabelText('Income tax rate (%)')).not.toBeInTheDocument(); // off by default
+    await user.click(lab.getByRole('checkbox', { name: /after-tax target/ }));
+    const target = lab.getByLabelText('Target monthly profit AFTER tax');
+    await user.clear(target);
+    await user.type(target, '1000');
+    await user.type(lab.getByLabelText('Income tax rate (%)'), '20');
+
+    const box = lab.getByText('Required pre-tax operating profit').parentElement!;
+    expect(box).toHaveTextContent('$1,250');
+    expect(lab.getByText('Estimated tax on current profit').parentElement).toHaveTextContent('$195');
+    expect(lab.getByText('After-tax operating profit (current plan)').parentElement).toHaveTextContent('$780');
+    expect(lab.getByText(/Simplified estimate – not tax advice/)).toBeInTheDocument();
+
+    // Both tools now use $1,250 (pre-tax). Coffee: $2 + ($1,500 + $1,250 − $1,275) ÷ 300 = $6.9167 → $6.92
+    expect(lab.getByLabelText('Desired monthly operating profit (pre-tax)')).toHaveValue('1250');
+    expect(lab.getByText('Minimum calculated price').parentElement).toHaveTextContent('$6.92');
+    expect(lab.getByLabelText('Target monthly operating profit (pre-tax)')).toHaveValue('1250');
+    expect(lab.getByText('Difference from target').parentElement).toHaveTextContent('−$275');
+
+    // An invalid rate is shown, not turned into 0, and the tools go back to their own targets.
+    const rate = lab.getByLabelText('Income tax rate (%)');
+    await user.clear(rate);
+    await user.type(rate, '120');
+    expect(lab.getByText('The tax rate must be between 0 and 100 %.')).toBeInTheDocument();
+    expect(lab.getByLabelText('Desired monthly operating profit')).toHaveValue('500');
+  });
+});
+
 describe('save my work', () => {
   const jsonFile = (text: string, name = 'saved.json') => new File([text], name, { type: 'application/json' });
   const coffeeSales = () => screen.getByLabelText('Expected monthly sales for Coffee');

@@ -3,12 +3,15 @@ import { useStore } from '../app/StoreContext';
 import { formatCAD, formatPercent, formatSignedCAD, unitsLabel } from '../lib/format';
 import { extraUnitsOfProduct, goalProgress, planForTarget } from '../lib/pricing';
 import { goalMath } from '../lib/showMath';
+import { formatRate } from '../lib/tax';
+import { toInputText } from '../lib/validation';
+import type { LinkedTarget } from './AfterTaxTarget';
 import ShowMath from './ShowMath';
 import { Field, parseSignedAmount } from './SmartPricing';
 import { ErrorList, Notice, SignedMoney, SubHeader } from './ui';
 
 /** 🎯 Profit Goal Tracker */
-export default function ProfitGoal() {
+export default function ProfitGoal({ linkedTarget = null }: { linkedTarget?: LinkedTarget | null }) {
   const { model } = useStore();
   const s = model.summary!;
   const [target, setTarget] = useState(String(Math.max(500, Math.ceil((s.operatingProfit + 500) / 100) * 100)));
@@ -16,7 +19,8 @@ export default function ProfitGoal() {
   const [productId, setProductId] = useState(model.products[0]?.id ?? '');
   const [custom, setCustom] = useState<Record<string, string>>({});
 
-  const t = parseSignedAmount(target);
+  // With an after-tax target switched on, the pre-tax figure from that panel is used.
+  const t = linkedTarget ? { ok: true as const, value: linkedTarget.preTax } : parseSignedAmount(target);
   const g = t.ok ? goalProgress(s.operatingProfit, t.value) : null;
   const product = model.products.find((p) => p.id === productId) ?? model.products[0];
 
@@ -30,7 +34,19 @@ export default function ProfitGoal() {
     <section aria-labelledby="goal-title" className="card space-y-5 p-5 sm:p-8">
       <SubHeader id="goal-title" emoji="🎯" title="Profit Goal Tracker" subtitle="Set a monthly operating profit goal and see what it would take to get there." />
       <div className="max-w-xs">
-        <Field id="goal-target" label="Target monthly operating profit" value={target} onChange={setTarget} invalid={!t.ok} prefix="$" />
+        {linkedTarget ? (
+          <Field
+            id="goal-target"
+            label="Target monthly operating profit (pre-tax)"
+            value={toInputText(linkedTarget.preTax)}
+            onChange={() => {}}
+            readOnly
+            prefix="$"
+            help={`From your after-tax target of ${formatCAD(linkedTarget.afterTax)} at ${formatRate(linkedTarget.ratePercent)} tax (set above).`}
+          />
+        ) : (
+          <Field id="goal-target" label="Target monthly operating profit" value={target} onChange={setTarget} invalid={!t.ok} prefix="$" />
+        )}
         <ErrorList messages={[t.ok ? undefined : t.error]} />
       </div>
 

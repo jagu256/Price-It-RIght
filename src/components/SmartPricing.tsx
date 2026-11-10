@@ -4,12 +4,14 @@ import { toCents } from '../lib/business';
 import { formatCAD, unitsLabel } from '../lib/format';
 import { requiredPrice } from '../lib/pricing';
 import { isWholeCents, requiredPriceMath, type RequiredPriceInput } from '../lib/showMath';
+import { formatRate } from '../lib/tax';
 import { parseAmount, parseMoney, parseUnits, toInputText } from '../lib/validation';
+import type { LinkedTarget } from './AfterTaxTarget';
 import ShowMath from './ShowMath';
 import { CellInput, ErrorList, Notice, SubHeader } from './ui';
 
 /** 💡 What Price Should I Charge? */
-export default function SmartPricing() {
+export default function SmartPricing({ linkedTarget = null }: { linkedTarget?: LinkedTarget | null }) {
   const { model } = useStore();
   const products = model.products;
   const [productId, setProductId] = useState(products[0]?.id ?? '');
@@ -21,7 +23,8 @@ export default function SmartPricing() {
   const product = products.find((p) => p.id === productId) ?? products[0];
   if (!product || model.fixedCosts === null) return null;
 
-  const targetR = parseSignedAmount(target);
+  // With an after-tax target switched on, the pre-tax figure from that panel is used.
+  const targetR = linkedTarget ? { ok: true as const, value: linkedTarget.preTax } : parseSignedAmount(target);
   const unitsR = parseUnits(unitsText ?? String(product.units));
   const vcR = parseMoney(vcText ?? toInputText(product.variableCost), 'variableCost');
   const shareR = mode === 'share' ? parseAmount(shareText, 'share of fixed costs') : null;
@@ -52,7 +55,19 @@ export default function SmartPricing() {
             {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
-        <Field id="sp-target" label="Desired monthly operating profit" value={target} onChange={setTarget} invalid={!targetR.ok} prefix="$" help="Can be negative to plan a smaller loss." />
+        {linkedTarget ? (
+          <Field
+            id="sp-target"
+            label="Desired monthly operating profit (pre-tax)"
+            value={toInputText(linkedTarget.preTax)}
+            onChange={() => {}}
+            readOnly
+            prefix="$"
+            help={`From your after-tax target of ${formatCAD(linkedTarget.afterTax)} at ${formatRate(linkedTarget.ratePercent)} tax (set above).`}
+          />
+        ) : (
+          <Field id="sp-target" label="Desired monthly operating profit" value={target} onChange={setTarget} invalid={!targetR.ok} prefix="$" help="Can be negative to plan a smaller loss." />
+        )}
         <Field id="sp-units" label={`Expected sales of ${product.name}`} value={unitsText ?? String(product.units)} onChange={setUnitsText} invalid={!unitsR.ok} />
         <Field id="sp-vc" label="Variable cost per unit" value={vcText ?? toInputText(product.variableCost)} onChange={setVcText} invalid={!vcR.ok} prefix="$" />
       </div>
@@ -125,12 +140,12 @@ function parseSignedAmount(raw: string) {
   return r.ok ? { ok: true as const, value: negative ? -r.value : r.value } : r;
 }
 
-function Field({ id, label, value, onChange, invalid, prefix, help }: { id: string; label: string; value: string; onChange: (v: string) => void; invalid?: boolean; prefix?: string; help?: string }) {
+function Field({ id, label, value, onChange, invalid, prefix, help, readOnly }: { id: string; label: string; value: string; onChange: (v: string) => void; invalid?: boolean; prefix?: string; help?: string; readOnly?: boolean }) {
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-semibold text-sage-900">{label}</label>
       <div className="mt-1">
-        <CellInput id={id} label={label} value={value} onChange={onChange} invalid={invalid} prefix={prefix} width="w-full" />
+        <CellInput id={id} label={label} value={value} onChange={onChange} invalid={invalid} prefix={prefix} width="w-full" readOnly={readOnly} />
       </div>
       {help && <p className="mt-1 text-xs text-sage-600">{help}</p>}
     </div>

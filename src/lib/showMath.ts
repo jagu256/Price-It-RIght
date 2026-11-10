@@ -13,6 +13,7 @@ import type { BusinessSummary } from './business';
 import { formatCAD, formatNumber, formatPercent, formatSignedCAD, roundCents, unitsLabel } from './format';
 import type { GoalProgress, RequiredPriceResult } from './pricing';
 import { formatLeverage, type OperatingLeverage, type SensitivityResult } from './sensitivity';
+import { formatRate, type PreTaxResult, type TaxEstimate } from './tax';
 
 export interface MathExplanation {
   /** Which number this explains. */
@@ -320,6 +321,54 @@ export function leverageMath(d: OperatingLeverage, r: SensitivityResult): MathEx
         volume && volume.upPercent !== null
           ? `Check: sales volume +${r.percent}% changes profit by ${formatPercent(volume.upPercent)}, which is ${formatLeverage(d.value)} × ${r.percent}%.`
           : undefined,
+    },
+  ];
+}
+
+/* ------------------------------------------------------------------ */
+/* After-tax target profit                                             */
+/* ------------------------------------------------------------------ */
+
+export function preTaxMath(afterTaxTarget: number, ratePercent: number, r: PreTaxResult): MathExplanation[] {
+  if (r.status !== 'ok') return [];
+  if (r.noTax) {
+    return [
+      {
+        title: 'Required pre-tax operating profit',
+        formula: 'There is no tax on a loss or on $0, so the pre-tax target equals the after-tax target',
+        steps: [],
+        withNumbers: `${formatCAD(afterTaxTarget)} = ${formatCAD(r.preTax)}`,
+        resultText: formatCAD(r.preTax),
+      },
+    ];
+  }
+  const end = isWholeCents(r.exact) ? formatCAD(r.preTax) : `$${r.exact.toFixed(4)}, rounded UP to ${formatCAD(r.preTax)}`;
+  return [
+    {
+      title: 'Required pre-tax operating profit',
+      formula: 'Required pre-tax profit = target after-tax profit ÷ (1 − tax rate)',
+      steps: [],
+      withNumbers: `${formatCAD(afterTaxTarget)} ÷ (1 − ${formatRate(ratePercent)}) = ${end}`,
+      resultText: formatCAD(r.preTax),
+    },
+    {
+      title: 'Check: after tax',
+      formula: 'After-tax profit = pre-tax profit − (pre-tax profit × tax rate)',
+      steps: [],
+      withNumbers: `${formatCAD(r.preTax)} − ${formatCAD(r.tax)} = ${formatCAD(r.afterTax)}`,
+      resultText: formatCAD(r.afterTax),
+    },
+  ];
+}
+
+export function taxEstimateMath(e: TaxEstimate, ratePercent: number): MathExplanation[] {
+  return [
+    {
+      title: 'Estimated tax and after-tax operating profit',
+      formula: e.noTax ? 'No tax is charged on an operating loss or on $0' : 'Estimated tax = operating profit × tax rate; after-tax profit = operating profit − estimated tax',
+      steps: e.noTax ? [] : [`Tax: ${formatCAD(e.operatingProfit)} × ${formatRate(ratePercent)} = ${formatCAD(e.tax)}`],
+      withNumbers: `${formatCAD(e.operatingProfit)} − ${formatCAD(e.tax)} = ${formatCAD(e.afterTax)}`,
+      resultText: formatCAD(e.afterTax),
     },
   ];
 }

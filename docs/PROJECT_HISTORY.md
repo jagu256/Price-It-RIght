@@ -103,6 +103,13 @@ The student expected "Export my business" to give a spreadsheet. The .json file 
 
 **Checks:** 210 tests in 13 files passed; build passed. At 375 px the dashboard has no sideways scrolling and the chart draws all 8 bars.
 
+### Feature 4 – After-tax target profit (9 Nov 2026)
+- New `src/lib/tax.ts`: tax-rate validation (0–100 %, user-entered, nothing hard-coded), required pre-tax profit = after-tax target ÷ (1 − rate) rounded UP to the cent, estimated tax (nearest cent, none on a loss), 100 % rate → Not Available.
+- Pricing Lab: an optional, unticked-by-default panel that shows the required pre-tax profit, the estimated tax on current profit and after-tax operating profit, with "Show the math" and a "simplified estimate – not tax advice" label. When it is on, *What Price Should I Charge?* and the *Profit Goal Tracker* use the pre-tax figure as their target. It is an experiment and is not saved.
+- Hand check reproduced: $1,000 after tax at 20 % → $1,250 pre-tax. A test over 72 target/rate pairs confirms the rounded pre-tax figure always leaves at least the target after tax.
+
+**Checks:** 223 tests in 14 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
