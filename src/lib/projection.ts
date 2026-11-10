@@ -10,10 +10,12 @@
  *
  * A month is "below break-even" when its operating profit is less than $0.
  */
+import { t, tx } from '../i18n/i18n';
 import { businessSummary, toCents, type ProductNumbers } from './business';
 import { cleanNumberText } from './validation';
 
-export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
+/** English month names (shown with t() on screen). */
+export const MONTHS = [tx('January'), tx('February'), tx('March'), tx('April'), tx('May'), tx('June'), tx('July'), tx('August'), tx('September'), tx('October'), tx('November'), tx('December')];
 
 /** Highest multiplier accepted (10× normal sales). */
 export const MAX_MULTIPLIER_PERCENT = 1000;
@@ -23,16 +25,16 @@ export type PercentResult = { ok: true; basisPoints: number; percent: number } |
 /** Sales multiplier: 0 to 1,000 %, up to 2 decimals, with or without a % sign. */
 export function parseMultiplier(raw: string): PercentResult {
   const trimmed = raw.trim().replace(/%$/, '').trim();
-  if (trimmed === '') return { ok: false, error: 'Please enter a sales level, for example 100 for a normal month.' };
+  if (trimmed === '') return { ok: false, error: t('Please enter a sales level, for example 100 for a normal month.') };
   const cleaned = cleanNumberText(trimmed);
   if ('error' in cleaned) return { ok: false, error: cleaned.error };
   const text = cleaned.text;
-  if (/^[-−–]/.test(text)) return { ok: false, error: 'A sales level can’t be negative. Use 0 for a month with no sales.' };
-  if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) return { ok: false, error: 'Please enter the sales level as a number, for example 120.' };
+  if (/^[-−–]/.test(text)) return { ok: false, error: t('A sales level can’t be negative. Use 0 for a month with no sales.') };
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) return { ok: false, error: t('Please enter the sales level as a number, for example 120.') };
   const decimals = text.includes('.') ? text.split('.')[1].length : 0;
-  if (decimals > 2) return { ok: false, error: 'Please use no more than 2 decimal places.' };
+  if (decimals > 2) return { ok: false, error: t('Please use no more than 2 decimal places.') };
   const percent = Number(text);
-  if (percent > MAX_MULTIPLIER_PERCENT) return { ok: false, error: `The sales level must be between 0 and ${MAX_MULTIPLIER_PERCENT} %.` };
+  if (percent > MAX_MULTIPLIER_PERCENT) return { ok: false, error: t('The sales level must be between 0 and {max} %.', { max: MAX_MULTIPLIER_PERCENT }) };
   return { ok: true, basisPoints: Math.round(percent * 100), percent };
 }
 

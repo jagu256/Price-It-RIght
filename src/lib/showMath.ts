@@ -8,10 +8,11 @@
  * from the result and formatted with the same helpers the cards use, so the
  * explanation can never disagree with the number on screen.
  */
+import { t } from '../i18n/i18n';
 import type { PricingResults } from './accounting';
 import type { BusinessSummary } from './business';
 import type { MakeOrBuyInput, MakeOrBuyResult, SpecialOrderInput, SpecialOrderResult } from './decisions';
-import { formatCAD, formatNumber, formatPercent, formatSignedCAD, roundCents, unitsLabel } from './format';
+import { formatCAD, formatCADDecimals, formatNumber, formatPercent, formatSignedCAD, roundCents, unitsLabel } from './format';
 import type { GoalProgress, RequiredPriceResult } from './pricing';
 import { formatLeverage, type OperatingLeverage, type SensitivityResult } from './sensitivity';
 import { formatRate, type PreTaxResult, type TaxEstimate } from './tax';
@@ -56,15 +57,15 @@ export interface SummaryMath {
  * Explanations for the six main business figures.
  * `unitsWord` describes the units used, e.g. "expected units" or "units sold".
  */
-export function summaryMath(s: BusinessSummary, unitsWord = 'expected units'): SummaryMath {
+export function summaryMath(s: BusinessSummary, unitsWord = t('expected units')): SummaryMath {
   const revenueSteps = s.products.map((p) => `${p.name}: ${formatCAD(p.price)} × ${formatNumber(p.units)} = ${formatCAD(p.revenue)}`);
   const costSteps = s.products.map((p) => `${p.name}: ${formatCAD(p.variableCost)} × ${formatNumber(p.units)} = ${formatCAD(p.totalVariableCosts)}`);
   const first = s.products[0];
 
   return {
     revenue: {
-      title: 'Total revenue',
-      formula: `Total revenue = selling price × ${unitsWord}, added up for every product`,
+      title: t('Total revenue'),
+      formula: t('Total revenue = selling price × {units}, added up for every product', { units: unitsWord }),
       steps: s.products.length > 1 ? revenueSteps : [],
       withNumbers: sumLine(
         s.products.map((p) => formatCAD(p.revenue)),
@@ -74,8 +75,8 @@ export function summaryMath(s: BusinessSummary, unitsWord = 'expected units'): S
       resultText: formatCAD(s.totalRevenue),
     },
     variableCosts: {
-      title: 'Total variable costs',
-      formula: `Total variable costs = variable cost per unit × ${unitsWord}, added up for every product`,
+      title: t('Total variable costs'),
+      formula: t('Total variable costs = variable cost per unit × {units}, added up for every product', { units: unitsWord }),
       steps: s.products.length > 1 ? costSteps : [],
       withNumbers: sumLine(
         s.products.map((p) => formatCAD(p.totalVariableCosts)),
@@ -85,39 +86,39 @@ export function summaryMath(s: BusinessSummary, unitsWord = 'expected units'): S
       resultText: formatCAD(s.totalVariableCosts),
     },
     contributionMargin: {
-      title: 'Total contribution margin',
-      formula: 'Total contribution margin = total revenue − total variable costs',
+      title: t('Total contribution margin'),
+      formula: t('Total contribution margin = total revenue − total variable costs'),
       steps: [],
       withNumbers: `${formatCAD(s.totalRevenue)} − ${m(s.totalVariableCosts)} = ${formatCAD(s.totalCM)}`,
       resultText: formatCAD(s.totalCM),
     },
     fixedCosts: {
-      title: 'Monthly fixed costs',
-      formula: 'Monthly fixed costs are a number you enter, not a calculation',
+      title: t('Monthly fixed costs'),
+      formula: t('Monthly fixed costs are a number you enter, not a calculation'),
       steps: [],
-      withNumbers: `${formatCAD(s.fixedCosts)} for the whole business, subtracted once (never once per product)`,
+      withNumbers: t('{fixed} for the whole business, subtracted once (never once per product)', { fixed: formatCAD(s.fixedCosts) }),
       resultText: formatCAD(s.fixedCosts),
     },
     operatingProfit: {
-      title: 'Operating profit',
-      formula: 'Operating profit = total contribution margin − fixed costs',
+      title: t('Operating profit'),
+      formula: t('Operating profit = total contribution margin − fixed costs'),
       steps: [],
       withNumbers: `${formatCAD(s.totalCM)} − ${m(s.fixedCosts)} = ${formatCAD(s.operatingProfit)}`,
       resultText: formatCAD(s.operatingProfit),
-      note: 'Operating profit is before taxes and interest, so it is not net income.',
+      note: t('Operating profit is before taxes and interest, so it is not net income.'),
     },
     cmRatio:
       s.overallCMRatio === null
         ? {
-            title: 'Overall contribution margin ratio',
-            formula: 'Overall CM ratio = total contribution margin ÷ total revenue × 100',
+            title: t('Overall contribution margin ratio'),
+            formula: t('Overall CM ratio = total contribution margin ÷ total revenue × 100'),
             steps: [],
-            withNumbers: 'Not available: total revenue is $0, and dividing by $0 has no answer.',
+            withNumbers: t('Not available: total revenue is $0, and dividing by $0 has no answer.'),
             resultText: 'N/A',
           }
         : {
-            title: 'Overall contribution margin ratio',
-            formula: 'Overall CM ratio = total contribution margin ÷ total revenue × 100',
+            title: t('Overall contribution margin ratio'),
+            formula: t('Overall CM ratio = total contribution margin ÷ total revenue × 100'),
             steps: [],
             withNumbers: `${formatCAD(s.totalCM)} ÷ ${formatCAD(s.totalRevenue)} × 100 = ${formatPercent(s.overallCMRatio)}`,
             resultText: formatPercent(s.overallCMRatio),
@@ -138,35 +139,35 @@ export function breakEvenMath(s: BusinessSummary): MathExplanation[] {
   const roundedUp = Math.ceil(be.totalUnitsExact);
   let unitsEnd: string;
   if (be.totalUnitsExact === be.totalUnits) unitsEnd = unitsLabel(be.totalUnits);
-  else if (be.totalUnits === roundedUp) unitsEnd = `${exact}, rounded UP to ${unitsLabel(be.totalUnits)}`;
-  else unitsEnd = `${exact}; ${unitsLabel(be.totalUnits)} are needed so the whole-unit split below covers fixed costs`;
+  else if (be.totalUnits === roundedUp) unitsEnd = t('{exact}, rounded UP to {units}', { exact, units: unitsLabel(be.totalUnits) });
+  else unitsEnd = t('{exact}; {units} are needed so the whole-unit split below covers fixed costs', { exact, units: unitsLabel(be.totalUnits) });
 
   const weightedIsWholeCents = Math.abs(be.weightedCM * 100 - Math.round(be.weightedCM * 100)) < 1e-9;
 
   return [
     {
-      title: 'Weighted-average CM per unit',
-      formula: 'Weighted-average CM per unit = total contribution margin ÷ total expected units',
+      title: t('Weighted-average CM per unit'),
+      formula: t('Weighted-average CM per unit = total contribution margin ÷ total expected units'),
       steps: [],
       withNumbers: `${formatCAD(s.totalCM)} ÷ ${unitsLabel(s.totalUnits)} = ${formatCAD(be.weightedCM)}`,
       resultText: formatCAD(be.weightedCM),
       note: weightedIsWholeCents ? undefined : 'Shown rounded to the nearest cent. The unrounded figure is used for the break-even point.',
     },
     {
-      title: 'Break-even units (total)',
-      formula: 'Break-even units = fixed costs ÷ weighted-average CM per unit',
+      title: t('Break-even units (total)'),
+      formula: t('Break-even units = fixed costs ÷ weighted-average CM per unit'),
       steps: [],
       withNumbers: `${formatCAD(s.fixedCosts)} ÷ (${formatCAD(s.totalCM)} ÷ ${formatNumber(s.totalUnits)}) = ${unitsEnd}`,
       resultText: unitsLabel(be.totalUnits),
-      note: 'Assumes your sales mix stays the same. You can’t sell part of a unit, so break-even units always round up.',
+      note: t('Assumes your sales mix stays the same. You can’t sell part of a unit, so break-even units always round up.'),
     },
     {
-      title: 'Break-even revenue',
-      formula: 'Break-even revenue = fixed costs ÷ overall CM ratio, where CM ratio = total contribution margin ÷ total revenue',
+      title: t('Break-even revenue'),
+      formula: t('Break-even revenue = fixed costs ÷ overall CM ratio, where CM ratio = total contribution margin ÷ total revenue'),
       steps: [],
       withNumbers: `${formatCAD(s.fixedCosts)} ÷ (${formatCAD(s.totalCM)} ÷ ${formatCAD(s.totalRevenue)}) = ${formatCAD(be.revenueExact)}`,
       resultText: formatCAD(be.revenueExact),
-      note: 'This is the theoretical figure before rounding to whole units.',
+      note: t('This is the theoretical figure before rounding to whole units.'),
     },
   ];
 }
@@ -177,8 +178,8 @@ export function marginOfSafetyMath(s: BusinessSummary): MathExplanation[] {
   const breakEvenRevenue = s.breakEven.status === 'reachable' ? s.breakEven.revenueExact : 0;
   const list: MathExplanation[] = [
     {
-      title: 'Margin of safety',
-      formula: 'Margin of safety = expected revenue − break-even revenue',
+      title: t('Margin of safety'),
+      formula: t('Margin of safety = expected revenue − break-even revenue'),
       steps: [],
       withNumbers: `${formatCAD(s.totalRevenue)} − ${m(breakEvenRevenue)} = ${formatCAD(s.marginOfSafety)}`,
       resultText: formatCAD(s.marginOfSafety),
@@ -186,8 +187,8 @@ export function marginOfSafetyMath(s: BusinessSummary): MathExplanation[] {
   ];
   if (s.marginOfSafetyPercent !== null) {
     list.push({
-      title: 'Margin of safety (%)',
-      formula: 'Margin of safety % = margin of safety ÷ expected revenue × 100',
+      title: t('Margin of safety (%)'),
+      formula: t('Margin of safety % = margin of safety ÷ expected revenue × 100'),
       steps: [],
       withNumbers: `${formatCAD(s.marginOfSafety)} ÷ ${formatCAD(s.totalRevenue)} × 100 = ${formatPercent(s.marginOfSafetyPercent)}`,
       resultText: formatPercent(s.marginOfSafetyPercent),
@@ -204,11 +205,11 @@ export function singleBreakEvenMath(r: PricingResults): MathExplanation[] {
   const be = r.breakEven;
   if (be.status !== 'reachable') return [];
   const { sellingPrice, variableCost, fixedCosts, units } = r.inputs;
-  const unitsEnd = be.unitsExact === be.unitsRounded ? unitsLabel(be.unitsRounded) : `${formatNumber(be.unitsExact)}, rounded UP to ${unitsLabel(be.unitsRounded)}`;
+  const unitsEnd = be.unitsExact === be.unitsRounded ? unitsLabel(be.unitsRounded) : t('{exact}, rounded UP to {units}', { exact: formatNumber(be.unitsExact), units: unitsLabel(be.unitsRounded) });
   const list: MathExplanation[] = [
     {
-      title: 'Break-even units',
-      formula: 'Break-even units = fixed costs ÷ (selling price − variable cost per unit)',
+      title: t('Break-even units'),
+      formula: t('Break-even units = fixed costs ÷ (selling price − variable cost per unit)'),
       steps: [],
       withNumbers: `${formatCAD(fixedCosts)} ÷ (${formatCAD(sellingPrice)} − ${m(variableCost)}) = ${unitsEnd}`,
       resultText: unitsLabel(be.unitsRounded),
@@ -216,11 +217,11 @@ export function singleBreakEvenMath(r: PricingResults): MathExplanation[] {
   ];
   if (r.marginOfSafety !== null) {
     list.push({
-      title: 'Margin of safety',
-      formula: 'Margin of safety = projected revenue − break-even revenue',
+      title: t('Margin of safety'),
+      formula: t('Margin of safety = projected revenue − break-even revenue'),
       steps: [
-        `Projected revenue: ${formatCAD(sellingPrice)} × ${formatNumber(units)} = ${formatCAD(r.revenue)}`,
-        `Break-even revenue: ${formatNumber(be.unitsExact)} units × ${formatCAD(sellingPrice)} = ${formatCAD(be.revenueExact)}`,
+        t('Projected revenue: {price} × {units} = {revenue}', { price: formatCAD(sellingPrice), units: formatNumber(units), revenue: formatCAD(r.revenue) }),
+        t('Break-even revenue: {exact} units × {price} = {revenue}', { exact: formatNumber(be.unitsExact), price: formatCAD(sellingPrice), revenue: formatCAD(be.revenueExact) }),
       ],
       withNumbers: `${formatCAD(r.revenue)} − ${m(be.revenueExact)} = ${formatCAD(r.marginOfSafety)}`,
       resultText: formatCAD(r.marginOfSafety),
@@ -250,19 +251,19 @@ export function isWholeCents(value: number): boolean {
 export function requiredPriceMath(input: RequiredPriceInput, result: RequiredPriceResult): MathExplanation[] {
   if (result.status !== 'ok') return [];
   const { variableCost, units, fixedCosts, targetProfit, otherContribution } = input;
-  const end = isWholeCents(result.exact) ? formatCAD(result.price) : `$${result.exact.toFixed(4)}, rounded UP to ${formatCAD(result.price)}`;
+  const end = isWholeCents(result.exact) ? formatCAD(result.price) : t('{exact}, rounded UP to {units}', { exact: formatCADDecimals(result.exact, 4), units: formatCAD(result.price) });
   return [
     {
-      title: 'Minimum calculated price',
-      formula: 'Required price = variable cost + (fixed costs + target profit − contribution from other products) ÷ expected units',
+      title: t('Minimum calculated price'),
+      formula: t('Required price = variable cost + (fixed costs + target profit − contribution from other products) ÷ expected units'),
       steps: [],
       withNumbers: `${formatCAD(variableCost)} + (${formatCAD(fixedCosts)} + ${m(targetProfit)} − ${m(otherContribution)}) ÷ ${formatNumber(units)} = ${end}`,
       resultText: formatCAD(result.price),
-      note: 'Rounded up to the next cent so the target is met, not just missed. Assumes sales stay at the number you entered.',
+      note: t('Rounded up to the next cent so the target is met, not just missed. Assumes sales stay at the number you entered.'),
     },
     {
-      title: 'Check: operating profit at this price',
-      formula: 'Operating profit = (price − variable cost) × expected units + contribution from other products − fixed costs',
+      title: t('Check: operating profit at this price'),
+      formula: t('Operating profit = (price − variable cost) × expected units + contribution from other products − fixed costs'),
       steps: [],
       withNumbers: `(${formatCAD(result.price)} − ${m(variableCost)}) × ${formatNumber(units)} + ${m(otherContribution)} − ${m(fixedCosts)} = ${formatCAD(result.profitAtPrice)}`,
       resultText: formatCAD(result.profitAtPrice),
@@ -273,21 +274,21 @@ export function requiredPriceMath(input: RequiredPriceInput, result: RequiredPri
 export function goalMath(g: GoalProgress): MathExplanation[] {
   return [
     {
-      title: 'Difference from target',
-      formula: 'Difference from target = current projected profit − target profit',
+      title: t('Difference from target'),
+      formula: t('Difference from target = current projected profit − target profit'),
       steps: [],
       withNumbers: `${formatCAD(g.current)} − ${m(g.target)} = ${formatSignedCAD(g.difference)}`,
       resultText: formatSignedCAD(g.difference),
     },
     {
-      title: 'Additional contribution margin required',
-      formula: 'Additional contribution margin required = target profit − current projected profit (never less than $0)',
+      title: t('Additional contribution margin required'),
+      formula: t('Additional contribution margin required = target profit − current projected profit (never less than $0)'),
       steps: [],
       withNumbers: g.met
-        ? `${formatCAD(g.additionalCMRequired)} – the target is already met`
+        ? t('{amount} – the target is already met', { amount: formatCAD(g.additionalCMRequired) })
         : `${formatCAD(g.target)} − ${m(g.current)} = ${formatCAD(g.additionalCMRequired)}`,
       resultText: formatCAD(g.additionalCMRequired),
-      note: 'Fixed costs stay the same, so every extra dollar of contribution margin is an extra dollar of operating profit.',
+      note: t('Fixed costs stay the same, so every extra dollar of contribution margin is an extra dollar of operating profit.'),
     },
   ];
 }
@@ -300,11 +301,13 @@ export function goalMath(g: GoalProgress): MathExplanation[] {
 export function sensitivityMath(r: SensitivityResult): MathExplanation[] {
   return r.rows.map((row) => ({
     title: `${row.label} +${r.percent}%`,
-    formula: `Change in operating profit = ${r.percent}% × ${row.baseName}${row.upChange < 0 ? ', which lowers profit' : ''}`,
+    formula: row.upChange < 0
+      ? t('Change in operating profit = {pct} × {base}, which lowers profit', { pct: formatPercent(r.percent), base: row.baseName })
+      : t('Change in operating profit = {pct} × {base}', { pct: formatPercent(r.percent), base: row.baseName }),
     steps: [],
     withNumbers: `${r.percent}% × ${formatCAD(row.baseAmount)} = ${formatSignedCAD(row.upChange)}, so ${formatCAD(r.baseProfit)} ${row.upChange < 0 ? '−' : '+'} ${formatCAD(Math.abs(row.upChange))} = ${formatCAD(row.upProfit)}`,
     resultText: formatCAD(row.upProfit),
-    note: `A ${r.percent}% decrease gives the opposite change: ${formatSignedCAD(row.downChange)} → ${formatCAD(row.downProfit)}.`,
+    note: t('A {pct} decrease gives the opposite change: {change} → {profit}.', { pct: formatPercent(r.percent), change: formatSignedCAD(row.downChange), profit: formatCAD(row.downProfit) }),
   }));
 }
 
@@ -313,14 +316,14 @@ export function leverageMath(d: OperatingLeverage, r: SensitivityResult): MathEx
   const volume = r.rows.find((x) => x.factor === 'volume');
   return [
     {
-      title: 'Degree of operating leverage',
-      formula: 'Degree of operating leverage = total contribution margin ÷ operating profit',
+      title: t('Degree of operating leverage'),
+      formula: t('Degree of operating leverage = total contribution margin ÷ operating profit'),
       steps: [],
       withNumbers: `${formatCAD(d.totalCM)} ÷ ${formatCAD(d.operatingProfit)} = ${formatLeverage(d.value)}`,
       resultText: formatLeverage(d.value),
       note:
         volume && volume.upPercent !== null
-          ? `Check: sales volume +${r.percent}% changes profit by ${formatPercent(volume.upPercent)}, which is ${formatLeverage(d.value)} × ${r.percent}%.`
+          ? t('Check: sales volume +{pct} changes profit by {change}, which is {dol} × {pct}.', { pct: formatPercent(r.percent), change: formatPercent(volume.upPercent), dol: formatLeverage(d.value) })
           : undefined,
     },
   ];
@@ -335,26 +338,26 @@ export function preTaxMath(afterTaxTarget: number, ratePercent: number, r: PreTa
   if (r.noTax) {
     return [
       {
-        title: 'Required pre-tax operating profit',
-        formula: 'There is no tax on a loss or on $0, so the pre-tax target equals the after-tax target',
+        title: t('Required pre-tax operating profit'),
+        formula: t('There is no tax on a loss or on $0, so the pre-tax target equals the after-tax target'),
         steps: [],
         withNumbers: `${formatCAD(afterTaxTarget)} = ${formatCAD(r.preTax)}`,
         resultText: formatCAD(r.preTax),
       },
     ];
   }
-  const end = isWholeCents(r.exact) ? formatCAD(r.preTax) : `$${r.exact.toFixed(4)}, rounded UP to ${formatCAD(r.preTax)}`;
+  const end = isWholeCents(r.exact) ? formatCAD(r.preTax) : t('{exact}, rounded UP to {units}', { exact: formatCADDecimals(r.exact, 4), units: formatCAD(r.preTax) });
   return [
     {
-      title: 'Required pre-tax operating profit',
-      formula: 'Required pre-tax profit = target after-tax profit ÷ (1 − tax rate)',
+      title: t('Required pre-tax operating profit'),
+      formula: t('Required pre-tax profit = target after-tax profit ÷ (1 − tax rate)'),
       steps: [],
       withNumbers: `${formatCAD(afterTaxTarget)} ÷ (1 − ${formatRate(ratePercent)}) = ${end}`,
       resultText: formatCAD(r.preTax),
     },
     {
-      title: 'Check: after tax',
-      formula: 'After-tax profit = pre-tax profit − (pre-tax profit × tax rate)',
+      title: t('Check: after tax'),
+      formula: t('After-tax profit = pre-tax profit − (pre-tax profit × tax rate)'),
       steps: [],
       withNumbers: `${formatCAD(r.preTax)} − ${formatCAD(r.tax)} = ${formatCAD(r.afterTax)}`,
       resultText: formatCAD(r.afterTax),
@@ -365,7 +368,7 @@ export function preTaxMath(afterTaxTarget: number, ratePercent: number, r: PreTa
 export function taxEstimateMath(e: TaxEstimate, ratePercent: number): MathExplanation[] {
   return [
     {
-      title: 'Estimated tax and after-tax operating profit',
+      title: t('Estimated tax and after-tax operating profit'),
       formula: e.noTax ? 'No tax is charged on an operating loss or on $0' : 'Estimated tax = operating profit × tax rate; after-tax profit = operating profit − estimated tax',
       steps: e.noTax ? [] : [`Tax: ${formatCAD(e.operatingProfit)} × ${formatRate(ratePercent)} = ${formatCAD(e.tax)}`],
       withNumbers: `${formatCAD(e.operatingProfit)} − ${formatCAD(e.tax)} = ${formatCAD(e.afterTax)}`,
@@ -381,15 +384,15 @@ export function taxEstimateMath(e: TaxEstimate, ratePercent: number): MathExplan
 export function specialOrderMath(product: { name: string; price: number; variableCost: number }, input: SpecialOrderInput, r: SpecialOrderResult): MathExplanation[] {
   return [
     {
-      title: 'Incremental profit from the special order',
-      formula: 'Incremental profit = (offered price − variable cost) × order units − extra one-time costs − contribution margin lost on displaced regular sales',
+      title: t('Incremental profit from the special order'),
+      formula: t('Incremental profit = (offered price − variable cost) × order units − extra one-time costs − contribution margin lost on displaced regular sales'),
       steps: [
-        `Order contribution: (${formatCAD(input.offeredPrice)} − ${m(product.variableCost)}) × ${formatNumber(input.orderUnits)} = ${formatCAD(r.orderCM)}`,
-        `Lost contribution: (${formatCAD(product.price)} − ${m(product.variableCost)}) × ${formatNumber(input.lostRegularUnits)} = ${formatCAD(r.lostCM)}`,
+        t('Order contribution: ({price} − {cost}) × {units} = {total}', { price: formatCAD(input.offeredPrice), cost: m(product.variableCost), units: formatNumber(input.orderUnits), total: formatCAD(r.orderCM) }),
+        t('Lost contribution: ({price} − {cost}) × {units} = {total}', { price: formatCAD(product.price), cost: m(product.variableCost), units: formatNumber(input.lostRegularUnits), total: formatCAD(r.lostCM) }),
       ],
       withNumbers: `${formatCAD(r.orderCM)} − ${m(r.extraCosts)} − ${m(r.lostCM)} = ${formatCAD(r.incrementalProfit)}`,
       resultText: formatCAD(r.incrementalProfit),
-      note: 'Fixed costs stay the same whether or not you accept, so they are left out.',
+      note: t('Fixed costs stay the same whether or not you accept, so they are left out.'),
     },
   ];
 }
@@ -397,23 +400,23 @@ export function specialOrderMath(product: { name: string; price: number; variabl
 export function makeOrBuyMath(input: MakeOrBuyInput, r: MakeOrBuyResult): MathExplanation[] {
   return [
     {
-      title: 'Relevant cost to make',
-      formula: 'Relevant cost to make = variable cost per unit × units + avoidable fixed costs + opportunity cost',
+      title: t('Relevant cost to make'),
+      formula: t('Relevant cost to make = variable cost per unit × units + avoidable fixed costs + opportunity cost'),
       steps: [],
       withNumbers: `${formatCAD(input.variableCostPerUnit)} × ${formatNumber(input.units)} + ${m(input.avoidableFixedCosts)} + ${m(input.opportunityCost)} = ${formatCAD(r.relevantCostToMake)}`,
       resultText: formatCAD(r.relevantCostToMake),
-      note: `Unavoidable fixed costs (${formatCAD(r.unavoidableFixedCosts)}) are paid whether you make or buy, so they are left out.`,
+      note: t('Unavoidable fixed costs ({amount}) are paid whether you make or buy, so they are left out.', { amount: formatCAD(r.unavoidableFixedCosts) }),
     },
     {
-      title: 'Cost to buy',
-      formula: 'Cost to buy = purchase price × units',
+      title: t('Cost to buy'),
+      formula: t('Cost to buy = purchase price × units'),
       steps: [],
       withNumbers: `${formatCAD(input.purchasePrice)} × ${formatNumber(input.units)} = ${formatCAD(r.costToBuy)}`,
       resultText: formatCAD(r.costToBuy),
     },
     {
-      title: 'Difference',
-      formula: 'Saving from making = cost to buy − relevant cost to make (negative means buying is cheaper)',
+      title: t('Difference'),
+      formula: t('Saving from making = cost to buy − relevant cost to make (negative means buying is cheaper)'),
       steps: [],
       withNumbers: `${formatCAD(r.costToBuy)} − ${m(r.relevantCostToMake)} = ${formatSignedCAD(r.savingFromMaking)}`,
       resultText: formatSignedCAD(r.savingFromMaking),

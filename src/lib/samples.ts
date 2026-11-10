@@ -2,6 +2,7 @@
  * Fictional sample businesses. Every number here is invented for learning –
  * these are NOT industry benchmarks or market averages.
  */
+import { t, tx } from '../i18n/i18n';
 import type { BusinessId } from './businesses';
 import type { UnitId } from './inventory';
 import { EMPTY_OTHER_COSTS, type BusinessData, type ProductInput } from './types';
@@ -156,6 +157,21 @@ const SAMPLES: Record<BusinessId | 'demo', Sample> = {
   },
 };
 
+/**
+ * Every name in the fictional samples, marked for translation: a sample loaded
+ * in French gets French names. (The user's own data is never translated.)
+ */
+export const SAMPLE_TEXT = [
+  tx('My Coffee Shop'), tx('My Bakery'), tx('My Nail Salon'), tx('My Clothing Store'), tx('My Business'), tx('Maple Leaf Café (demo)'),
+  tx('Coffee'), tx('Latte'), tx('Muffin'), tx('Sandwich'), tx('Cookie'), tx('Sourdough loaf'), tx('Croissant'), tx('Cupcake'), tx('Cookie box'),
+  tx('Classic manicure'), tx('Gel manicure'), tx('Pedicure'), tx('Nail art add-on'), tx('T-shirt'), tx('Hoodie'), tx('Cap'), tx('Tote bag'),
+  tx('Product A'), tx('Product B'),
+  tx('Drinks'), tx('Bakery'), tx('Food'), tx('Bread'), tx('Pastry'), tx('Sweets'), tx('Hands'), tx('Feet'), tx('Extras'), tx('Tops'), tx('Accessories'),
+  tx('Coffee beans'), tx('Milk'), tx('Coffee cups'), tx('Flour'), tx('Sugar'), tx('Butter'), tx('Eggs'), tx('Gift boxes'), tx('Gel polish'), tx('Regular polish'),
+  tx('Nail files'), tx('Cotton pads'), tx('Foot soak'), tx('T-shirts (finished)'), tx('Hoodies (finished)'), tx('Caps (finished)'), tx('Tote bags (finished)'),
+  tx('Shopping bags'), tx('Main material'), tx('Packaging'), tx('Bread slices'), tx('Cheese'),
+];
+
 /** Builds a complete business from a sample, giving every record a unique id. */
 export function sampleBusiness(type: BusinessId | 'demo', newId: (prefix: string) => string): BusinessData {
   const s = SAMPLES[type];
@@ -181,13 +197,14 @@ export function sampleBusiness(type: BusinessId | 'demo', newId: (prefix: string
       return { id: newId('r'), itemId: id, quantity, unit };
     });
   }
+  // Recipes are linked by id above, so the names can now be shown in the chosen language.
   return {
     type: type === 'demo' ? 'coffee' : type,
-    name: s.name,
+    name: t(s.name),
     isDemo: type === 'demo',
     fixedCosts: s.fixedCosts,
-    products,
-    inventory,
+    products: products.map((p) => ({ ...p, name: t(p.name), category: p.category ? t(p.category) : '' })),
+    inventory: inventory.map((i) => ({ ...i, name: t(i.name) })),
     recipes,
   };
 }

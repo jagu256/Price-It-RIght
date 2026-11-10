@@ -14,6 +14,7 @@
  * Everything is worked in whole cents; each change is rounded to the nearest
  * cent once (halves rounded away from zero).
  */
+import { locale, t } from '../i18n/i18n';
 import { toCents, type BusinessSummary } from './business';
 
 export type SensitivityFactor = 'prices' | 'variableCosts' | 'volume' | 'fixedCosts';
@@ -64,10 +65,10 @@ export function sensitivity(s: BusinessSummary, percent = 10): SensitivityResult
 
   // +1 means "profit rises when this input rises", −1 means it falls.
   const defs: { factor: SensitivityFactor; label: string; baseC: number; baseName: string; direction: 1 | -1 }[] = [
-    { factor: 'prices', label: 'Selling prices', baseC: revC, baseName: 'total revenue', direction: 1 },
-    { factor: 'variableCosts', label: 'Variable costs', baseC: vcC, baseName: 'total variable costs', direction: -1 },
-    { factor: 'volume', label: 'Sales volume (same mix)', baseC: cmC, baseName: 'total contribution margin', direction: 1 },
-    { factor: 'fixedCosts', label: 'Fixed costs', baseC: fixedC, baseName: 'fixed costs', direction: -1 },
+    { factor: 'prices', label: t('Selling prices'), baseC: revC, baseName: t('total revenue'), direction: 1 },
+    { factor: 'variableCosts', label: t('Variable costs'), baseC: vcC, baseName: t('total variable costs'), direction: -1 },
+    { factor: 'volume', label: t('Sales volume (same mix)'), baseC: cmC, baseName: t('total contribution margin'), direction: 1 },
+    { factor: 'fixedCosts', label: t('Fixed costs'), baseC: fixedC, baseName: t('fixed costs'), direction: -1 },
   ];
 
   const pctOfProfit = (changeC: number) => (profitC === 0 ? null : (changeC / Math.abs(profitC)) * 100);
@@ -117,15 +118,15 @@ export function operatingLeverage(s: BusinessSummary): OperatingLeverage {
   const profitC = cmC - toCents(s.fixedCosts);
   const base = { totalCM: cmC / 100, operatingProfit: profitC / 100 };
   if (profitC === 0) {
-    return { status: 'not-meaningful', reason: 'Operating profit is exactly $0, and dividing by $0 has no answer. At break-even, any small change in sales is an infinitely large percentage change in profit.', ...base };
+    return { status: 'not-meaningful', reason: t('Operating profit is exactly $0, and dividing by $0 has no answer. At break-even, any small change in sales is an infinitely large percentage change in profit.'), ...base };
   }
   if (profitC < 0) {
-    return { status: 'not-meaningful', reason: 'The business has an operating loss. Dividing by a negative profit gives a negative number that can’t be read as “profit changes this many times as fast as sales”.', ...base };
+    return { status: 'not-meaningful', reason: t('The business has an operating loss. Dividing by a negative profit gives a negative number that can’t be read as “profit changes this many times as fast as sales”.'), ...base };
   }
   return { status: 'ok', value: cmC / profitC, ...base };
 }
 
 /** DOL shown to 2 decimals, e.g. 2.54. */
 export function formatLeverage(value: number): string {
-  return value.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return value.toLocaleString(locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

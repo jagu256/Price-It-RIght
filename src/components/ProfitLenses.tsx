@@ -1,3 +1,4 @@
+import { t } from '../i18n/i18n';
 import { useStore } from '../app/StoreContext';
 import { formatCAD } from '../lib/format';
 import { checkPlan, planFinancials, proportionalPlan } from '../lib/planning';
@@ -21,9 +22,9 @@ export default function ProfitLenses() {
     const check = checkPlan(demand, model.products, model.recipes, model.stock);
     if (check.feasibility === 'infeasible') {
       const { plan } = proportionalPlan(model.products, model.recipes, model.stock);
-      constrained = { profit: planFinancials(plan, model.products, model.fixedCosts).summary.operatingProfit, note: 'Inventory can’t cover expected demand. This keeps your mix and scales down to what stock allows.' };
+      constrained = { profit: planFinancials(plan, model.products, model.fixedCosts).summary.operatingProfit, note: t('Inventory can’t cover expected demand. This keeps your mix and scales down to what stock allows.') };
     } else {
-      constrained = { profit: s.operatingProfit, note: check.feasibility === 'feasible' ? 'Your inventory covers expected demand, so this equals expected profit.' : 'No shortages found, but some products have no recipe and were not checked.' };
+      constrained = { profit: s.operatingProfit, note: check.feasibility === 'feasible' ? t('Your inventory covers expected demand, so this equals expected profit.') : t('No shortages found, but some products have no recipe and were not checked.') };
     }
   }
 
@@ -31,18 +32,18 @@ export default function ProfitLenses() {
   const scenarioProfit = scenario.changed && scenario.summary ? scenario.summary.operatingProfit : null;
 
   const lenses = [
-    { title: 'Expected Profit', value: s.operatingProfit, note: 'Based on the expected customer demand you entered.', href: '#my-business' },
+    { title: t('Expected Profit'), value: s.operatingProfit, note: t('Based on the expected customer demand you entered.'), href: '#my-business' },
     constrained
-      ? { title: 'Inventory-Constrained Profit', value: constrained.profit, note: constrained.note, href: '#planner' }
-      : { title: 'Inventory-Constrained Profit', value: null, note: 'Add inventory and recipes in the Smart Inventory Hub to see what your stock allows.', href: '#inventory' },
+      ? { title: t('Inventory-Constrained Profit'), value: constrained.profit, note: constrained.note, href: '#planner' }
+      : { title: t('Inventory-Constrained Profit'), value: null, note: t('Add inventory and recipes in the Smart Inventory Hub to see what your stock allows.'), href: '#inventory' },
     scenarioProfit !== null
-      ? { title: 'Scenario Profit', value: scenarioProfit, note: 'Based on the modified assumptions in the Pricing Lab (not applied).', href: '#pricing' }
-      : { title: 'Scenario Profit', value: null, note: 'Try a what-if scenario in the Pricing Lab.', href: '#pricing' },
+      ? { title: t('Scenario Profit'), value: scenarioProfit, note: t('Based on the modified assumptions in the Pricing Lab (not applied).'), href: '#pricing' }
+      : { title: t('Scenario Profit'), value: null, note: t('Try a what-if scenario in the Pricing Lab.'), href: '#pricing' },
   ];
 
   return (
     <section aria-labelledby="lenses-title" className="space-y-3">
-      <h3 id="lenses-title" className="text-xl font-bold text-sage-900">Three ways to look at profit</h3>
+      <h3 id="lenses-title" className="text-xl font-bold text-sage-900">{t('Three ways to look at profit')}</h3>
       <div className="grid gap-3 md:grid-cols-3">
         {lenses.map((l) => (
           <a key={l.title} href={l.href} className="card block p-4 transition hover:-translate-y-0.5 hover:shadow-lift">

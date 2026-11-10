@@ -89,7 +89,7 @@ describe('show the math – after-tax target', () => {
     const [est] = taxEstimateMath(estimateTax(975, 2000), 20);
     expect(est.steps).toEqual(['Tax: $975 × 20% = $195']);
     expect(est.withNumbers).toBe('$975 − $195 = $780');
-    expect(preTaxMath(1000, 30, requiredPreTaxProfit(1000, 3000))[0].withNumbers).toBe('$1,000 ÷ (1 − 30%) = $1428.5714, rounded UP to $1,428.58');
+    expect(preTaxMath(1000, 30, requiredPreTaxProfit(1000, 3000))[0].withNumbers).toBe('$1,000 ÷ (1 − 30%) = $1,428.5714, rounded UP to $1,428.58');
     expect(formatRate(12.5)).toBe('12.5%');
   });
 });
