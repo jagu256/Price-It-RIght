@@ -32,7 +32,7 @@ export default function PriceSlider({ id, label, value, max, onChange, colour = 
         style={{ ['--pct' as string]: `${pct}%`, ['--fill' as string]: colour }}
       />
       <div className="mt-1 flex justify-between text-xs font-semibold text-sage-500" aria-hidden="true">
-        <span>$0</span>
+        <span>{formatCAD(0)}</span>
         <span>{formatCAD(max)}</span>
       </div>
     </div>

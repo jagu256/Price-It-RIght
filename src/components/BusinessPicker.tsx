@@ -1,3 +1,4 @@
+import { t } from '../i18n/i18n';
 import { BUSINESSES, type BusinessId } from '../lib/businesses';
 
 interface Props {
@@ -28,10 +29,10 @@ export default function BusinessPicker({ selected, onSelect, labelledBy }: Props
             >
               {b.emoji}
             </span>
-            <span className="mt-3 font-display text-base font-bold text-sage-900">{b.label}</span>
-            <span className="mt-0.5 text-xs leading-snug text-sage-600">{b.blurb}</span>
+            <span className="mt-3 font-display text-base font-bold text-sage-900">{t(b.label)}</span>
+            <span className="mt-0.5 text-xs leading-snug text-sage-600">{t(b.blurb)}</span>
             {active && (
-              <span className="mt-2 rounded-full bg-sage-700 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-cream-50">Selected</span>
+              <span className="mt-2 rounded-full bg-sage-700 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-cream-50">{t('Selected')}</span>
             )}
           </button>
         );

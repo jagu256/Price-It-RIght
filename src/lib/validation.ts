@@ -3,6 +3,7 @@
  * entries are never silently replaced with zero – they are shown back to the
  * user with a friendly message instead.
  */
+import { getLanguage, t, tx } from '../i18n/i18n';
 import type { PricingInputs } from './accounting';
 
 export type FieldKey = 'sellingPrice' | 'variableCost' | 'fixedCosts' | 'units';
@@ -23,74 +24,84 @@ export interface RawInputs {
 }
 
 const FIELD_NAMES: Record<FieldKey, string> = {
-  sellingPrice: 'selling price',
-  variableCost: 'variable cost',
-  fixedCosts: 'fixed costs',
-  units: 'sales volume',
+  sellingPrice: tx('selling price'),
+  variableCost: tx('variable cost'),
+  fixedCosts: tx('fixed costs'),
+  units: tx('sales volume'),
 };
 
-/** Removes spaces and checks that any commas are proper thousands separators. */
+/**
+ * Removes spaces and checks commas.
+ * English: commas are thousands separators only (1,500).
+ * French: a comma is the decimal separator (6,50) and spaces separate thousands (1 500).
+ */
 export function cleanNumberText(raw: string): { text: string } | { error: string } {
   const text = raw.trim().replace(/\s+/g, '');
   if (text.includes(',')) {
+    if (getLanguage() === 'fr') {
+      if (!/^[-−–]?\$?\d*,\d+\$?$/.test(text)) return { error: t('Please check the comma – in French, use it only as the decimal separator, like 6,50.') };
+      return { text: text.replace(',', '.').replace(/\$$/, '') };
+    }
     if (!/^\$?\d{1,3}(,\d{3})+(\.\d*)?$/.test(text)) {
-      return { error: 'Please check the commas – use them only as thousands separators, like 1,500.' };
+      return { error: t('Please check the commas – use them only as thousands separators, like 1,500.') };
     }
     return { text: text.replace(/,/g, '') };
   }
-  return { text };
+  // "6 $" style (French) – the dollar sign after the number.
+  return { text: getLanguage() === 'fr' ? text.replace(/\$$/, '') : text };
 }
 
 export function parseMoney(raw: string, field: Exclude<FieldKey, 'units'>): ParseResult {
-  return parseAmount(raw, FIELD_NAMES[field]);
+  return parseAmount(raw, FIELD_NAMES[field]); // parseAmount translates the name
 }
 
 /** Validates a CAD amount (0 or more, max 2 decimals). `name` is used in messages, e.g. "selling price". */
 export function parseAmount(raw: string, name: string): ParseResult {
-  if (raw.trim() === '') return { ok: false, error: `Please enter the ${name}.` };
+  const label = t(name);
+  if (raw.trim() === '') return { ok: false, error: t('Please enter the {name}.', { name: label }) };
 
   const cleaned = cleanNumberText(raw);
   if ('error' in cleaned) return { ok: false, error: cleaned.error };
   let text = cleaned.text;
 
   if (/^[-−–]/.test(text) || /^\$[-−–]/.test(text)) {
-    return { ok: false, error: `The ${name} can't be negative. Please enter 0 or more.` };
+    return { ok: false, error: t("The {name} can't be negative. Please enter 0 or more.", { name: label }) };
   }
   if (text.startsWith('$')) text = text.slice(1);
 
   if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) {
-    return { ok: false, error: 'Please use numbers only, for example 6 or 6.50.' };
+    return { ok: false, error: t('Please use numbers only, for example 6 or 6.50.') };
   }
   const decimals = text.includes('.') ? text.split('.')[1].length : 0;
   if (decimals > 2) {
-    return { ok: false, error: 'Please use no more than 2 decimal places (dollars and cents).' };
+    return { ok: false, error: t('Please use no more than 2 decimal places (dollars and cents).') };
   }
   const value = Number(text);
   if (!Number.isFinite(value) || value > MAX_VALUE) {
-    return { ok: false, error: 'That number is larger than this simulator supports (max $1,000,000,000).' };
+    return { ok: false, error: t('That number is larger than this simulator supports (max $1,000,000,000).') };
   }
   return { ok: true, value };
 }
 
 export function parseUnits(raw: string): ParseResult {
-  if (raw.trim() === '') return { ok: false, error: 'Please enter your expected monthly sales volume.' };
+  if (raw.trim() === '') return { ok: false, error: t('Please enter your expected monthly sales volume.') };
 
   const cleaned = cleanNumberText(raw);
   if ('error' in cleaned) return { ok: false, error: cleaned.error };
   const text = cleaned.text;
 
   if (/^[-−–]/.test(text)) {
-    return { ok: false, error: "Sales volume can't be negative. Please enter 0 or more." };
+    return { ok: false, error: t("Sales volume can't be negative. Please enter 0 or more.") };
   }
   if (/^\d*\.\d*$/.test(text) && text !== '.') {
-    return { ok: false, error: 'Please enter a whole number of units – you can’t sell part of a unit.' };
+    return { ok: false, error: t('Please enter a whole number of units – you can’t sell part of a unit.') };
   }
   if (!/^\d+$/.test(text)) {
-    return { ok: false, error: 'Please use whole numbers only, for example 300.' };
+    return { ok: false, error: t('Please use whole numbers only, for example 300.') };
   }
   const value = Number(text);
   if (!Number.isFinite(value) || value > MAX_VALUE) {
-    return { ok: false, error: 'That number is larger than this simulator supports (max 1,000,000,000 units).' };
+    return { ok: false, error: t('That number is larger than this simulator supports (max 1,000,000,000 units).') };
   }
   return { ok: true, value };
 }

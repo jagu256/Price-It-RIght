@@ -1,3 +1,4 @@
+import { t } from '../i18n/i18n';
 import { useId, useState, type ReactNode } from 'react';
 
 interface Props {
@@ -19,7 +20,7 @@ export default function InfoTip({ label, children, align = 'left' }: Props) {
     >
       <button
         type="button"
-        aria-label={`What is “${label}”?`}
+        aria-label={t('What is “{label}”?', { label })}
         aria-describedby={open ? id : undefined}
         aria-expanded={open}
         // Hover and focus already open the tip, so a click/tap only ever opens it

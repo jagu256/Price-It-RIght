@@ -1,5 +1,6 @@
 /** Small shared building blocks so every section looks and behaves the same. */
 import type { ReactNode } from 'react';
+import { t, tx } from '../i18n/i18n';
 import type { StockStatus } from '../lib/planning';
 
 export function SectionHeader({ emoji, title, subtitle, eyebrow, id }: { emoji?: string; title: string; subtitle?: string; eyebrow?: string; id?: string }) {
@@ -60,10 +61,10 @@ export function EmptyState({ title, children, action }: { title: string; childre
 }
 
 const statusInfo: Record<StockStatus, { label: string; dot: string; cls: string }> = {
-  sufficient: { label: 'Sufficient Stock', dot: '🟢', cls: 'bg-sage-100 text-sage-800' },
-  low: { label: 'Low Stock', dot: '🟡', cls: 'bg-butter-200 text-butter-700' },
-  shortage: { label: 'Inventory Shortage', dot: '🔴', cls: 'bg-loss-100 text-loss-700' },
-  unused: { label: 'Not used by plan', dot: '⚪', cls: 'bg-cream-200 text-sage-700' },
+  sufficient: { label: tx('Sufficient Stock'), dot: '🟢', cls: 'bg-sage-100 text-sage-800' },
+  low: { label: tx('Low Stock'), dot: '🟡', cls: 'bg-butter-200 text-butter-700' },
+  shortage: { label: tx('Inventory Shortage'), dot: '🔴', cls: 'bg-loss-100 text-loss-700' },
+  unused: { label: tx('Not used by plan'), dot: '⚪', cls: 'bg-cream-200 text-sage-700' },
 };
 
 export function StatusPill({ status }: { status: StockStatus }) {
@@ -71,7 +72,7 @@ export function StatusPill({ status }: { status: StockStatus }) {
   return (
     <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${s.cls}`}>
       <span aria-hidden="true">{s.dot}</span>
-      {s.label}
+      {t(s.label)}
     </span>
   );
 }
@@ -142,6 +143,15 @@ export function ErrorList({ id, messages }: { id?: string; messages: (string | u
   );
 }
 
+/**
+ * Shows a translated sentence where **double asterisks** mark bold words, so a
+ * whole sentence stays together in the dictionary even when one word is bold.
+ */
+export function Rich({ text }: { text: string }) {
+  const parts = text.split(/\*\*(.+?)\*\*/g);
+  return <>{parts.map((p, i) => (i % 2 === 1 ? <strong key={i}>{p}</strong> : p))}</>;
+}
+
 /** Money value coloured by sign (green profit / raspberry loss). */
 export function SignedMoney({ value, text }: { value: number; text: string }) {
   const v = Math.round(value * 100);
@@ -152,8 +162,8 @@ export function SignedMoney({ value, text }: { value: number; text: string }) {
 export function NeedsValidBusiness({ ready, children }: { ready: boolean; children: ReactNode }) {
   if (ready) return <>{children}</>;
   return (
-    <EmptyState title="Some business numbers need attention" action={<a className="btn-primary" href="#my-business">Go to My Business</a>}>
-      Fix the highlighted products or fixed costs in 🏠 My Business. We don’t show results built on incomplete or invalid numbers.
+    <EmptyState title={t('Some business numbers need attention')} action={<a className="btn-primary" href="#my-business">{t('Go to My Business')}</a>}>
+      {t('Fix the highlighted products or fixed costs in 🏠 My Business. We don’t show results built on incomplete or invalid numbers.')}
     </EmptyState>
   );
 }

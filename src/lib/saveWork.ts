@@ -11,6 +11,7 @@
  * Values the user typed (prices, quantities…) are kept exactly as text – they
  * are never converted or "fixed" here; `model.ts` validates them as usual.
  */
+import { t, tx } from '../i18n/i18n';
 import { BUSINESSES, type BusinessId } from './businesses';
 import { UNITS, type UnitId } from './inventory';
 import type { BusinessData, InventoryRecord, OtherCosts, ProductInput, RecipeLineInput } from './types';
@@ -70,6 +71,7 @@ const isUnit = (v: unknown): v is UnitId => typeof v === 'string' && Object.prot
 const isBusinessId = (v: unknown): v is BusinessId => BUSINESSES.some((b) => b.id === v);
 
 const PRODUCT_TEXT = ['name', 'category', 'price', 'variableCost', 'units'] as const;
+const FIELD_LABELS: Record<(typeof PRODUCT_TEXT)[number], string> = { name: tx('name'), category: tx('category'), price: tx('price'), variableCost: tx('variable cost'), units: tx('units') };
 const OTHER_COSTS = ['labour', 'packaging', 'paymentFees', 'other'] as const;
 
 /**
@@ -78,48 +80,48 @@ const OTHER_COSTS = ['labour', 'packaging', 'paymentFees', 'other'] as const;
  * Never throws.
  */
 export function parseSavedBusiness(text: string): ParseResult {
-  if (text.length > MAX_FILE_BYTES) return fail('This file is too large to be a Price It Right save file (limit 1 MB).');
-  if (text.trim() === '') return fail('This file is empty.');
+  if (text.length > MAX_FILE_BYTES) return fail(t('This file is too large to be a Price It Right save file (limit 1 MB).'));
+  if (text.trim() === '') return fail(t('This file is empty.'));
 
   let raw: unknown;
   try {
     raw = JSON.parse(text);
   } catch {
-    return fail('This file could not be read. It is not a valid Price It Right save file (.json) or it has been damaged.');
+    return fail(t('This file could not be read. It is not a valid Price It Right save file (.json) or it has been damaged.'));
   }
-  if (!isObject(raw) || raw.app !== APP_ID) return fail('This is not a Price It Right save file. Choose a file made with “Export my business”.');
+  if (!isObject(raw) || raw.app !== APP_ID) return fail(t('This is not a Price It Right save file. Choose a file made with “Export my business”.'));
 
   const version = raw.schemaVersion;
-  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) return fail('This save file has no valid version number, so it can’t be read safely.');
-  if (version > SCHEMA_VERSION) return fail(`This save file was made by a newer version of Price It Right (file version ${version}; this app reads up to version ${SCHEMA_VERSION}).`);
+  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) return fail(t('This save file has no valid version number, so it can’t be read safely.'));
+  if (version > SCHEMA_VERSION) return fail(t('This save file was made by a newer version of Price It Right (file version {version}; this app reads up to version {max}).', { version, max: SCHEMA_VERSION }));
   // Older versions would be upgraded here, one step at a time. Version 1 is the first.
 
   const b = raw.business;
-  if (!isObject(b)) return fail('The save file has no business in it.');
+  if (!isObject(b)) return fail(t('The save file has no business in it.'));
 
   const errors: string[] = [];
-  if (!isBusinessId(b.type)) errors.push('The business category is missing or not recognised.');
-  if (!isText(b.name)) errors.push('The business name is missing or too long.');
-  if (typeof b.isDemo !== 'boolean') errors.push('The “fictional demo” marker is missing.');
-  if (!isText(b.fixedCosts)) errors.push('Monthly fixed costs are missing.');
+  if (!isBusinessId(b.type)) errors.push(t('The business category is missing or not recognised.'));
+  if (!isText(b.name)) errors.push(t('The business name is missing or too long.'));
+  if (typeof b.isDemo !== 'boolean') errors.push(t('The “fictional demo” marker is missing.'));
+  if (!isText(b.fixedCosts)) errors.push(t('Monthly fixed costs are missing.'));
 
   // Products
   const products: ProductInput[] = [];
   const productIds = new Map<string, string>(); // id in the file → fresh id
-  if (!Array.isArray(b.products)) errors.push('The product list is missing.');
-  else if (b.products.length > MAX_PRODUCTS) errors.push(`The file has ${b.products.length} products; the limit is ${MAX_PRODUCTS}.`);
+  if (!Array.isArray(b.products)) errors.push(t('The product list is missing.'));
+  else if (b.products.length > MAX_PRODUCTS) errors.push(t('The file has {count} products; the limit is {max}.', { count: b.products.length, max: MAX_PRODUCTS }));
   else {
     b.products.forEach((p: unknown, i: number) => {
-      const where = `Product ${i + 1}`;
-      if (!isObject(p)) return errors.push(`${where} is not a valid product.`);
+      const where = t('Product {n}', { n: i + 1 });
+      if (!isObject(p)) return errors.push(t('{where} is not a valid product.', { where }));
       const before = errors.length;
       const bad = PRODUCT_TEXT.filter((k) => !isText(p[k]));
       const costs = p.otherCosts;
-      if (typeof p.id !== 'string' || p.id === '') errors.push(`${where} has no internal id.`);
-      else if (productIds.has(p.id)) errors.push(`${where} repeats the internal id of another product.`);
-      if (bad.length) errors.push(`${where} is missing: ${bad.join(', ')}.`);
-      if (p.costMode !== 'manual' && p.costMode !== 'itemized') errors.push(`${where} has an unknown costing method.`);
-      if (!isObject(costs) || OTHER_COSTS.some((k) => !isText(costs[k]))) errors.push(`${where} has missing “other variable costs”.`);
+      if (typeof p.id !== 'string' || p.id === '') errors.push(t('{where} has no internal id.', { where }));
+      else if (productIds.has(p.id)) errors.push(t('{where} repeats the internal id of another product.', { where }));
+      if (bad.length) errors.push(t('{where} is missing: {fields}.', { where, fields: bad.map((k) => t(FIELD_LABELS[k])).join(', ') }));
+      if (p.costMode !== 'manual' && p.costMode !== 'itemized') errors.push(t('{where} has an unknown costing method.', { where }));
+      if (!isObject(costs) || OTHER_COSTS.some((k) => !isText(costs[k]))) errors.push(t('{where} has missing “other variable costs”.', { where }));
       if (errors.length > before || !isObject(costs) || (p.costMode !== 'manual' && p.costMode !== 'itemized')) return;
       const id = `p${i + 1}`;
       productIds.set(p.id as string, id);
@@ -139,17 +141,17 @@ export function parseSavedBusiness(text: string): ParseResult {
   // Inventory
   const inventory: InventoryRecord[] = [];
   const itemIds = new Map<string, string>();
-  if (!Array.isArray(b.inventory)) errors.push('The inventory list is missing.');
-  else if (b.inventory.length > MAX_INVENTORY) errors.push(`The file has ${b.inventory.length} inventory items; the limit is ${MAX_INVENTORY}.`);
+  if (!Array.isArray(b.inventory)) errors.push(t('The inventory list is missing.'));
+  else if (b.inventory.length > MAX_INVENTORY) errors.push(t('The file has {count} inventory items; the limit is {max}.', { count: b.inventory.length, max: MAX_INVENTORY }));
   else {
     b.inventory.forEach((r: unknown, i: number) => {
-      const where = `Inventory item ${i + 1}`;
-      if (!isObject(r)) return errors.push(`${where} is not a valid item.`);
+      const where = t('Inventory item {n}', { n: i + 1 });
+      if (!isObject(r)) return errors.push(t('{where} is not a valid item.', { where }));
       const before = errors.length;
-      if (typeof r.id !== 'string' || r.id === '') errors.push(`${where} has no internal id.`);
-      else if (itemIds.has(r.id)) errors.push(`${where} repeats the internal id of another item.`);
-      if (!isText(r.name) || !isText(r.quantity) || !isText(r.cost)) errors.push(`${where} is missing its name, quantity or cost.`);
-      if (!isUnit(r.unit)) errors.push(`${where} has an unknown unit (allowed: g, kg, mL, L, pcs).`);
+      if (typeof r.id !== 'string' || r.id === '') errors.push(t('{where} has no internal id.', { where }));
+      else if (itemIds.has(r.id)) errors.push(t('{where} repeats the internal id of another item.', { where }));
+      if (!isText(r.name) || !isText(r.quantity) || !isText(r.cost)) errors.push(t('{where} is missing its name, quantity or cost.', { where }));
+      if (!isUnit(r.unit)) errors.push(t('{where} has an unknown unit (allowed: g, kg, mL, L, pcs).', { where }));
       if (errors.length > before) return;
       const id = `i${i + 1}`;
       itemIds.set(r.id as string, id);
@@ -160,23 +162,23 @@ export function parseSavedBusiness(text: string): ParseResult {
   // Recipes (productId → lines)
   const recipes: Record<string, RecipeLineInput[]> = {};
   let lineNo = 0;
-  if (!isObject(b.recipes)) errors.push('The recipe list is missing.');
+  if (!isObject(b.recipes)) errors.push(t('The recipe list is missing.'));
   else {
     for (const [fileProductId, lines] of Object.entries(b.recipes)) {
       const productId = productIds.get(fileProductId);
       if (!productId) {
-        errors.push('A recipe belongs to a product that is not in the file.');
+        errors.push(t('A recipe belongs to a product that is not in the file.'));
         continue;
       }
-      const name = products.find((p) => p.id === productId)?.name || 'a product';
+      const name = products.find((p) => p.id === productId)?.name || t('a product');
       if (!Array.isArray(lines) || lines.length > MAX_RECIPE_LINES) {
-        errors.push(`The recipe for ${name} is not valid.`);
+        errors.push(t('The recipe for {name} is not valid.', { name }));
         continue;
       }
       const clean: RecipeLineInput[] = [];
       for (const l of lines as unknown[]) {
         if (!isObject(l) || typeof l.itemId !== 'string' || !isText(l.quantity) || !isUnit(l.unit)) {
-          errors.push(`The recipe for ${name} has a line that is not valid.`);
+          errors.push(t('The recipe for {name} has a line that is not valid.', { name }));
           continue;
         }
         lineNo += 1;
@@ -187,7 +189,7 @@ export function parseSavedBusiness(text: string): ParseResult {
     }
   }
 
-  if (errors.length > 0) return { ok: false, errors: errors.slice(0, 8).concat(errors.length > 8 ? [`…and ${errors.length - 8} more problems.`] : []) };
+  if (errors.length > 0) return { ok: false, errors: errors.slice(0, 8).concat(errors.length > 8 ? [t('…and {n} more problems.', { n: errors.length - 8 })] : []) };
 
   return {
     ok: true,

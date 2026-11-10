@@ -1,14 +1,15 @@
+import { tx } from '../i18n/i18n';
 import { useEffect, useState } from 'react';
 
 export const SECTIONS = [
-  { id: 'my-business', emoji: '🏠', label: 'My Business' },
-  { id: 'dashboard', emoji: '💰', label: 'Profit Dashboard' },
-  { id: 'pricing', emoji: '🎯', label: 'Pricing Lab' },
-  { id: 'inventory', emoji: '📦', label: 'Smart Inventory Hub' },
-  { id: 'planner', emoji: '🏆', label: 'Production Planner' },
-  { id: 'decisions', emoji: '🧭', label: 'Decisions' },
-  { id: 'challenge', emoji: '🎮', label: 'Business Challenge' },
-  { id: 'report', emoji: '📊', label: 'Business Report' },
+  { id: 'my-business', emoji: '🏠', label: tx('My Business') },
+  { id: 'dashboard', emoji: '💰', label: tx('Profit Dashboard') },
+  { id: 'pricing', emoji: '🎯', label: tx('Pricing Lab') },
+  { id: 'inventory', emoji: '📦', label: tx('Smart Inventory Hub') },
+  { id: 'planner', emoji: '🏆', label: tx('Production Planner') },
+  { id: 'decisions', emoji: '🧭', label: tx('Decisions') },
+  { id: 'challenge', emoji: '🎮', label: tx('Business Challenge') },
+  { id: 'report', emoji: '📊', label: tx('Business Report') },
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]['id'] | 'home';

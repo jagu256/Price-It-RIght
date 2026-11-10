@@ -4,7 +4,8 @@ import BusinessPicker from '../components/BusinessPicker';
 import InfoTip from '../components/InfoTip';
 import ProductCollection from '../components/ProductCollection';
 import SaveMyWork from '../components/SaveMyWork';
-import { Notice, SectionHeader } from '../components/ui';
+import { Notice, Rich, SectionHeader } from '../components/ui';
+import { t } from '../i18n/i18n';
 import { getBusiness, type BusinessId } from '../lib/businesses';
 import { hasUnsavedWork } from '../lib/store';
 
@@ -18,9 +19,9 @@ export default function MyBusiness() {
     if (
       hasUnsavedWork(state) &&
       !(await confirm({
-        title: `Switch to the ${getBusiness(id).label} example?`,
-        message: 'This replaces your current products, fixed costs, inventory and recipes with fictional example data. Your changes will be lost.',
-        confirmLabel: 'Replace my work',
+        title: t('Switch to the {name} example?', { name: t(getBusiness(id).label) }),
+        message: t('This replaces your current products, fixed costs, inventory and recipes with fictional example data. Your changes will be lost.'),
+        confirmLabel: t('Replace my work'),
         danger: true,
       }))
     )
@@ -30,28 +31,27 @@ export default function MyBusiness() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6">
-      <SectionHeader emoji="🏠" title="My Business" subtitle="Choose a business, then add your products and monthly fixed costs." />
+      <SectionHeader emoji="🏠" title={t('My Business')} subtitle={t('Choose a business, then add your products and monthly fixed costs.')} />
 
       <section aria-labelledby="choose-business" className="space-y-4">
         <div>
-          <h3 id="choose-business" className="text-2xl font-bold text-sage-900">Choose your business</h3>
+          <h3 id="choose-business" className="text-2xl font-bold text-sage-900">{t('Choose your business')}</h3>
           <p className="mt-1 text-sage-700">
-            Each category loads <strong>fictional example</strong> products, costs and inventory – not real market averages. You can
-            change every value.
+            <Rich text={t('Each category loads **fictional example** products, costs and inventory – not real market averages. You can change every value.')} />
           </p>
         </div>
         <BusinessPicker selected={b.type} onSelect={choose} labelledBy="choose-business" />
         {b.isDemo && (
-          <Notice tone="warn" title="You are using the fictional demo business">
-            Maple Leaf Café is invented for learning. Pick a category above to start your own.
+          <Notice tone="warn" title={t('You are using the fictional demo business')}>
+            {t('Maple Leaf Café is invented for learning. Pick a category above to start your own.')}
           </Notice>
         )}
       </section>
 
-      <section className="card grid gap-6 p-5 sm:p-8 md:grid-cols-2" aria-label="Business details">
+      <section className="card grid gap-6 p-5 sm:p-8 md:grid-cols-2" aria-label={t('Business details')}>
         <div>
-          <label htmlFor="business-name" className="block font-semibold text-sage-900">Business name</label>
-          <p className="text-sm text-sage-600">Shown on your dashboard and report.</p>
+          <label htmlFor="business-name" className="block font-semibold text-sage-900">{t('Business name')}</label>
+          <p className="text-sm text-sage-600">{t('Shown on your dashboard and report.')}</p>
           <input
             id="business-name"
             className="text-input mt-2"
@@ -62,13 +62,12 @@ export default function MyBusiness() {
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <label htmlFor="fixed-costs" className="block font-semibold text-sage-900">Monthly fixed costs (whole business)</label>
-            <InfoTip label="Monthly fixed costs" align="right">
-              Rent, insurance, software, salaried wages – costs that stay about the same each month whatever you sell. Entered once
-              for the whole business, never per product.
+            <label htmlFor="fixed-costs" className="block font-semibold text-sage-900">{t('Monthly fixed costs (whole business)')}</label>
+            <InfoTip label={t('Monthly fixed costs')} align="right">
+              {t('Rent, insurance, software, salaried wages – costs that stay about the same each month whatever you sell. Entered once for the whole business, never per product.')}
             </InfoTip>
           </div>
-          <p className="text-sm text-sage-600">All amounts are in Canadian dollars (CAD).</p>
+          <p className="text-sm text-sage-600">{t('All amounts are in Canadian dollars (CAD).')}</p>
           <div className={`mt-2 flex items-center rounded-2xl border-2 bg-white ${model.fixedError ? 'border-loss-600' : 'border-sage-200 focus-within:border-sage-500'}`}>
             <span className="pl-4 font-semibold text-sage-500" aria-hidden="true">$</span>
             <input
@@ -81,7 +80,7 @@ export default function MyBusiness() {
               aria-describedby={model.fixedError ? 'fixed-costs-error' : undefined}
               onChange={(e) => dispatch({ type: 'set-fixed-costs', value: e.target.value })}
             />
-            <span className="whitespace-nowrap pr-4 text-sm font-semibold text-sage-500">per month</span>
+            <span className="whitespace-nowrap pr-4 text-sm font-semibold text-sage-500">{t('per month')}</span>
           </div>
           {model.fixedError && (
             <p id="fixed-costs-error" className="mt-1.5 text-sm font-semibold text-loss-700">⚠ {model.fixedError}</p>

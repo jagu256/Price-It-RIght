@@ -1,3 +1,4 @@
+import { t } from '../i18n/i18n';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 interface ConfirmOptions {
@@ -56,7 +57,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <div id="confirm-message" className="mt-2 text-sage-700">{pending.message}</div>
             <div className="mt-6 flex flex-wrap justify-end gap-3">
               <button type="button" className="btn-secondary" onClick={() => close(false)}>
-                {pending.cancelLabel ?? 'Cancel'}
+                {pending.cancelLabel ?? t('Cancel')}
               </button>
               <button
                 ref={confirmRef}

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type Dispatch, type ReactNode } from 'react';
 import { buildModel, type BusinessModel } from '../lib/model';
+import { useLanguage } from './language';
 import { browserStorage, clearStorage, loadFromStorage, saveToStorage, type LoadResult } from '../lib/saveWork';
 import { hasUnsavedWork, initialAppState, reducer, savedAppState, type Action, type AppState } from '../lib/store';
 
@@ -36,7 +37,9 @@ export function StoreProvider({ children, initial }: { children: ReactNode; init
   const [state, dispatch] = useReducer(reducer, boot.state);
   const [available, setAvailable] = useState(boot.startup !== 'unavailable');
   const [saved, setSaved] = useState(boot.startup === 'restored');
-  const model = useMemo(() => buildModel(state.business), [state.business]);
+  // The model holds validation messages, so it is rebuilt when the language changes too.
+  const { lang } = useLanguage();
+  const model = useMemo(() => buildModel(state.business), [state.business, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save: keep the user's own work on this device. An untouched example is
   // not saved (and removes any older copy, which the user agreed to replace).

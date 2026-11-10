@@ -3,6 +3,8 @@ import { ConfirmProvider } from './app/Confirm';
 import { useRoute, type SectionId } from './app/routes';
 import { StoreProvider } from './app/StoreContext';
 import { SectionVisibleContext } from './app/visibility';
+import { LanguageProvider, useLanguage } from './app/language';
+import { t } from './i18n/i18n';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import type { AppState } from './lib/store';
@@ -30,7 +32,17 @@ function Panel({ id, route, children }: { id: SectionId; route: SectionId; child
 }
 
 export default function App({ initial }: { initial?: AppState }) {
+  return (
+    <LanguageProvider>
+      <AppInner initial={initial} />
+    </LanguageProvider>
+  );
+}
+
+function AppInner({ initial }: { initial?: AppState }) {
   const [route] = useRoute();
+  // Reading the language here means the whole app redraws when it changes.
+  useLanguage();
   return (
     <StoreProvider initial={initial}>
       <ConfirmProvider>
@@ -40,7 +52,7 @@ export default function App({ initial }: { initial?: AppState }) {
             onClick={() => document.getElementById('main')?.focus()}
             className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2"
           >
-            Skip to content
+            {t('Skip to content')}
           </button>
           <Header route={route} />
           <main id="main" tabIndex={-1} className="flex-1 outline-none">
