@@ -212,6 +212,60 @@ describe('price-sensitive demand (optional)', () => {
   });
 });
 
+describe('decisions', () => {
+  it('special order: shows incremental profit when stock covers it, and “not achievable” when it doesn’t', async () => {
+    const { user } = setup('decisions'); // fictional Coffee Shop example
+    const dec = within(panel('decisions'));
+    const productSelect = dec.getByLabelText('Product');
+    await user.selectOptions(productSelect, within(productSelect).getByRole('option', { name: 'Muffin' }));
+    const units = dec.getByLabelText('Order quantity (units)');
+    await user.clear(units);
+    await user.type(units, '10');
+    await user.type(dec.getByLabelText('Offered price per unit'), '3');
+    // (3 − 1.50) × 10 = $15; 160 muffins use 16 kg of 20 kg flour and 4.8 kg of 5 kg sugar.
+    expect(dec.getByText('Incremental profit from this order').parentElement).toHaveTextContent('+$15');
+    expect(dec.getByText('Inventory check: covered')).toBeInTheDocument();
+
+    await user.clear(units);
+    await user.type(units, '20');
+    // 170 muffins × 30 g = 5,100 g sugar, only 5,000 g available.
+    const alert = dec.getByRole('alert');
+    expect(alert).toHaveTextContent('Not achievable with your current inventory');
+    expect(alert).toHaveTextContent('Sugar: 100 grams short');
+    expect(dec.queryByText('Incremental profit from this order')).not.toBeInTheDocument();
+
+    // Losing 10 regular muffin sales frees enough sugar: (3 − 1.50) × 20 − (4 − 1.50) × 10 = $30 − $25 = +$5.
+    await user.click(dec.getByRole('checkbox', { name: /losing some regular sales/ }));
+    const lost = dec.getByLabelText('Regular sales of Muffin lost (units)');
+    await user.clear(lost);
+    await user.type(lost, '10');
+    expect(dec.getByText('Incremental profit from this order').parentElement).toHaveTextContent('+$5');
+  });
+
+  it('make or buy: compares relevant costs and shows unavoidable fixed costs as irrelevant', async () => {
+    const { user } = setup('decisions');
+    const dec = within(panel('decisions'));
+    const fill = async (label: string, value: string) => {
+      const f = dec.getByLabelText(label);
+      await user.clear(f);
+      await user.type(f, value);
+    };
+    await fill('Units needed', '1000');
+    await fill('Supplier’s price per unit (buy)', '5');
+    await fill('Variable cost to make one unit', '3.50');
+    await fill('Avoidable fixed costs', '1000');
+    await fill('Unavoidable fixed costs', '2000');
+    await fill('Opportunity cost (optional)', '300');
+    expect(dec.getByText('Make it')).toBeInTheDocument();
+    expect(dec.getByText('Making costs $200 less than buying.')).toBeInTheDocument();
+    const totals = dec.getByRole('rowheader', { name: 'Total relevant cost' }).closest('tr')!;
+    expect(totals).toHaveTextContent('$4,800');
+    expect(totals).toHaveTextContent('$5,000');
+    expect(dec.getByRole('rowheader', { name: /Unavoidable fixed costs – irrelevant/ })).toBeInTheDocument();
+    expect(dec.getByText(/depends on qualitative factors too/)).toBeInTheDocument();
+  });
+});
+
 describe('save my work', () => {
   const jsonFile = (text: string, name = 'saved.json') => new File([text], name, { type: 'application/json' });
   const coffeeSales = () => screen.getByLabelText('Expected monthly sales for Coffee');

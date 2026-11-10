@@ -6,6 +6,7 @@ export const SECTIONS = [
   { id: 'pricing', emoji: '🎯', label: 'Pricing Lab' },
   { id: 'inventory', emoji: '📦', label: 'Smart Inventory Hub' },
   { id: 'planner', emoji: '🏆', label: 'Production Planner' },
+  { id: 'decisions', emoji: '🧭', label: 'Decisions' },
   { id: 'challenge', emoji: '🎮', label: 'Business Challenge' },
   { id: 'report', emoji: '📊', label: 'Business Report' },
 ] as const;

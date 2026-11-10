@@ -10,6 +10,7 @@
  */
 import type { PricingResults } from './accounting';
 import type { BusinessSummary } from './business';
+import type { MakeOrBuyInput, MakeOrBuyResult, SpecialOrderInput, SpecialOrderResult } from './decisions';
 import { formatCAD, formatNumber, formatPercent, formatSignedCAD, roundCents, unitsLabel } from './format';
 import type { GoalProgress, RequiredPriceResult } from './pricing';
 import { formatLeverage, type OperatingLeverage, type SensitivityResult } from './sensitivity';
@@ -369,6 +370,53 @@ export function taxEstimateMath(e: TaxEstimate, ratePercent: number): MathExplan
       steps: e.noTax ? [] : [`Tax: ${formatCAD(e.operatingProfit)} × ${formatRate(ratePercent)} = ${formatCAD(e.tax)}`],
       withNumbers: `${formatCAD(e.operatingProfit)} − ${formatCAD(e.tax)} = ${formatCAD(e.afterTax)}`,
       resultText: formatCAD(e.afterTax),
+    },
+  ];
+}
+
+/* ------------------------------------------------------------------ */
+/* Decisions                                                           */
+/* ------------------------------------------------------------------ */
+
+export function specialOrderMath(product: { name: string; price: number; variableCost: number }, input: SpecialOrderInput, r: SpecialOrderResult): MathExplanation[] {
+  return [
+    {
+      title: 'Incremental profit from the special order',
+      formula: 'Incremental profit = (offered price − variable cost) × order units − extra one-time costs − contribution margin lost on displaced regular sales',
+      steps: [
+        `Order contribution: (${formatCAD(input.offeredPrice)} − ${m(product.variableCost)}) × ${formatNumber(input.orderUnits)} = ${formatCAD(r.orderCM)}`,
+        `Lost contribution: (${formatCAD(product.price)} − ${m(product.variableCost)}) × ${formatNumber(input.lostRegularUnits)} = ${formatCAD(r.lostCM)}`,
+      ],
+      withNumbers: `${formatCAD(r.orderCM)} − ${m(r.extraCosts)} − ${m(r.lostCM)} = ${formatCAD(r.incrementalProfit)}`,
+      resultText: formatCAD(r.incrementalProfit),
+      note: 'Fixed costs stay the same whether or not you accept, so they are left out.',
+    },
+  ];
+}
+
+export function makeOrBuyMath(input: MakeOrBuyInput, r: MakeOrBuyResult): MathExplanation[] {
+  return [
+    {
+      title: 'Relevant cost to make',
+      formula: 'Relevant cost to make = variable cost per unit × units + avoidable fixed costs + opportunity cost',
+      steps: [],
+      withNumbers: `${formatCAD(input.variableCostPerUnit)} × ${formatNumber(input.units)} + ${m(input.avoidableFixedCosts)} + ${m(input.opportunityCost)} = ${formatCAD(r.relevantCostToMake)}`,
+      resultText: formatCAD(r.relevantCostToMake),
+      note: `Unavoidable fixed costs (${formatCAD(r.unavoidableFixedCosts)}) are paid whether you make or buy, so they are left out.`,
+    },
+    {
+      title: 'Cost to buy',
+      formula: 'Cost to buy = purchase price × units',
+      steps: [],
+      withNumbers: `${formatCAD(input.purchasePrice)} × ${formatNumber(input.units)} = ${formatCAD(r.costToBuy)}`,
+      resultText: formatCAD(r.costToBuy),
+    },
+    {
+      title: 'Difference',
+      formula: 'Saving from making = cost to buy − relevant cost to make (negative means buying is cheaper)',
+      steps: [],
+      withNumbers: `${formatCAD(r.costToBuy)} − ${m(r.relevantCostToMake)} = ${formatSignedCAD(r.savingFromMaking)}`,
+      resultText: formatSignedCAD(r.savingFromMaking),
     },
   ];
 }

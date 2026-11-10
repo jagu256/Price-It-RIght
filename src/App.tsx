@@ -7,6 +7,7 @@ import Header from './components/Header';
 import type { AppState } from './lib/store';
 import BusinessChallenge from './sections/BusinessChallenge';
 import BusinessReport from './sections/BusinessReport';
+import Decisions from './sections/Decisions';
 import Home from './sections/Home';
 import InventoryHub from './sections/InventoryHub';
 import MyBusiness from './sections/MyBusiness';
@@ -47,6 +48,7 @@ export default function App({ initial }: { initial?: AppState }) {
             <Panel id="pricing" route={route}><PricingLab /></Panel>
             <Panel id="inventory" route={route}><InventoryHub /></Panel>
             <Panel id="planner" route={route}><ProductionPlanner /></Panel>
+            <Panel id="decisions" route={route}><Decisions /></Panel>
             <Panel id="challenge" route={route}><BusinessChallenge /></Panel>
             <Panel id="report" route={route}><BusinessReport /></Panel>
           </main>

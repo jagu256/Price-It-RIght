@@ -119,6 +119,14 @@ The student expected "Export my business" to give a spreadsheet. The .json file 
 
 **Checks:** 242 tests in 15 files passed; build passed. At 375 px with both demand panels and the after-tax panel open: no sideways scrolling.
 
+### Feature 6 – Decisions: special order and make-or-buy (9 Nov 2026)
+- New `src/lib/decisions.ts` and a new **🧭 Decisions** section (between Production Planner and Business Challenge).
+- Special order: incremental profit = order CM − extra one-time costs − CM lost on displaced regular sales. The inventory check reuses `checkPlan` on regular demand (less lost units) plus the order.
+- **Design decision found while building:** in the Coffee Shop example, regular demand is already short of beans and milk. A whole-business check would therefore have called every special order "infeasible", even a muffin order that uses only flour and sugar. The rule used instead is that an order is achievable only if every item **its product uses** covers regular demand (all products sharing the item) plus the order. Items it doesn't use can't be affected by the order, so their existing shortages are reported separately. An order that doesn't fit is labelled "not achievable", and its profit is only described as "if you could get the extra inventory".
+- Make or buy: relevant cost to make (variable + avoidable fixed + opportunity cost) vs cost to buy; unavoidable fixed costs shown crossed out as irrelevant; decision rule and qualitative factors.
+
+**Checks:** 259 tests in 16 files passed; build passed. At 375 px the new section has no sideways scrolling.
+
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
