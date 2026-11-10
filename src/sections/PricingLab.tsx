@@ -11,7 +11,8 @@ import SmartPricing from '../components/SmartPricing';
 import SurpriseEvents from '../components/SurpriseEvents';
 import { CellInput, ErrorList, NeedsValidBusiness, Notice, SectionHeader, SignedMoney, SubHeader } from '../components/ui';
 import type { BusinessSummary } from '../lib/business';
-import { formatCAD, formatCompactCAD, formatSignedCAD, roundCents } from '../lib/format';
+import { formatCAD, formatCompactCAD, formatNumber, formatSignedCAD, roundCents, unitsLabel } from '../lib/format';
+import { plural, t } from '../i18n/i18n';
 import { contributionFromOthers, resolveScenario } from '../lib/pricing';
 import { summaryMath } from '../lib/showMath';
 import { toInputText } from '../lib/validation';
@@ -23,7 +24,7 @@ export default function PricingLab() {
   const linked = model.summary ? linkedTargetFrom(taxPlan) : null;
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
-      <SectionHeader emoji="🎯" title="Pricing Lab" subtitle="Experiment with prices and discover how your decisions affect profit." />
+      <SectionHeader emoji="🎯" title={t('Pricing Lab')} subtitle={t('Experiment with prices and discover how your decisions affect profit.')} />
       <NeedsValidBusiness ready={!!model.summary}>
         <WhatIfSimulator />
         <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />
@@ -42,7 +43,7 @@ const planMath = (s: BusinessSummary) => {
 };
 
 const breakEvenText = (s: BusinessSummary) =>
-  s.breakEven.status === 'reachable' ? `${s.breakEven.totalUnits.toLocaleString('en-CA')} units` : s.breakEven.status === 'no-fixed-costs' ? '0 units' : 'Not Available';
+  s.breakEven.status === 'reachable' ? unitsLabel(s.breakEven.totalUnits) : s.breakEven.status === 'no-fixed-costs' ? unitsLabel(0) : t('Not Available');
 
 function WhatIfSimulator() {
   const { state, dispatch, model } = useStore();
@@ -59,18 +60,23 @@ function WhatIfSimulator() {
     if (!scenario.changed || !modified) return;
     const itemizedChanged = model.products.filter((p) => p.costMode === 'itemized' && state.scenario.products[p.id]?.variableCost !== undefined && roundCents(scenario.products.find((x) => x.id === p.id)!.variableCost) !== roundCents(p.variableCost));
     const ok = await confirm({
-      title: 'Apply the modified plan?',
+      title: t('Apply the modified plan?'),
       message: (
         <>
-          <p>This replaces your current business plan with the modified prices, costs and sales volumes.</p>
+          <p>{t('This replaces your current business plan with the modified prices, costs and sales volumes.')}</p>
           {itemizedChanged.length > 0 && (
             <p className="mt-2 font-semibold">
-              {itemizedChanged.map((p) => p.name).join(', ')} {itemizedChanged.length === 1 ? 'uses' : 'use'} itemized costing; applying a new variable cost switches {itemizedChanged.length === 1 ? 'it' : 'them'} to a manual cost.
+              {plural(
+                itemizedChanged.length,
+                '{names} uses itemized costing; applying a new variable cost switches it to a manual cost.',
+                '{names} use itemized costing; applying a new variable cost switches them to a manual cost.',
+                { names: itemizedChanged.map((p) => p.name).join(', ') },
+              )}
             </p>
           )}
         </>
       ),
-      confirmLabel: 'Apply changes',
+      confirmLabel: t('Apply changes'),
     });
     if (!ok) return;
     const resolved: { fixedCosts?: string; products: Record<string, { price?: string; variableCost?: string; units?: string }> } = { products: {} };
@@ -86,27 +92,28 @@ function WhatIfSimulator() {
     dispatch({ type: 'scenario-apply', resolved });
   };
 
-  const rows: { label: string; a: number; b: number | null; money?: boolean }[] = [
-    { label: 'Revenue', a: current.totalRevenue, b: modified?.totalRevenue ?? null },
-    { label: 'Variable costs', a: current.totalVariableCosts, b: modified?.totalVariableCosts ?? null },
-    { label: 'Contribution margin', a: current.totalCM, b: modified?.totalCM ?? null },
-    { label: 'Fixed costs', a: current.fixedCosts, b: modified?.fixedCosts ?? null },
-    { label: 'Operating profit', a: current.operatingProfit, b: modified?.operatingProfit ?? null },
+  // `cost` rows count a decrease as good news; the key (not the shown label) decides that.
+  const rows: { key: string; label: string; a: number; b: number | null; cost?: boolean }[] = [
+    { key: 'revenue', label: t('Revenue'), a: current.totalRevenue, b: modified?.totalRevenue ?? null },
+    { key: 'variable', label: t('Variable costs'), a: current.totalVariableCosts, b: modified?.totalVariableCosts ?? null, cost: true },
+    { key: 'cm', label: t('Contribution margin'), a: current.totalCM, b: modified?.totalCM ?? null },
+    { key: 'fixed', label: t('Fixed costs'), a: current.fixedCosts, b: modified?.fixedCosts ?? null, cost: true },
+    { key: 'profit', label: t('Operating profit'), a: current.operatingProfit, b: modified?.operatingProfit ?? null },
   ];
 
   return (
     <section aria-labelledby="whatif-title" className="space-y-4">
-      <SubHeader id="whatif-title" emoji="🔁" title="What-If Pricing Simulator" subtitle="Change prices, costs, sales volumes or fixed costs. Your current business plan stays the same unless you apply the changes." />
+      <SubHeader id="whatif-title" emoji="🔁" title={t('What-If Pricing Simulator')} subtitle={t('Change prices, costs, sales volumes or fixed costs. Your current business plan stays the same unless you apply the changes.')} />
 
       <div className="card overflow-x-auto p-2 sm:p-4">
         <table className="data-table min-w-[44rem]">
-          <caption className="sr-only">Modified business plan inputs</caption>
+          <caption className="sr-only">{t('Modified business plan inputs')}</caption>
           <thead>
             <tr>
-              <th scope="col">Product</th>
-              <th scope="col">Price (current → modified)</th>
-              <th scope="col">Variable cost</th>
-              <th scope="col">Expected sales</th>
+              <th scope="col">{t('Product')}</th>
+              <th scope="col">{t('Price (current → modified)')}</th>
+              <th scope="col">{t('Variable cost')}</th>
+              <th scope="col">{t('Expected sales')}</th>
             </tr>
           </thead>
           <tbody>
@@ -121,19 +128,19 @@ function WhatIfSimulator() {
                   <td>
                     <div className="flex items-center gap-2">
                       <span className="w-14 text-sage-500">{formatCAD(p.price)}</span>→
-                      <CellInput id={`sc-${p.id}-price`} label={`Modified price for ${p.name}`} prefix="$" value={field(p.id, 'price', toInputText(p.price))} invalid={!!errs[0]} onChange={(v) => dispatch({ type: 'scenario-set', productId: p.id, field: 'price', value: v })} />
+                      <CellInput id={`sc-${p.id}-price`} label={t('Modified price for {name}', { name: p.name })} prefix="$" value={field(p.id, 'price', toInputText(p.price))} invalid={!!errs[0]} onChange={(v) => dispatch({ type: 'scenario-set', productId: p.id, field: 'price', value: v })} />
                     </div>
                   </td>
                   <td>
                     <div className="flex items-center gap-2">
                       <span className="w-14 text-sage-500">{formatCAD(p.variableCost)}</span>→
-                      <CellInput id={`sc-${p.id}-vc`} label={`Modified variable cost for ${p.name}`} prefix="$" value={field(p.id, 'variableCost', toInputText(p.variableCost))} invalid={!!errs[1]} onChange={(v) => dispatch({ type: 'scenario-set', productId: p.id, field: 'variableCost', value: v })} />
+                      <CellInput id={`sc-${p.id}-vc`} label={t('Modified variable cost for {name}', { name: p.name })} prefix="$" value={field(p.id, 'variableCost', toInputText(p.variableCost))} invalid={!!errs[1]} onChange={(v) => dispatch({ type: 'scenario-set', productId: p.id, field: 'variableCost', value: v })} />
                     </div>
                   </td>
                   <td>
                     <div className="flex items-center gap-2">
-                      <span className="w-12 text-sage-500">{p.units.toLocaleString('en-CA')}</span>→
-                      <CellInput id={`sc-${p.id}-units`} label={`Modified expected sales for ${p.name}`} inputMode="numeric" value={field(p.id, 'units', String(p.units))} invalid={!!errs[2]} onChange={(v) => dispatch({ type: 'scenario-set', productId: p.id, field: 'units', value: v })} />
+                      <span className="w-12 text-sage-500">{formatNumber(p.units)}</span>→
+                      <CellInput id={`sc-${p.id}-units`} label={t('Modified expected sales for {name}', { name: p.name })} inputMode="numeric" value={field(p.id, 'units', String(p.units))} invalid={!!errs[2]} onChange={(v) => dispatch({ type: 'scenario-set', productId: p.id, field: 'units', value: v })} />
                     </div>
                   </td>
                 </tr>
@@ -141,13 +148,13 @@ function WhatIfSimulator() {
             })}
             <tr>
               <th scope="row" className="font-semibold text-sage-900">
-                Monthly fixed costs
+                {t('Monthly fixed costs')}
                 <ErrorList messages={[scenario.errors.fixedCosts]} />
               </th>
               <td colSpan={3}>
                 <div className="flex items-center gap-2">
                   <span className="w-14 text-sage-500">{formatCAD(fixed)}</span>→
-                  <CellInput id="sc-fixed" label="Modified monthly fixed costs" prefix="$" width="w-32" value={state.scenario.fixedCosts ?? toInputText(fixed)} invalid={!!scenario.errors.fixedCosts} onChange={(v) => dispatch({ type: 'scenario-set', productId: null, field: 'fixedCosts', value: v })} />
+                  <CellInput id="sc-fixed" label={t('Modified monthly fixed costs')} prefix="$" width="w-32" value={state.scenario.fixedCosts ?? toInputText(fixed)} invalid={!!scenario.errors.fixedCosts} onChange={(v) => dispatch({ type: 'scenario-set', productId: null, field: 'fixedCosts', value: v })} />
                 </div>
               </td>
             </tr>
@@ -157,49 +164,49 @@ function WhatIfSimulator() {
 
       <div className="card overflow-x-auto p-4 sm:p-6" aria-live="polite">
         <table className="data-table min-w-[32rem]">
-          <caption className="mb-3 text-left font-display text-lg font-bold text-sage-900">Current Business Plan vs. Modified Business Plan</caption>
+          <caption className="mb-3 text-left font-display text-lg font-bold text-sage-900">{t('Current Business Plan vs. Modified Business Plan')}</caption>
           <thead>
             <tr>
-              <th scope="col">Metric</th>
-              <th scope="col" className="text-right">Current</th>
-              <th scope="col" className="text-right">Modified</th>
-              <th scope="col" className="text-right">Difference</th>
+              <th scope="col">{t('Metric')}</th>
+              <th scope="col" className="text-right">{t('Current')}</th>
+              <th scope="col" className="text-right">{t('Modified')}</th>
+              <th scope="col" className="text-right">{t('Difference')}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.label} className={r.label === 'Operating profit' ? 'font-bold' : ''}>
+              <tr key={r.key} className={r.key === 'profit' ? 'font-bold' : ''}>
                 <th scope="row" className="font-semibold">{r.label}</th>
                 <td className="text-right">{formatCAD(r.a)}</td>
                 <td className="text-right">{r.b === null ? '—' : formatCAD(r.b)}</td>
-                <td className="text-right">{r.b === null ? '—' : <SignedMoney value={r.label === 'Variable costs' || r.label === 'Fixed costs' ? -(r.b - r.a) : r.b - r.a} text={formatSignedCAD(r.b - r.a)} />}</td>
+                <td className="text-right">{r.b === null ? '—' : <SignedMoney value={r.cost ? -(r.b - r.a) : r.b - r.a} text={formatSignedCAD(r.b - r.a)} />}</td>
               </tr>
             ))}
             <tr>
-              <th scope="row" className="font-semibold">Break-even point (sales mix)</th>
+              <th scope="row" className="font-semibold">{t('Break-even point (sales mix)')}</th>
               <td className="text-right">{breakEvenText(current)}</td>
               <td className="text-right">{modified ? breakEvenText(modified) : '—'}</td>
               <td />
             </tr>
           </tbody>
         </table>
-        {!modified && <p className="mt-3 text-sm font-semibold text-loss-700">Fix the highlighted values to see the modified plan.</p>}
-        {modified && !scenario.changed && <p className="mt-3 text-sm text-sage-600">No changes yet – edit any value above to compare.</p>}
-        {modified && <ShowMath label="the modified plan" items={planMath(modified)} />}
+        {!modified && <p className="mt-3 text-sm font-semibold text-loss-700">{t('Fix the highlighted values to see the modified plan.')}</p>}
+        {modified && !scenario.changed && <p className="mt-3 text-sm text-sage-600">{t('No changes yet – edit any value above to compare.')}</p>}
+        {modified && <ShowMath label={t('the modified plan')} items={planMath(modified)} />}
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button type="button" className="btn-primary" onClick={apply} disabled={!scenario.changed || !modified}>Apply Changes</button>
-        <button type="button" className="btn-secondary" onClick={() => dispatch({ type: 'scenario-reset' })}>↺ Reset Scenario</button>
+        <button type="button" className="btn-primary" onClick={apply} disabled={!scenario.changed || !modified}>{t('Apply Changes')}</button>
+        <button type="button" className="btn-secondary" onClick={() => dispatch({ type: 'scenario-reset' })}>↺ {t('Reset Scenario')}</button>
         <button type="button" className="btn-secondary" onClick={() => setShowChart((v) => !v)} aria-expanded={showChart} disabled={!modified}>
-          📊 {showChart ? 'Hide comparison' : 'Compare Results'}
+          📊 {showChart ? t('Hide comparison') : t('Compare Results')}
         </button>
       </div>
 
       {showChart && modified && (
         <figure className="card p-4 sm:p-6">
-          <figcaption className="font-display text-lg font-bold text-sage-900">Scenario comparison</figcaption>
-          <div className="mt-3 h-72" role="img" aria-label="Bar chart comparing the current and modified plans">
+          <figcaption className="font-display text-lg font-bold text-sage-900">{t('Scenario comparison')}</figcaption>
+          <div className="mt-3 h-72" role="img" aria-label={t('Bar chart comparing the current and modified plans')}>
             <ChartContainer width="100%" height="100%">
               <BarChart data={rows.map((r) => ({ name: r.label, Current: r.a, Modified: r.b ?? 0 }))} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
                 <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" vertical={false} />
@@ -207,8 +214,8 @@ function WhatIfSimulator() {
                 <YAxis tickFormatter={formatCompactCAD} stroke="#3E5A40" tick={{ fontSize: 12 }} width={64} />
                 <Tooltip formatter={(v: number) => formatCAD(v)} contentStyle={{ borderRadius: 16 }} />
                 <Legend />
-                <Bar dataKey="Current" fill="#86A882" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="Modified" fill="#C9A227" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Current" name={t('Current')} fill="#86A882" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Modified" name={t('Modified')} fill="#C9A227" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ChartContainer>
           </div>
@@ -216,8 +223,7 @@ function WhatIfSimulator() {
       )}
 
       <Notice tone="idea">
-        Each scenario uses only the numbers you enter. In real life, changing a price can change how many customers buy – adjust
-        expected sales too if you expect demand to react, or try the optional assumption below.
+        {t('Each scenario uses only the numbers you enter. In real life, changing a price can change how many customers buy – adjust expected sales too if you expect demand to react, or try the optional assumption below.')}
       </Notice>
       <WhatIfDemand />
     </section>
@@ -233,8 +239,8 @@ function WhatIfDemand() {
   return (
     <div className="space-y-2">
       <label className="flex flex-wrap items-center gap-2 text-sm font-semibold text-sage-900">
-        Product for the demand assumption
-        <select className="select" value={product.id} onChange={(e) => setProductId(e.target.value)} aria-label="Product for the demand assumption">
+        {t('Product for the demand assumption')}
+        <select className="select" value={product.id} onChange={(e) => setProductId(e.target.value)} aria-label={t('Product for the demand assumption')}>
           {model.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </label>

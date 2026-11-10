@@ -12,6 +12,7 @@
  * The rate is stored in basis points (20 % = 2,000) so all arithmetic stays in
  * whole numbers of cents.
  */
+import { locale, t } from '../i18n/i18n';
 import { toCents } from './business';
 import { cleanNumberText } from './validation';
 
@@ -20,16 +21,16 @@ export type TaxRateResult = { ok: true; basisPoints: number; percent: number } |
 /** Accepts 0–100, up to 2 decimals, with or without a % sign: "20", "12.5%", "0". */
 export function parseTaxRate(raw: string): TaxRateResult {
   const trimmed = raw.trim().replace(/%$/, '').trim();
-  if (trimmed === '') return { ok: false, error: 'Please enter your income tax rate (0 to 100 %).' };
+  if (trimmed === '') return { ok: false, error: t('Please enter your income tax rate (0 to 100 %).') };
   const cleaned = cleanNumberText(trimmed);
   if ('error' in cleaned) return { ok: false, error: cleaned.error };
   const text = cleaned.text;
-  if (/^[-−–]/.test(text)) return { ok: false, error: 'The tax rate can’t be negative. Please enter 0 to 100 %.' };
-  if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) return { ok: false, error: 'Please enter the tax rate as a number, for example 20 or 12.5.' };
+  if (/^[-−–]/.test(text)) return { ok: false, error: t('The tax rate can’t be negative. Please enter 0 to 100 %.') };
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(text)) return { ok: false, error: t('Please enter the tax rate as a number, for example 20 or 12.5.') };
   const decimals = text.includes('.') ? text.split('.')[1].length : 0;
-  if (decimals > 2) return { ok: false, error: 'Please use no more than 2 decimal places for the tax rate.' };
+  if (decimals > 2) return { ok: false, error: t('Please use no more than 2 decimal places for the tax rate.') };
   const percent = Number(text);
-  if (percent > 100) return { ok: false, error: 'The tax rate must be between 0 and 100 %.' };
+  if (percent > 100) return { ok: false, error: t('The tax rate must be between 0 and 100 %.') };
   return { ok: true, basisPoints: Math.round(percent * 100), percent };
 }
 
@@ -65,7 +66,7 @@ export function requiredPreTaxProfit(afterTaxTarget: number, basisPoints: number
     return { status: 'ok', preTax: targetC / 100, exact: targetC / 100, tax: 0, afterTax: targetC / 100, noTax: true };
   }
   if (basisPoints >= 10_000) {
-    return { status: 'not-available', reason: 'At a 100 % tax rate every dollar of profit goes to tax, so no pre-tax profit can leave a positive amount after tax.' };
+    return { status: 'not-available', reason: t('At a 100 % tax rate every dollar of profit goes to tax, so no pre-tax profit can leave a positive amount after tax.') };
   }
   const keep = 10_000 - basisPoints; // share kept after tax, in basis points
   // Round UP so the after-tax target is met, not just missed.
@@ -91,7 +92,8 @@ export function estimateTax(operatingProfit: number, basisPoints: number): TaxEs
   return { operatingProfit: profitC / 100, tax: taxC / 100, afterTax: (profitC - taxC) / 100, noTax: false };
 }
 
-/** "20%", "12.5%" */
+/** "20%", "12.5%" in English; « 20 % », « 12,5 % » in French. */
 export function formatRate(percent: number): string {
-  return `${percent.toLocaleString('en-CA', { maximumFractionDigits: 2 })}%`;
+  const n = percent.toLocaleString(locale(), { maximumFractionDigits: 2 });
+  return locale() === 'fr-CA' ? `${n} %` : `${n}%`;
 }

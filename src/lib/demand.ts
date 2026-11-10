@@ -13,6 +13,7 @@
  * and the highest profit wins. It is only the best price UNDER THIS
  * ASSUMPTION – real customers may behave differently.
  */
+import { t } from '../i18n/i18n';
 import { toCents } from './business';
 import { cleanNumberText, MAX_VALUE } from './validation';
 
@@ -41,15 +42,15 @@ export type WholeResult = { ok: true; value: number } | { ok: false; error: stri
 
 /** X must be a whole number of units, 0 or more. */
 export function parseUnitsPerDollar(raw: string): WholeResult {
-  if (raw.trim() === '') return { ok: false, error: 'Please enter how many units sales change for each $1 change in price.' };
+  if (raw.trim() === '') return { ok: false, error: t('Please enter how many units sales change for each $1 change in price.') };
   const cleaned = cleanNumberText(raw);
   if ('error' in cleaned) return { ok: false, error: cleaned.error };
   const text = cleaned.text;
-  if (/^[-−–]/.test(text)) return { ok: false, error: 'Please enter the size of the change as 0 or more – the direction is always opposite to the price.' };
-  if (/^\d*\.\d*$/.test(text) && text !== '.') return { ok: false, error: 'Please enter a whole number of units – you can’t sell part of a unit.' };
-  if (!/^\d+$/.test(text)) return { ok: false, error: 'Please use whole numbers only, for example 20.' };
+  if (/^[-−–]/.test(text)) return { ok: false, error: t('Please enter the size of the change as 0 or more – the direction is always opposite to the price.') };
+  if (/^\d*\.\d*$/.test(text) && text !== '.') return { ok: false, error: t('Please enter a whole number of units – you can’t sell part of a unit.') };
+  if (!/^\d+$/.test(text)) return { ok: false, error: t('Please use whole numbers only, for example 20.') };
   const value = Number(text);
-  if (value > MAX_VALUE) return { ok: false, error: 'That number is larger than this simulator supports.' };
+  if (value > MAX_VALUE) return { ok: false, error: t('That number is larger than this simulator supports.') };
   return { ok: true, value };
 }
 
@@ -115,7 +116,7 @@ export function bestPrice(a: DemandAssumption, ctx: ProfitContext): BestPriceRes
   if (!range) {
     return {
       status: 'no-maximum',
-      reason: 'With 0 units lost per $1, sales never fall, so every higher price earns more and there is no best price. Enter how many units customers would stop buying for each $1.',
+      reason: t('With 0 units lost per $1, sales never fall, so every higher price earns more and there is no best price. Enter how many units customers would stop buying for each $1.'),
     };
   }
   const toC = Math.round(range.to * 100);
@@ -141,7 +142,7 @@ export type TargetPriceResult =
 /** Lowest and highest prices (checked every cent) whose profit reaches the target. */
 export function pricesForTarget(a: DemandAssumption, ctx: ProfitContext, targetProfit: number): TargetPriceResult {
   const range = searchRange(a);
-  if (!range) return { status: 'no-maximum', reason: 'With 0 units lost per $1, sales never fall, so this assumption can’t limit the price.' };
+  if (!range) return { status: 'no-maximum', reason: t('With 0 units lost per $1, sales never fall, so this assumption can’t limit the price.') };
   const targetC = toCents(targetProfit);
   const toC = Math.round(range.to * 100);
   let lowC = -1;

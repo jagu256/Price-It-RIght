@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ReferenceDot, ReferenceLine, Tooltip, XAxis, YAxis } from 'recharts';
-import ChartContainer from './ChartContainer';
+import { useLanguage } from '../app/language';
+import { plural, t } from '../i18n/i18n';
 import { bestPrice, parseUnitsPerDollar, pricesForTarget, profitCurve, type DemandAssumption, type ProfitContext } from '../lib/demand';
 import { formatCAD, formatCompactCAD, formatNumber, unitsLabel } from '../lib/format';
+import ChartContainer from './ChartContainer';
 import { Field } from './SmartPricing';
-import { ErrorList, Notice } from './ui';
+import { ErrorList, Notice, Rich } from './ui';
 
 interface Props {
   /** Makes ids unique when the panel appears twice. */
@@ -34,8 +36,8 @@ export default function DemandExplorer(props: Props) {
       <label className="flex items-start gap-2 text-sm font-semibold text-sage-900">
         <input type="checkbox" className="mt-1" checked={on} onChange={(e) => setOn(e.target.checked)} />
         <span>
-          📉 Optional assumption: customers react to the price of {p.productName}
-          <span className="block text-xs font-normal text-sage-600">Off by default. When it is off, every result stays exactly as before.</span>
+          📉 {t('Optional assumption: customers react to the price of {name}', { name: p.productName })}
+          <span className="block text-xs font-normal text-sage-600">{t('Off by default. When it is off, every result stays exactly as before.')}</span>
         </span>
       </label>
       {on && (
@@ -43,11 +45,11 @@ export default function DemandExplorer(props: Props) {
           <div className="max-w-sm">
             <Field
               id={`${p.idPrefix}-x`}
-              label="For every $1 change in price, sales change by this many units (opposite direction)"
+              label={t('For every $1 change in price, sales change by this many units (opposite direction)')}
               value={xText}
               onChange={setXText}
               invalid={xText.trim() !== '' && !x.ok}
-              help={`Whole units, 0 or more. Starts from ${unitsLabel(p.baseUnits)} at ${formatCAD(p.basePrice)}.`}
+              help={t('Whole units, 0 or more. Starts from {units} at {price}.', { units: unitsLabel(p.baseUnits), price: formatCAD(p.basePrice) })}
             />
             <ErrorList messages={[xText.trim() === '' || x.ok ? undefined : x.error]} />
           </div>
@@ -58,9 +60,12 @@ export default function DemandExplorer(props: Props) {
               ctx={{ variableCost: p.variableCost, otherContribution: p.otherContribution, fixedCosts: p.fixedCosts }}
             />
           )}
-          <Notice tone="warn" title="An assumption, not a forecast">
-            This straight-line rule is something you choose. Real customers may react differently, and the effect may not be the same for every $1. The best price below
-            is the best price <strong>under this assumption only</strong> – not a guaranteed or market-optimal price.
+          <Notice tone="warn" title={t('An assumption, not a forecast')}>
+            <Rich
+              text={t(
+                'This straight-line rule is something you choose. Real customers may react differently, and the effect may not be the same for every $1. The best price below is the best price **under this assumption only** – not a guaranteed or market-optimal price.',
+              )}
+            />
           </Notice>
         </>
       )}
@@ -69,60 +74,98 @@ export default function DemandExplorer(props: Props) {
 }
 
 function Results({ a, ctx, target, onTry, idPrefix, productName }: Props & { a: DemandAssumption; ctx: ProfitContext }) {
+  const { lang } = useLanguage(); // results include sentences, so redo them when the language changes
   // Checking every cent can mean up to 2 million prices, so only redo it when an input changes.
-  const best = useMemo(() => bestPrice(a, ctx), [a.basePrice, a.baseUnits, a.unitsPerDollar, ctx.variableCost, ctx.otherContribution, ctx.fixedCosts]); // eslint-disable-line react-hooks/exhaustive-deps
-  const curve = useMemo(() => profitCurve(a, ctx), [a.basePrice, a.baseUnits, a.unitsPerDollar, ctx.variableCost, ctx.otherContribution, ctx.fixedCosts]); // eslint-disable-line react-hooks/exhaustive-deps
-  const forTarget = useMemo(
-    () => (target === undefined ? null : pricesForTarget(a, ctx, target)),
-    [a.basePrice, a.baseUnits, a.unitsPerDollar, ctx.variableCost, ctx.otherContribution, ctx.fixedCosts, target], // eslint-disable-line react-hooks/exhaustive-deps
-  );
+  const deps = [a.basePrice, a.baseUnits, a.unitsPerDollar, ctx.variableCost, ctx.otherContribution, ctx.fixedCosts, lang];
+  const best = useMemo(() => bestPrice(a, ctx), deps); // eslint-disable-line react-hooks/exhaustive-deps
+  const curve = useMemo(() => profitCurve(a, ctx), deps); // eslint-disable-line react-hooks/exhaustive-deps
+  const forTarget = useMemo(() => (target === undefined ? null : pricesForTarget(a, ctx, target)), [...deps, target]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (best.status === 'no-maximum') return <Notice tone="info" title="No best price">{best.reason}</Notice>;
+  if (best.status === 'no-maximum') return <Notice tone="info" title={t('No best price')}>{best.reason}</Notice>;
 
   return (
     <div className="space-y-4" aria-live="polite">
       <div className="rounded-2xl bg-sage-700 px-5 py-4 text-cream-50" data-testid={`${idPrefix}-best`}>
-        <p className="text-xs font-bold uppercase tracking-wider opacity-90">Best price under this assumption only</p>
+        <p className="text-xs font-bold uppercase tracking-wider opacity-90">{t('Best price under this assumption only')}</p>
         <p className="font-display text-3xl font-extrabold tabular-nums">{formatCAD(best.price)}</p>
         <p className="text-sm opacity-95">
-          Sells {unitsLabel(best.units)} of {productName}, for an operating profit of {formatCAD(best.profit)}. Found by checking every cent from {formatCAD(best.range.from)} to{' '}
-          {formatCAD(best.range.to)} ({formatNumber(best.range.pricesChecked)} prices){best.range.capped ? ' – the search stops at $20,000' : ', where sales reach zero'}.
-          {best.tiedPrices > 0 && ` ${formatNumber(best.tiedPrices)} other price${best.tiedPrices === 1 ? '' : 's'} earn the same; the lowest is shown.`}
+          {t('Sells {units} of {name}, for an operating profit of {profit}.', { units: unitsLabel(best.units), name: productName, profit: formatCAD(best.profit) })}{' '}
+          {best.range.capped
+            ? t('Found by checking every cent from {from} to {to} ({count} prices) – the search stops at $20,000.', {
+                from: formatCAD(best.range.from),
+                to: formatCAD(best.range.to),
+                count: formatNumber(best.range.pricesChecked),
+              })
+            : t('Found by checking every cent from {from} to {to} ({count} prices), where sales reach zero.', {
+                from: formatCAD(best.range.from),
+                to: formatCAD(best.range.to),
+                count: formatNumber(best.range.pricesChecked),
+              })}
+          {best.tiedPrices > 0 &&
+            ' ' + plural(best.tiedPrices, '{n} other price earns the same; the lowest is shown.', '{n} other prices earn the same; the lowest is shown.', { n: formatNumber(best.tiedPrices) })}
         </p>
       </div>
       {onTry && (
         <button type="button" className="btn-secondary" onClick={() => onTry(best.price, best.units)}>
-          Try {formatCAD(best.price)} ({unitsLabel(best.units)}) in the modified plan
+          {t('Try {price} ({units}) in the modified plan', { price: formatCAD(best.price), units: unitsLabel(best.units) })}
         </button>
       )}
 
       {forTarget && forTarget.status === 'ok' && (
         <p className="text-sm text-sage-800">
-          <strong>Prices that reach your {formatCAD(target!)} target under this assumption:</strong> lowest {formatCAD(forTarget.lowest.price)} ({unitsLabel(forTarget.lowest.units)},{' '}
-          {formatCAD(forTarget.lowest.profit)}), highest {formatCAD(forTarget.highest.price)} ({unitsLabel(forTarget.highest.units)}, {formatCAD(forTarget.highest.profit)}). Because sales are
-          whole units, a few prices between these can fall just short – check the exact price before using it.
+          <Rich
+            text={t(
+              '**Prices that reach your {target} target under this assumption:** lowest {low} ({lowUnits}, {lowProfit}), highest {high} ({highUnits}, {highProfit}). Because sales are whole units, a few prices between these can fall just short – check the exact price before using it.',
+              {
+                target: formatCAD(target!),
+                low: formatCAD(forTarget.lowest.price),
+                lowUnits: unitsLabel(forTarget.lowest.units),
+                lowProfit: formatCAD(forTarget.lowest.profit),
+                high: formatCAD(forTarget.highest.price),
+                highUnits: unitsLabel(forTarget.highest.units),
+                highProfit: formatCAD(forTarget.highest.profit),
+              },
+            )}
+          />
         </p>
       )}
       {forTarget && forTarget.status === 'unreachable' && (
-        <Notice tone="error" title="Target not reachable under this assumption">
-          No price from {formatCAD(forTarget.range.from)} to {formatCAD(forTarget.range.to)} reaches {formatCAD(target!)}. The most this product can help is {formatCAD(best.profit)} at{' '}
-          {formatCAD(best.price)}.
+        <Notice tone="error" title={t('Target not reachable under this assumption')}>
+          {t('No price from {from} to {to} reaches {target}. The most this product can help is {profit} at {price}.', {
+            from: formatCAD(forTarget.range.from),
+            to: formatCAD(forTarget.range.to),
+            target: formatCAD(target!),
+            profit: formatCAD(best.profit),
+            price: formatCAD(best.price),
+          })}
         </Notice>
       )}
 
       <figure>
-        <figcaption className="text-sm font-semibold text-sage-900">Operating profit at different prices of {productName} (other products unchanged)</figcaption>
-        <div className="mt-2 h-64" role="img" aria-label={`Line chart of operating profit against the price of ${productName}`}>
+        <figcaption className="text-sm font-semibold text-sage-900">{t('Operating profit at different prices of {name} (other products unchanged)', { name: productName })}</figcaption>
+        <div className="mt-2 h-64" role="img" aria-label={t('Line chart of operating profit against the price of {name}', { name: productName })}>
           <ChartContainer width="100%" height="100%">
             <LineChart data={curve} margin={{ top: 16, right: 16, bottom: 20, left: 8 }}>
               <CartesianGrid stroke="#E4EDE1" strokeDasharray="3 3" />
-              <XAxis dataKey="price" type="number" domain={[0, 'dataMax']} tickFormatter={(v) => formatCAD(v)} stroke="#3E5A40" tick={{ fontSize: 11 }} label={{ value: `Price of ${productName}`, position: 'insideBottom', offset: -12, fill: '#3E5A40', fontSize: 12 }} />
+              <XAxis
+                dataKey="price"
+                type="number"
+                domain={[0, 'dataMax']}
+                tickFormatter={(v) => formatCAD(v)}
+                stroke="#3E5A40"
+                tick={{ fontSize: 11 }}
+                label={{ value: t('Price of {name}', { name: productName }), position: 'insideBottom', offset: -12, fill: '#3E5A40', fontSize: 12 }}
+              />
               <YAxis tickFormatter={formatCompactCAD} stroke="#3E5A40" tick={{ fontSize: 11 }} width={64} />
-              <Tooltip contentStyle={{ borderRadius: 16 }} labelFormatter={(v) => `Price ${formatCAD(Number(v))}`} formatter={(v: number, n: string) => (n === 'units' ? [formatNumber(v), 'Units sold'] : [formatCAD(v), 'Operating profit'])} />
+              <Tooltip
+                contentStyle={{ borderRadius: 16 }}
+                labelFormatter={(v) => t('Price {price}', { price: formatCAD(Number(v)) })}
+                formatter={(v: number, n: string) => (n === 'units' ? [formatNumber(v), t('Units sold')] : [formatCAD(v), t('Operating profit')])}
+              />
               <ReferenceLine y={0} stroke="#3E5A40" />
-              <ReferenceLine x={a.basePrice} stroke="#86A882" strokeDasharray="2 4" label={{ value: 'Now', position: 'insideTopLeft', fill: '#3E5A40', fontSize: 11 }} />
+              <ReferenceLine x={a.basePrice} stroke="#86A882" strokeDasharray="2 4" label={{ value: t('Now'), position: 'insideTopLeft', fill: '#3E5A40', fontSize: 11 }} />
               <Line type="linear" dataKey="profit" name="profit" stroke="#4F7150" strokeWidth={3} dot={false} />
-              <ReferenceDot x={best.price} y={best.profit} r={7} fill="#FAEDA8" stroke="#304633" strokeWidth={2.5} label={{ value: 'Best', position: 'top', fill: '#304633', fontSize: 12, fontWeight: 700 }} />
+              <ReferenceDot x={best.price} y={best.profit} r={7} fill="#FAEDA8" stroke="#304633" strokeWidth={2.5} label={{ value: t('Best'), position: 'top', fill: '#304633', fontSize: 12, fontWeight: 700 }} />
             </LineChart>
           </ChartContainer>
         </div>

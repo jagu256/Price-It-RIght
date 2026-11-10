@@ -3,6 +3,8 @@
  * Each event is a pure transformation of the business data, so its preview and
  * the "accept" step use exactly the same numbers.
  */
+import { t, tx } from '../i18n/i18n';
+import { formatCAD, formatPercent } from './format';
 import { parseQuantity } from './inventory';
 import { parseCost } from './stock';
 import type { BusinessData } from './types';
@@ -26,47 +28,47 @@ export const EVENTS: EventSpec[] = [
   {
     id: 'supplier-increase',
     emoji: '🚚',
-    title: 'Supplier Price Increase',
+    title: tx('Supplier Price Increase'),
     defaultAmount: 15,
     kind: '%',
-    describe: (a) => `Your suppliers raise prices: variable costs increase by ${a}%.`,
-    responses: ['Compare prices from other suppliers.', 'Test a small price increase in the What-If Simulator.', 'Look for ways to use less of the most expensive ingredients.'],
+    describe: (a) => t('Your suppliers raise prices: variable costs increase by {pct}.', { pct: formatPercent(a) }),
+    responses: [tx('Compare prices from other suppliers.'), tx('Test a small price increase in the What-If Simulator.'), tx('Look for ways to use less of the most expensive ingredients.')],
   },
   {
     id: 'rent-increase',
     emoji: '🏢',
-    title: 'Rent Increase',
+    title: tx('Rent Increase'),
     defaultAmount: 300,
     kind: '$',
-    describe: (a) => `Your landlord raises the rent: monthly fixed costs increase by $${a}.`,
-    responses: ['Check how many more units you need to break even.', 'Review other fixed costs you could reduce.', 'Use the Profit Goal Tracker to plan extra sales.'],
+    describe: (a) => t('Your landlord raises the rent: monthly fixed costs increase by {amount}.', { amount: formatCAD(a) }),
+    responses: [tx('Check how many more units you need to break even.'), tx('Review other fixed costs you could reduce.'), tx('Use the Profit Goal Tracker to plan extra sales.')],
   },
   {
     id: 'demand-up',
     emoji: '📈',
-    title: 'Higher Customer Demand',
+    title: tx('Higher Customer Demand'),
     defaultAmount: 20,
     kind: '%',
-    describe: (a) => `A local article brings new customers: expected sales increase by ${a}%.`,
-    responses: ['Check the Smart Inventory Hub – do you have enough stock?', 'Use the Production Planner to see which products to prioritise.'],
+    describe: (a) => t('A local article brings new customers: expected sales increase by {pct}.', { pct: formatPercent(a) }),
+    responses: [tx('Check the Smart Inventory Hub – do you have enough stock?'), tx('Use the Production Planner to see which products to prioritise.')],
   },
   {
     id: 'demand-down',
     emoji: '📉',
-    title: 'Lower Customer Demand',
+    title: tx('Lower Customer Demand'),
     defaultAmount: 20,
     kind: '%',
-    describe: (a) => `A new competitor opens nearby: expected sales decrease by ${a}%.`,
-    responses: ['Check your margin of safety on the Profit Dashboard.', 'Consider promotions for your highest-margin products.'],
+    describe: (a) => t('A new competitor opens nearby: expected sales decrease by {pct}.', { pct: formatPercent(a) }),
+    responses: [tx('Check your margin of safety on the Profit Dashboard.'), tx('Consider promotions for your highest-margin products.')],
   },
   {
     id: 'inventory-shortage',
     emoji: '📦',
-    title: 'Inventory Shortage',
+    title: tx('Inventory Shortage'),
     defaultAmount: 25,
     kind: '%',
-    describe: (a, item) => `A delivery goes missing: available ${item ?? 'inventory'} decreases by ${a}%.`,
-    responses: ['See which products are affected in the Production Planner.', 'Prioritise products that make the best use of the scarce item.'],
+    describe: (a, item) => t('A delivery goes missing: available {item} decreases by {pct}.', { item: item ?? t('inventory'), pct: formatPercent(a) }),
+    responses: [tx('See which products are affected in the Production Planner.'), tx('Prioritise products that make the best use of the scarce item.')],
   },
 ];
 
