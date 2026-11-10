@@ -19,6 +19,7 @@ import {
   type PlanFinancials,
 } from '../lib/planning';
 import { summaryMath } from '../lib/showMath';
+import { optimalMix, type OptimizerResult } from '../lib/optimizer';
 import { parseUnits } from '../lib/validation';
 
 export default function ProductionPlanner() {
@@ -75,6 +76,7 @@ function Planner() {
   const modified = valid ? planFinancials(plan, model.products, fixed) : null;
 
   const fill = (p: Plan) => dispatch({ type: 'planner-fill', units: p });
+  const [best, setBest] = useState<OptimizerResult | null>(null);
 
   return (
     <>
@@ -86,11 +88,25 @@ function Planner() {
           <button type="button" className="btn-small" onClick={() => dispatch({ type: 'planner-reset' })}>↺ Expected demand (original)</button>
           <button type="button" className="btn-small" onClick={() => fill(proportionalPlan(model.products, model.recipes, model.stock).plan)}>⚖️ Keep my mix, fit inventory</button>
           <button type="button" className="btn-small" onClick={() => fill(suggestedPlan(model.products, model.recipes, model.stock, resource))}>💡 Suggested plan</button>
+          <button
+            type="button"
+            className="btn-small"
+            onClick={() => {
+              const r = optimalMix(model.products, model.recipes, model.stock);
+              setBest(r);
+              fill(r.plan);
+            }}
+          >
+            🧮 Best mix (exact search)
+          </button>
         </div>
         <p className="text-xs text-sage-600">
           “Keep my mix” scales every product down by the same percentage until inventory fits. “Suggested plan” fills demand in order of contribution per unit of
           the selected scarce item while respecting every item – a rule of thumb, <strong>not proven optimal</strong>. When several items are limited, other plans may earn more.
+          “Best mix” searches every possible whole-unit plan (skipping only groups it can prove can’t do better) for the most total contribution margin within all your
+          inventory and expected demand.
         </p>
+        {best && <BestMixNote r={best} />}
 
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="card overflow-x-auto p-2 sm:p-4">
@@ -143,6 +159,29 @@ function Planner() {
 
       {modifiedCheck && <Alerts check={modifiedCheck} plan={plan} />}
     </>
+  );
+}
+
+/** Says exactly what the exact search proved – "proven optimal" only when the whole search finished. */
+function BestMixNote({ r }: { r: OptimizerResult }) {
+  return r.status === 'proven-optimal' ? (
+    <Notice tone="success" title="Best mix – proven optimal for these numbers" role="status">
+      <p>
+        No other whole-unit plan within your current inventory and expected demand earns more than {formatCAD(r.optimizedCM)} of contribution margin from products with
+        recipes (checked with {r.nodes.toLocaleString('en-CA')} search steps). Fixed costs are the same for every plan, so this is also the highest operating profit.
+      </p>
+      <p className="mt-1">
+        It is only as good as your numbers: it assumes demand, prices, costs and recipes are right, and it ignores the hypothetical extra inventory below. There may be
+        other plans that tie.
+        {r.unchecked.length > 0 && ` ${r.unchecked.join(', ')} ${r.unchecked.length === 1 ? 'has' : 'have'} no recipe, so ${r.unchecked.length === 1 ? 'it was' : 'they were'} left at expected demand and not checked.`}
+        {r.zeroMargin.length > 0 && ` ${r.zeroMargin.join(', ')} earn${r.zeroMargin.length === 1 ? 's' : ''} no contribution per unit, so ${r.zeroMargin.length === 1 ? 'it is' : 'they are'} set to 0.`}
+      </p>
+    </Notice>
+  ) : (
+    <Notice tone="warn" title="Suggested mix – NOT proven optimal" role="status">
+      The search stopped after {r.nodes.toLocaleString('en-CA')} steps before it could check every possibility, so this is the best plan found so far ({formatCAD(r.optimizedCM)}{' '}
+      of contribution margin). A better plan may exist.
+    </Notice>
   );
 }
 

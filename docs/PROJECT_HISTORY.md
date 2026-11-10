@@ -147,9 +147,15 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 281 tests in 18 files passed; build passed.
 
+### Extra C – Exact product-mix optimizer (9 Nov 2026)
+- The brief allowed this only if it could be proven correct. New `src/lib/optimizer.ts`: branch and bound with a valid upper bound (each remaining product's stand-alone maximum from the stock left). It is exact when the search completes, and is labelled "proven optimal" only then. If the 2,000,000-step limit is reached, it is labelled "suggested – not proven optimal".
+- Checked against an independent brute-force search written separately in the tests: 300 random problems, the Expert challenge bakery (every one of 151 × 121 × 201 plans) and the demo café. All match. Production Planner gets a "🧮 Best mix (exact search)" button; the existing heuristic "Suggested plan" keeps its "not proven optimal" label.
+
+**Checks:** 290 tests in 19 files passed; build passed.
+
 ### Not done yet (usage limit reached, 9 Nov 2026)
 - The independent verification of Features 3–6's hand-checked examples by a separate agent, and its README section.
-- Extras A–C (waiting for the student to check Features 1–7 first).
+- Extra B (French toggle) – in progress after A and C.
 
 ## Recommendations discussed (9 Nov 2026) – not yet built
 Priority for the grade:

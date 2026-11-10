@@ -7,7 +7,7 @@ Small-business pricing, inventory and profitability simulator for an **ACCT 4500
 ## Commands
 - `npm install` – install dependencies (first time)
 - `npm run dev` – local dev server (http://localhost:5173)
-- `npm test` – Vitest suite (281 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
+- `npm test` – Vitest suite (290 tests as of 9 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
 - `npm run build` – type-check (`tsc -b`) + production build; must succeed before pushing
 - Deployment: Vercel builds automatically on every push to `main` (GitHub repo `jagu256/Price-It-RIght`, live at https://price-it-r-ight.vercel.app). Never push a failing build.
 
@@ -43,7 +43,7 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
 - Keep **expected**, **inventory-constrained** and **scenario** profit separate and labelled. Unsold production is never revenue. Infeasible plans are never shown as achievable.
 - **No double counting of costs**: a product uses either one manual variable cost OR itemized (recipe materials + other variable costs). Missing purchase costs are unknown, never $0.
 - Duplicates in inventory/imports are flagged, never merged. Recipes are never invented.
-- The "suggested plan" is a heuristic and must stay labelled "not proven optimal". Don't call anything optimal unless it is mathematically proven.
+- The "suggested plan" is a heuristic and must stay labelled "not proven optimal". Don't call anything optimal unless it is mathematically proven. `optimizer.ts` ("Best mix", branch and bound) may say "proven optimal" only when its search finished (status `proven-optimal`); keep its brute-force cross-check tests.
 - Never describe a price as guaranteed or market-optimal. Experiments (Pricing Lab, Production Planner, events) don't change the business until the user confirms.
 - All sample/demo data is **fictional** and labelled so. All amounts CAD.
 - Ask for confirmation (use `useConfirm`) before replacing or deleting important data.

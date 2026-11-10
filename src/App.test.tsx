@@ -590,6 +590,26 @@ describe('production planner', () => {
     await user.click(pl.getByRole('button', { name: /Expected demand/ }));
     expect(pl.getByLabelText('Planned production of Coffee')).toHaveValue('300');
   });
+
+  it('“Best mix” finds a proven-optimal feasible plan, and it earns at least as much as the other plans', async () => {
+    const { user } = setup('planner', 'demo');
+    const pl = within(panel('planner'));
+    const modifiedProfit = () => Number(pl.getByRole('rowheader', { name: 'Operating profit' }).closest('tr')!.children[2].textContent!.replace(/[^0-9.−-]/g, '').replace('−', '-'));
+
+    await user.click(pl.getByRole('button', { name: /Keep my mix, fit inventory/ }));
+    const keepMix = modifiedProfit();
+    await user.click(pl.getByRole('button', { name: /Suggested plan/ }));
+    const suggested = modifiedProfit();
+
+    await user.click(pl.getByRole('button', { name: /Best mix \(exact search\)/ }));
+    expect(pl.getByText('Best mix – proven optimal for these numbers')).toBeInTheDocument();
+    expect(pl.getAllByText('✅ Feasible').length).toBe(1); // the modified plan fits the inventory
+    const best = modifiedProfit();
+    expect(best).toBeGreaterThanOrEqual(keepMix);
+    expect(best).toBeGreaterThanOrEqual(suggested);
+    // The heuristic keeps its honest label.
+    expect(pl.getByText(/a rule of thumb,/).textContent).toMatch(/not proven optimal/);
+  });
 });
 
 describe('business challenge', () => {
