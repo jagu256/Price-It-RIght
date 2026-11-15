@@ -242,6 +242,15 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 374 tests in 31 files passed; build passed.
 
+### UI/UX – 11. Larger text and high contrast (15 Nov 2026)
+- New `src/lib/display.ts` (load/save with try/catch; only real true/false values are accepted; applied as `data-text` and `data-contrast` attributes on `<html>`), CSS rules in `index.css` (112.5 % root font size, because everything is in rem, plus darker sage text and borders and a white background), and two `aria-pressed` buttons in the header. `main.tsx` applies the saved choice before the first paint.
+- **Bug caught in the browser check:** two quick clicks (A+ then ◐) lost the first choice, because the second click built on out-of-date settings. Each click now updates the latest settings, and the click-through test clicks both straight after each other.
+- Checked at 375 px with both on: 18 px text, no sideways scrolling on any of the 9 screens, and the header buttons fit (the business name hides itself to make room).
+
+**Checks:** 378 tests in 32 files passed; build passed. The main file is now 1,094 kB (311 kB gzipped), still Vite’s size warning, not an error.
+
+**All 11 items on the extra-features / UI-UX list are built** (15 Nov 2026). Not done: a separate-agent re-check of the new hand-worked examples, and real user testing (still owned by the team).
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

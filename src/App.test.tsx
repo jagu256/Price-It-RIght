@@ -275,6 +275,37 @@ describe('decisions', () => {
   });
 });
 
+describe('Larger text and high contrast', () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute('data-text');
+    document.documentElement.removeAttribute('data-contrast');
+  });
+
+  it('turns each option on and off from the header, keeps both after quick clicks, and remembers them', async () => {
+    const { user, unmount } = setup('home', 'demo');
+    const html = document.documentElement;
+    const large = screen.getByRole('button', { name: 'Larger text' });
+    const contrast = screen.getByRole('button', { name: 'High contrast' });
+    expect(large).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(large);
+    await user.click(contrast); // straight after – must not undo the first click
+    expect(html).toHaveAttribute('data-text', 'large');
+    expect(html).toHaveAttribute('data-contrast', 'high');
+    expect(large).toHaveAttribute('aria-pressed', 'true');
+    expect(JSON.parse(window.localStorage.getItem('price-it-right:display')!)).toEqual({ largeText: true, highContrast: true });
+
+    // Remembered next time.
+    unmount();
+    html.removeAttribute('data-text');
+    setup('home', 'demo');
+    expect(html).toHaveAttribute('data-text', 'large');
+    await user.click(screen.getByRole('button', { name: 'Larger text' }));
+    expect(html).not.toHaveAttribute('data-text');
+    expect(html).toHaveAttribute('data-contrast', 'high');
+  });
+});
+
 describe('Setup checklist', () => {
   it('ticks itself off as the business is set up, with links to what is missing', async () => {
     const { user } = setup('home', 'coffee');

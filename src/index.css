@@ -139,3 +139,39 @@ input[type='range'].slider::-moz-range-thumb {
 .overflow-auto {
   position: relative;
 }
+
+/* ------------------------------------------------------------------ */
+/* Display options (header buttons A+ and ◐) – see src/lib/display.ts  */
+/* ------------------------------------------------------------------ */
+
+/* Larger text: everything is sized in rem, so this scales the whole app by 12.5 %. */
+html[data-text='large'] {
+  font-size: 112.5%;
+}
+
+/* High contrast: darker text and borders, a plain white background. */
+html[data-contrast='high'] body {
+  background-color: #ffffff;
+}
+html[data-contrast='high'] :is(.text-sage-500, .text-sage-600, .text-sage-700, .text-sage-800, .text-ink) {
+  color: #102414;
+}
+html[data-contrast='high'] .text-butter-700 {
+  color: #4a3a05;
+}
+html[data-contrast='high'] .text-loss-700 {
+  color: #6e0d27;
+}
+html[data-contrast='high'] :is(.border-sage-100, .border-sage-200, .border-sage-300) {
+  border-color: #3e5a40;
+}
+html[data-contrast='high'] :is(.ring-sage-100, .ring-sage-200, .ring-sage-300) {
+  --tw-ring-color: #3e5a40;
+}
+html[data-contrast='high'] ::placeholder {
+  color: #3e5a40;
+}
+html[data-contrast='high'] :focus-visible {
+  outline: 3px solid #102414;
+  outline-offset: 2px;
+}

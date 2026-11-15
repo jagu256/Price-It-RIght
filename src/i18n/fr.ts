@@ -1742,4 +1742,8 @@ export const FR: Record<string, string> = {
   'Upload a spreadsheet or type items in (needed for stock checks).': 'Importez un chiffrier ou saisissez les articles (nécessaire pour vérifier les stocks).',
   'Give every product a recipe': 'Donnez une recette à chaque produit',
   'Tell the app how much of each item one product uses (needed for production planning).': 'Indiquez à l’application la quantité de chaque article qu’utilise un produit (nécessaire pour planifier la production).',
+  /* Display options */
+  'Display': 'Affichage',
+  'Larger text': 'Texte plus grand',
+  'High contrast': 'Contraste élevé',
 };

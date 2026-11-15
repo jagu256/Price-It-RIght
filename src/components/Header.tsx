@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { useLanguage } from '../app/language';
+import { applyDisplay, loadDisplay, saveDisplay, type DisplaySettings } from '../lib/display';
 import { SECTIONS, type SectionId } from '../app/routes';
 import { useStore } from '../app/StoreContext';
 import { t } from '../i18n/i18n';
@@ -10,6 +12,13 @@ export default function Header({ route }: { route: SectionId }) {
   const { state } = useStore();
   const { lang, change } = useLanguage();
   const { highlight } = useTour();
+  const [display, setDisplay] = useState<DisplaySettings>(loadDisplay);
+  useEffect(() => {
+    applyDisplay(display);
+    saveDisplay(display);
+  }, [display]);
+  // Built from the latest settings (d), so two quick clicks never undo each other.
+  const toggle = (key: keyof DisplaySettings) => setDisplay((d) => ({ ...d, [key]: !d[key] }));
   const b = state.business;
   const business = getBusiness(b.type);
   return (
@@ -25,6 +34,14 @@ export default function Header({ route }: { route: SectionId }) {
             <span className="truncate">{b.name.trim() || t('My business')}</span>
             {b.isDemo && <span className="shrink-0 rounded-full bg-butter-200 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-butter-700">{t('Fictional demo')}</span>}
           </p>
+          <div role="group" aria-label={t('Display')} className="flex shrink-0 overflow-hidden rounded-full ring-1 ring-sage-200">
+            <button type="button" aria-pressed={display.largeText} aria-label={t('Larger text')} title={t('Larger text')} onClick={() => toggle('largeText')} className={`px-2 py-0.5 text-xs font-bold transition ${display.largeText ? 'bg-sage-700 text-cream-50' : 'bg-white text-sage-700 hover:bg-sage-100'}`}>
+              A+
+            </button>
+            <button type="button" aria-pressed={display.highContrast} aria-label={t('High contrast')} title={t('High contrast')} onClick={() => toggle('highContrast')} className={`px-2 py-0.5 text-xs font-bold transition ${display.highContrast ? 'bg-sage-700 text-cream-50' : 'bg-white text-sage-700 hover:bg-sage-100'}`}>
+              ◐
+            </button>
+          </div>
           <div role="group" aria-label={t('Language')} className="flex shrink-0 overflow-hidden rounded-full ring-1 ring-sage-200">
             {(['en', 'fr'] as const).map((l) => (
               <button

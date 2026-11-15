@@ -7,7 +7,7 @@ Small-business pricing, inventory and profitability simulator for an **ACCT 4500
 ## Commands
 - `npm install` – install dependencies (first time)
 - `npm run dev` – local dev server (http://localhost:5173)
-- `npm test` – Vitest suite (374 tests as of 15 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
+- `npm test` – Vitest suite (378 tests as of 15 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
 - `npm run build` – type-check (`tsc -b`) + production build; must succeed before pushing
 - Deployment: Vercel builds automatically on every push to `main` (GitHub repo `jagu256/Price-It-RIght`, live at https://price-it-r-ight.vercel.app). Never push a failing build.
 
@@ -28,6 +28,12 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
   - `demand.ts` OPTIONAL price-sensitive demand (off by default), best price by checking every cent – "best under this assumption only". UI `components/DemandExplorer.tsx` (What-If + SmartPricing)
   - `decisions.ts` special order (incremental profit; achievable only if every item the product uses covers regular demand + order) and make-or-buy (relevant costs; unavoidable fixed costs irrelevant). UI `sections/Decisions.tsx`
   - `projection.ts` 12-month projection (monthly sales level + fixed costs; annual = sum of months). UI `components/SeasonalProjection.tsx` on the dashboard
+  - `variance.ts` budget vs actual (flexible-budget variances; quantity rounded to the cent, mix = remainder so they add up exactly). UI `components/VarianceAnalysis.tsx` (dashboard)
+  - `stepCosts.ts` step fixed costs / relevant range (break-even per range at the expected mix). UI `components/StepFixedCosts.tsx` (dashboard)
+  - `purchasing.ts` "What should I buy?" (buffer and packs rounded UP; unknown cost never $0; buying stock is cash, not an expense). UI `components/PurchasePlanner.tsx` (Inventory Hub)
+  - `costPlus.ts` markup vs margin pricing (rounded UP to the cent). UI `components/CostPlusPricing.tsx`; `compareScenarios` in `pricing.ts` + `components/SavedScenarios.tsx` (Pricing Lab; saved scenarios are NOT persisted)
+  - `glossary.ts` (ⓘ term tooltips, `components/TermTip.tsx`, rendered in a portal), `tour.ts` (guided tour, `components/GuidedTour.tsx`; `App autoTour` is on only in `main.tsx`), `setupChecklist.ts` (Home), `display.ts` (larger text / high contrast; header buttons + CSS in `index.css`)
+  - Undo: `reducer` in `store.ts` wraps `baseReducer`; big changes (see `undoMessage`) can be undone, any other business change clears the undo. UI `components/UndoToast.tsx`
   - `showMath.ts` "Show the math" explanations – built only from already-calculated results, never its own arithmetic (UI: `components/ShowMath.tsx`)
   - `importer.ts`, `templates.ts` Excel/CSV import and templates; `events.ts`, `challenges.ts`; `report.ts` + `reportPdf.ts`
   - `store.ts` single reducer for all app state; `types.ts` input shapes; `samples.ts` fictional sample businesses
@@ -62,5 +68,6 @@ Sage green / cream / white / pastel yellow / muted dark green; rounded cards, so
 - Fill in the README manual testing table (Actual Result / Pass-Fail) – only with real results.
 - Run real user testing, record feedback in the README section, and make at least one improvement based on it (required by the brief). Never invent feedback or results.
 - Vercel: remove the `price-it-right.ca` redirect unless the domain is actually owned and its DNS is set (A record @ → 216.198.79.1).
-- Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand, Decisions, Excel export, 12-month projection, Best mix optimizer, French toggle (9 Nov 2026).
+- Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand, Decisions, Excel export, 12-month projection, Best mix optimizer, French toggle (9 Nov 2026); budget vs actual, purchase plan, cost-plus pricing, saved scenarios, step fixed costs, guided tour, term tooltips, live profit bar, undo, setup checklist, larger text / high contrast (15 Nov 2026).
+- Not yet independently re-verified by a separate agent: the 15 Nov hand checks (variance $975 → $943, purchase plan $31.25 / $51.88, cost-plus $3.00 / $4.00, step costs 455 / 607 / $475).
 - Have a French speaker review the translations listed in README → Language.
