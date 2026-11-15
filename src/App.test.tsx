@@ -275,6 +275,56 @@ describe('decisions', () => {
   });
 });
 
+describe('Guided tour', () => {
+  const tourCard = () => screen.queryByRole('dialog', { name: /Welcome to Price It Right|\d\. / });
+  const navLink = (id: string) => document.querySelector(`nav a[href="#${id}"]`)!;
+
+  it('opens on a first visit, walks through the sections highlighting each tab, and can be skipped', async () => {
+    window.location.hash = 'home';
+    const user = userEvent.setup(FAST_USER);
+    const view = render(<App initial={initialAppState('demo')} autoTour />);
+    const card = within(tourCard()!);
+    expect(card.getByText('Tour – step 1 of 8')).toBeInTheDocument();
+
+    await user.click(card.getByRole('button', { name: /Next/ }));
+    expect(card.getByRole('heading', { name: '1. Start with your business' })).toBeInTheDocument();
+    expect(window.location.hash).toBe('#my-business');
+    expect(navLink('my-business')).toHaveClass('tour-highlight');
+
+    await user.click(card.getByRole('button', { name: /Next/ }));
+    expect(window.location.hash).toBe('#dashboard');
+    expect(navLink('my-business')).not.toHaveClass('tour-highlight');
+    await user.click(card.getByRole('button', { name: /Back/ }));
+    expect(window.location.hash).toBe('#my-business');
+
+    await user.click(card.getByRole('button', { name: 'Skip tour' }));
+    expect(tourCard()).not.toBeInTheDocument();
+    expect(navLink('my-business')).not.toHaveClass('tour-highlight');
+    expect(window.localStorage.getItem('price-it-right:tour-done')).toBe('yes');
+
+    // Not shown again on the next visit…
+    view.unmount();
+    render(<App initial={initialAppState('demo')} autoTour />);
+    expect(tourCard()).not.toBeInTheDocument();
+    // …but Home can restart it, and Escape closes it.
+    await go('home');
+    await user.click(within(panel('home')).getByRole('button', { name: /Take the tour/ }));
+    expect(tourCard()).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(tourCard()).not.toBeInTheDocument();
+  });
+
+  it('goes through all 8 steps and finishes', async () => {
+    window.location.hash = 'home';
+    const user = userEvent.setup(FAST_USER);
+    render(<App initial={initialAppState('demo')} autoTour />);
+    for (let i = 0; i < 7; i++) await user.click(within(tourCard()!).getByRole('button', { name: /Next/ }));
+    expect(window.location.hash).toBe('#report');
+    await user.click(within(tourCard()!).getByRole('button', { name: 'Finish' }));
+    expect(tourCard()).not.toBeInTheDocument();
+  });
+});
+
 describe('Step fixed costs', () => {
   it('adds a +$500 step above 600 units: break-even 455, again at 607, expected profit $475', async () => {
     const { user } = setup('dashboard', 'demo');

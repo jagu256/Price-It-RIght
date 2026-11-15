@@ -6,6 +6,7 @@ import { SectionVisibleContext } from './app/visibility';
 import { LanguageProvider, useLanguage } from './app/language';
 import { t } from './i18n/i18n';
 import Footer from './components/Footer';
+import { TourProvider } from './components/GuidedTour';
 import Header from './components/Header';
 import type { AppState } from './lib/store';
 import BusinessChallenge from './sections/BusinessChallenge';
@@ -31,21 +32,23 @@ function Panel({ id, route, children }: { id: SectionId; route: SectionId; child
   );
 }
 
-export default function App({ initial }: { initial?: AppState }) {
+/** `autoTour`: open the guided tour on a first visit (the real app turns it on; tests leave it off unless testing the tour). */
+export default function App({ initial, autoTour = false }: { initial?: AppState; autoTour?: boolean }) {
   return (
     <LanguageProvider>
-      <AppInner initial={initial} />
+      <AppInner initial={initial} autoTour={autoTour} />
     </LanguageProvider>
   );
 }
 
-function AppInner({ initial }: { initial?: AppState }) {
+function AppInner({ initial, autoTour }: { initial?: AppState; autoTour: boolean }) {
   const [route] = useRoute();
   // Reading the language here means the whole app redraws when it changes.
   useLanguage();
   return (
     <StoreProvider initial={initial}>
       <ConfirmProvider>
+        <TourProvider auto={autoTour}>
         <div className="flex min-h-screen flex-col">
           <button
             type="button"
@@ -68,6 +71,7 @@ function AppInner({ initial }: { initial?: AppState }) {
           </main>
           <Footer />
         </div>
+        </TourProvider>
       </ConfirmProvider>
     </StoreProvider>
   );

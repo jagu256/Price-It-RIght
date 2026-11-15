@@ -1,5 +1,6 @@
 import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
+import { useTour } from '../components/GuidedTour';
 import LearnSection from '../components/LearnSection';
 import { Rich } from '../components/ui';
 import { t, tx } from '../i18n/i18n';
@@ -16,6 +17,7 @@ const STEPS = [
 export default function Home() {
   const { state, dispatch } = useStore();
   const confirm = useConfirm();
+  const tour = useTour();
 
   const tryDemo = async () => {
     if (
@@ -52,6 +54,9 @@ export default function Home() {
               </a>
               <button type="button" onClick={tryDemo} className="btn-secondary px-6 py-4 text-lg">
                 <span aria-hidden="true">✨</span> {t('Try a Demo Business')}
+              </button>
+              <button type="button" onClick={tour.start} className="btn-small px-4 py-3">
+                <span aria-hidden="true">🧭</span> {t('Take the tour')}
               </button>
             </div>
             <p className="mt-3 text-sm text-sage-600">

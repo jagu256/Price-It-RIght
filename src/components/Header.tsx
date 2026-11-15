@@ -3,11 +3,13 @@ import { SECTIONS, type SectionId } from '../app/routes';
 import { useStore } from '../app/StoreContext';
 import { t } from '../i18n/i18n';
 import { getBusiness } from '../lib/businesses';
+import { useTour } from './GuidedTour';
 import Logo from './Logo';
 
 export default function Header({ route }: { route: SectionId }) {
   const { state } = useStore();
   const { lang, change } = useLanguage();
+  const { highlight } = useTour();
   const b = state.business;
   const business = getBusiness(b.type);
   return (
@@ -51,7 +53,7 @@ export default function Header({ route }: { route: SectionId }) {
                   aria-current={active ? 'page' : undefined}
                   className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 transition ${
                     active ? 'bg-sage-700 text-cream-50 shadow-soft' : 'text-sage-700 hover:bg-sage-100'
-                  }`}
+                  }${highlight === s.id ? ' tour-highlight' : ''}`}
                 >
                   <span aria-hidden="true">{s.emoji}</span>
                   {t(s.label)}

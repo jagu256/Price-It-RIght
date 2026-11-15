@@ -205,6 +205,14 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 352 tests in 27 files passed; build passed.
 
+### UI/UX – 6. Guided first-visit tour (15 Nov 2026)
+- New `src/lib/tour.ts` (8 steps; "done" flag in localStorage, wrapped in try/catch) and `components/GuidedTour.tsx` (a `TourProvider` with a small non-blocking card: Back / Next / Skip / Finish, Esc, focus moved to the card). Home has a **🧭 Take the tour** button.
+- `App` has an `autoTour` prop: the real app (`main.tsx`) turns it on, and the tests leave it off so the tour doesn't get in the way of other tests. A dedicated test turns it on.
+- **Bug caught by a test:** the first version added the highlight class to the tab directly, and React removed it when the page changed. The Header now draws the highlight from the tour's state.
+- Checked in the browser at 375 px: the card fits at the bottom, the tab is outlined, and there is no sideways scrolling.
+
+**Checks:** 357 tests in 28 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

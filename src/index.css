@@ -120,6 +120,19 @@ input[type='range'].slider::-moz-range-thumb {
   }
 }
 
+/* Guided tour: the tab the tour is talking about. */
+.tour-highlight {
+  outline: 3px solid #c9a227;
+  outline-offset: 2px;
+  animation: tour-pulse 1.6s ease-in-out infinite;
+}
+@keyframes tour-pulse {
+  50% { outline-color: rgba(201, 162, 39, 0.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-highlight { animation: none; }
+}
+
 /* Keep visually-hidden (absolutely positioned) labels inside scrolling tables,
    so they can't widen the page. */
 .overflow-x-auto,
