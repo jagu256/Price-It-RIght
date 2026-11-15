@@ -8,6 +8,7 @@ import { t } from './i18n/i18n';
 import Footer from './components/Footer';
 import { TourProvider } from './components/GuidedTour';
 import Header from './components/Header';
+import UndoToast from './components/UndoToast';
 import type { AppState } from './lib/store';
 import BusinessChallenge from './sections/BusinessChallenge';
 import BusinessReport from './sections/BusinessReport';
@@ -70,6 +71,7 @@ function AppInner({ initial, autoTour }: { initial?: AppState; autoTour: boolean
             <Panel id="report" route={route}><BusinessReport /></Panel>
           </main>
           <Footer />
+          <UndoToast />
         </div>
         </TourProvider>
       </ConfirmProvider>

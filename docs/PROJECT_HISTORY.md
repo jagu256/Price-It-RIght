@@ -229,6 +229,13 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 361 tests in 29 files passed; build passed.
 
+### UI/UX – 9. Undo after delete or Apply (15 Nov 2026)
+- The reducer in `src/lib/store.ts` is now a small wrapper around the original (`baseReducer`). For big changes (listed in `undoMessage`) it remembers the previous business and baseline. `undo` restores them and `undo-dismiss` forgets them. **Any other change to the business clears the undo**, so undoing can never silently throw away a later edit. Experiments (What-If, planner) don't clear it.
+- `components/UndoToast.tsx` shows the message with ↩ Undo and ✕. It closes after 15 s and sits at the top right so it doesn't cover the live profit bar. Existing confirmations stay. Undo is an extra safety net, not a replacement.
+- Messages are stored as English keys and translated when shown, so they follow the language switch.
+
+**Checks:** 369 tests in 30 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

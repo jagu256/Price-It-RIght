@@ -5,6 +5,7 @@
  * Experiments (Pricing Lab scenario, Production Planner plan, surprise events)
  * are kept SEPARATE from the business plan until the user explicitly applies them.
  */
+import { tx } from '../i18n/i18n';
 import type { BusinessId } from './businesses';
 import type { UnitId } from './inventory';
 import { sampleBusiness } from './samples';
@@ -31,6 +32,18 @@ export interface AppState {
   scenario: ScenarioOverrides;
   planner: PlannerOverrides;
   nextId: number;
+  /** The business just before the last big change (delete, import, apply…), so it can be undone. */
+  undo?: UndoInfo;
+}
+
+export interface UndoInfo {
+  business: BusinessData;
+  baseline: string;
+  /** English message key (translated when shown) and its values. */
+  message: string;
+  vars?: Record<string, string | number>;
+  /** Changes every time, so the message can restart its timer. */
+  id: number;
 }
 
 type ProductTextField = 'name' | 'category' | 'price' | 'variableCost' | 'units';
@@ -64,7 +77,57 @@ export type Action =
   | { type: 'planner-reset' }
   | { type: 'replace-business'; business: BusinessData }
   /** A business restored from this device or imported from a save file. Experiments start empty. */
-  | { type: 'load-business'; business: BusinessData; nextId: number };
+  | { type: 'load-business'; business: BusinessData; nextId: number }
+  | { type: 'undo' }
+  | { type: 'undo-dismiss' };
+
+/** The big changes that can be undone, with the message shown afterwards. */
+function undoMessage(state: AppState, action: Action): { message: string; vars?: Record<string, string | number> } | null {
+  const b = state.business;
+  switch (action.type) {
+    case 'delete-product':
+      return { message: tx('Deleted the product “{name}”.'), vars: { name: b.products.find((p) => p.id === action.id)?.name.trim() || tx('Unnamed product') } };
+    case 'delete-stock':
+      return { message: tx('Deleted the inventory item “{name}”.'), vars: { name: b.inventory.find((i) => i.id === action.id)?.name.trim() || tx('Unnamed item') } };
+    case 'clear-stock':
+      return { message: tx('Removed all inventory items.') };
+    case 'import-stock':
+      return { message: action.mode === 'replace' ? tx('Replaced your inventory with the imported items.') : tx('Added the imported inventory items.') };
+    case 'import-recipes':
+      return { message: tx('Imported the recipes.') };
+    case 'scenario-apply':
+      return { message: tx('Applied the modified plan to your business.') };
+    case 'load-sample':
+      return { message: tx('Loaded a different business.') };
+    case 'load-business':
+      return { message: tx('Loaded a saved business.') };
+    case 'replace-business':
+      return { message: tx('Applied the event to your business.') };
+    default:
+      return null;
+  }
+}
+
+let undoCounter = 0;
+
+/**
+ * The app's single reducer. Big changes remember the previous business so they
+ * can be undone; any OTHER change to the business clears that, because undoing
+ * afterwards would also throw away the later change.
+ */
+export function reducer(state: AppState, action: Action): AppState {
+  if (action.type === 'undo') {
+    if (!state.undo) return state;
+    const { business, baseline } = state.undo;
+    return { ...state, business, baseline, undo: undefined };
+  }
+  if (action.type === 'undo-dismiss') return state.undo ? { ...state, undo: undefined } : state;
+  const next = baseReducer(state, action);
+  if (next.business === state.business) return next;
+  const m = undoMessage(state, action);
+  if (m) return { ...next, undo: { business: state.business, baseline: state.baseline, ...m, id: ++undoCounter } };
+  return next.undo ? { ...next, undo: undefined } : next;
+}
 
 function idMaker(state: { nextId: number }) {
   let n = state.nextId;
@@ -120,7 +183,7 @@ function uniqueName(base: string, taken: string[]): string {
   }
 }
 
-export function reducer(state: AppState, action: Action): AppState {
+function baseReducer(state: AppState, action: Action): AppState {
   const b = state.business;
   switch (action.type) {
     case 'load-sample': {

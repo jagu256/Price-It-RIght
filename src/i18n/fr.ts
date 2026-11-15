@@ -1709,4 +1709,17 @@ export const FR: Record<string, string> = {
   'See the dashboard': 'Voir le tableau de bord',
   'Fix {n} highlighted field to see your results.': 'Corrigez {n} champ en surbrillance pour voir vos résultats.',
   'Fix {n} highlighted fields to see your results.': 'Corrigez {n} champs en surbrillance pour voir vos résultats.',
+  /* Undo */
+  'Undo': 'Annuler',
+  'Close': 'Fermer',
+  'Deleted the product “{name}”.': 'Produit « {name} » supprimé.',
+  'Deleted the inventory item “{name}”.': 'Article en stock « {name} » supprimé.',
+  'Removed all inventory items.': 'Tous les articles en stock ont été retirés.',
+  'Replaced your inventory with the imported items.': 'Vos stocks ont été remplacés par les articles importés.',
+  'Added the imported inventory items.': 'Les articles importés ont été ajoutés aux stocks.',
+  'Imported the recipes.': 'Les recettes ont été importées.',
+  'Applied the modified plan to your business.': 'Le plan modifié a été appliqué à votre entreprise.',
+  'Loaded a different business.': 'Une autre entreprise a été chargée.',
+  'Loaded a saved business.': 'Une entreprise enregistrée a été chargée.',
+  'Applied the event to your business.': 'L’événement a été appliqué à votre entreprise.',
 };

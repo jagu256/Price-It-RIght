@@ -275,6 +275,50 @@ describe('decisions', () => {
   });
 });
 
+describe('Undo', () => {
+  const toast = () => document.querySelector<HTMLElement>('[role="status"].fixed');
+
+  it('undoes a deleted product and an applied What-If plan', async () => {
+    const { user } = setup('my-business', 'demo');
+    const mb = within(panel('my-business'));
+    await user.click(mb.getByRole('button', { name: 'Delete Muffin' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Delete product' }));
+    expect(mb.queryByDisplayValue('Muffin')).not.toBeInTheDocument();
+    expect(toast()).toHaveTextContent('Deleted the product “Muffin”.');
+    await user.click(within(toast()!).getByRole('button', { name: /Undo/ }));
+    expect(mb.getByDisplayValue('Muffin')).toBeInTheDocument();
+    expect(toast()).toBeNull();
+    expect(mb.getByRole('complementary', { name: 'Live results' })).toHaveTextContent('Operating profit $975');
+
+    await go('pricing');
+    const lab = within(panel('pricing'));
+    const price = lab.getByLabelText('Modified price for Coffee');
+    await user.clear(price);
+    await user.type(price, '7');
+    await user.click(lab.getByRole('button', { name: /Apply Changes/ }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Apply changes' }));
+    expect(toast()).toHaveTextContent('Applied the modified plan to your business.');
+    expect(within(panel('my-business')).getByLabelText('Selling price per unit for Coffee')).toHaveValue('7');
+    await user.click(within(toast()!).getByRole('button', { name: /Undo/ }));
+    expect(within(panel('my-business')).getByLabelText('Selling price per unit for Coffee')).toHaveValue('6');
+  });
+
+  it('closes with ✕, and a later edit removes the chance to undo (so the edit is never lost)', async () => {
+    const { user } = setup('my-business', 'demo');
+    const mb = within(panel('my-business'));
+    await user.click(mb.getByRole('button', { name: 'Delete Cookie' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Delete product' }));
+    await user.click(within(toast()!).getByRole('button', { name: 'Close' }));
+    expect(toast()).toBeNull();
+
+    await user.click(mb.getByRole('button', { name: 'Delete Sandwich' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Delete product' }));
+    expect(toast()).not.toBeNull();
+    await user.type(mb.getByLabelText('Selling price per unit for Coffee'), '5'); // 6 → 65
+    expect(toast()).toBeNull();
+  });
+});
+
 describe('Live profit bar', () => {
   it('updates as you type in My Business, and pauses (never shows 0) when a value is invalid', async () => {
     const { user } = setup('my-business', 'demo');
