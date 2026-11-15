@@ -23,7 +23,7 @@ export default function CostPlusPricing() {
 
   return (
     <section aria-labelledby="costplus-title" className="space-y-5">
-      <SubHeader id="costplus-title" emoji="🏷️" title={t('Cost-plus pricing helper')} subtitle={t('Get a starting price from a product’s variable cost, using a markup or a target margin.')} />
+      <SubHeader id="costplus-title" emoji="🏷️" title={t('Cost-plus pricing helper')} term="markup" subtitle={t('Get a starting price from a product’s variable cost, using a markup or a target margin.')} />
       <div className="card space-y-4 p-5 sm:p-6">
         <div className="flex flex-wrap items-end gap-4">
           <label className="flex flex-col gap-1 text-sm font-semibold text-sage-800">

@@ -11,6 +11,7 @@ import Sensitivity from '../components/Sensitivity';
 import StepFixedCosts from '../components/StepFixedCosts';
 import VarianceAnalysis from '../components/VarianceAnalysis';
 import ShowMath from '../components/ShowMath';
+import TermTip from '../components/TermTip';
 import { NeedsValidBusiness, Notice, SectionHeader, SubHeader } from '../components/ui';
 import { t } from '../i18n/i18n';
 import { calculate } from '../lib/accounting';
@@ -57,12 +58,13 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <ResultCard title={t('Total Monthly Revenue')} value={formatCAD(s.totalRevenue)} detail={t('Sum of every product’s price × expected units.')} icon={<CoinsIcon />} math={math.revenue} />
-        <ResultCard title={t('Total Variable Costs')} value={formatCAD(s.totalVariableCosts)} detail={t('Costs that grow with each unit sold.')} icon={<TagIcon />} math={math.variableCosts} />
-        <ResultCard title={t('Total Contribution Margin')} value={formatCAD(s.totalCM)} detail={t('Revenue − variable costs. What’s left to cover fixed costs.')} icon={<PieIcon />} tone={s.totalCM < 0 ? 'loss' : 'neutral'} math={math.contributionMargin} />
-        <ResultCard title={t('Monthly Fixed Costs')} value={formatCAD(s.fixedCosts)} detail={t('Entered once for the whole business.')} icon={<ShieldIcon />} math={math.fixedCosts} />
+        <ResultCard title={t('Total Monthly Revenue')} term="revenue" value={formatCAD(s.totalRevenue)} detail={t('Sum of every product’s price × expected units.')} icon={<CoinsIcon />} math={math.revenue} />
+        <ResultCard title={t('Total Variable Costs')} term="variableCosts" value={formatCAD(s.totalVariableCosts)} detail={t('Costs that grow with each unit sold.')} icon={<TagIcon />} math={math.variableCosts} />
+        <ResultCard title={t('Total Contribution Margin')} term="contributionMargin" value={formatCAD(s.totalCM)} detail={t('Revenue − variable costs. What’s left to cover fixed costs.')} icon={<PieIcon />} tone={s.totalCM < 0 ? 'loss' : 'neutral'} math={math.contributionMargin} />
+        <ResultCard title={t('Monthly Fixed Costs')} term="fixedCosts" value={formatCAD(s.fixedCosts)} detail={t('Entered once for the whole business.')} icon={<ShieldIcon />} math={math.fixedCosts} />
         <ResultCard
           title={profit < 0 ? t('Projected Operating Loss') : t('Projected Operating Profit')}
+          term="operatingProfit"
           value={formatCAD(profit)}
           badge={profit > 0 ? t('Profit') : profit < 0 ? t('Loss') : t('Break-even')}
           detail={t('Total contribution margin − fixed costs.')}
@@ -72,6 +74,7 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
         />
         <ResultCard
           title={t('Overall CM Ratio')}
+          term="cmRatio"
           value={s.overallCMRatio === null ? t('N/A') : formatPercent(s.overallCMRatio)}
           detail={s.overallCMRatio === null ? t('Not available when expected revenue is $0.') : t('Share of each sales dollar left after variable costs.')}
           icon={<PieIcon />}
@@ -200,7 +203,7 @@ function BreakEven({ s, products }: { s: BusinessSummary; products: ParsedProduc
   const name = new Map(products.map((p) => [p.id, p.name]));
   return (
     <section aria-labelledby="breakeven-title" className="card space-y-4 p-5 sm:p-8">
-      <SubHeader id="breakeven-title" emoji="⚖️" title={t('Break-even analysis (whole business)')} subtitle={t('How much you need to sell to cover all fixed costs – assuming your expected sales mix stays the same.')} />
+      <SubHeader id="breakeven-title" emoji="⚖️" title={t('Break-even analysis (whole business)')} term="breakEven" subtitle={t('How much you need to sell to cover all fixed costs – assuming your expected sales mix stays the same.')} />
       <Notice tone="idea" title={t('Constant sales-mix assumption')}>
         {s.salesMix
           ? t('With several products, break-even depends on the mix. This uses your expected mix: {mix}.', {
@@ -245,6 +248,7 @@ function BreakEven({ s, products }: { s: BusinessSummary; products: ParsedProduc
             {s.marginOfSafety !== null && s.marginOfSafetyPercent !== null
               ? `${t('Margin of safety: {amount} ({pct} of expected revenue, measured against the theoretical break-even revenue of {be}).', { amount: formatCAD(s.marginOfSafety), pct: formatPercent(s.marginOfSafetyPercent), be: formatCAD(be.revenueExact) })} ${s.marginOfSafety >= 0 ? t('Sales could fall this much before reaching break-even.') : t('Expected revenue is below break-even.')}`
               : t('Margin of safety: Not Available.')}
+            <TermTip id="marginOfSafety" />
           </p>
           <ShowMath label={t('margin of safety')} items={marginOfSafetyMath(s)} />
         </>

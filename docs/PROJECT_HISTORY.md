@@ -213,6 +213,16 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 357 tests in 28 files passed; build passed.
 
+### UI/UX – 7. Term tooltips (15 Nov 2026)
+- New `src/lib/glossary.ts` (22 one-line definitions, consistent with "Understand Your Numbers") and `components/TermTip.tsx`: an **i** button (`aria-expanded`, label "What is …?") showing a short note. `ResultCard` and `SubHeader` got an optional `term` prop. The ⓘ sits next to the heading, not inside it, so headings keep their names.
+- **Two problems found by checking at phone width in the browser:**
+  1. The first version opened the box beside the button, and near the screen edges part of it ran off the screen (−21 px / 438 px on a 375 px phone). The box is now placed from the button's position and kept within 8 px of each edge.
+  2. Inside the dashboard cards it then appeared hundreds of pixels away, because the cards' lift animation (a CSS transform) changes what "fixed" positions are measured from. The box is now drawn at the top level of the page with a React portal.
+  Re-measured: every box opens 6 px under its button and stays within the screen.
+- The box closes on a second tap, Esc, a click elsewhere or scrolling.
+
+**Checks:** 360 tests in 29 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

@@ -6,6 +6,7 @@ import { formatLeverage, operatingLeverage, sensitivity, tornadoOrder } from '..
 import { leverageMath, sensitivityMath } from '../lib/showMath';
 import ChartContainer from './ChartContainer';
 import ShowMath from './ShowMath';
+import TermTip from './TermTip';
 import { Notice, SignedMoney, SubHeader } from './ui';
 
 const PERCENT = 10;
@@ -22,6 +23,7 @@ export default function Sensitivity({ s }: { s: BusinessSummary }) {
     <section aria-labelledby="sensitivity-title" className="card space-y-5 p-5 sm:p-8">
       <SubHeader
         id="sensitivity-title"
+        term="sensitivity"
         emoji="🌪️"
         title={t('Sensitivity analysis')}
         subtitle={t('How much operating profit (now {profit}) changes if ONE input moves by {pct} and everything else stays the same.', { profit: formatCAD(r.baseProfit), pct })}
@@ -84,7 +86,7 @@ export default function Sensitivity({ s }: { s: BusinessSummary }) {
       </figure>
 
       <div className="rounded-2xl bg-cream-50 p-4 ring-1 ring-sage-100" aria-live="polite">
-        <p className="text-xs font-bold uppercase tracking-wider text-sage-600">{t('Degree of operating leverage (DOL)')}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-sage-600">{t('Degree of operating leverage (DOL)')}<TermTip id="operatingLeverage" /></p>
         {dol.status === 'ok' ? (
           <>
             <p className="mt-1 font-display text-3xl font-extrabold tabular-nums text-sage-900">{formatLeverage(dol.value)}</p>

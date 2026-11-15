@@ -43,6 +43,7 @@ export default function StepFixedCosts() {
     <section aria-labelledby="steps-title" className="card space-y-5 p-5 sm:p-8">
       <SubHeader
         id="steps-title"
+        term="relevantRange"
         emoji="🪜"
         title={t('Step fixed costs (relevant range)')}
         subtitle={t('Fixed costs are only fixed within a range. Add a step such as “above 600 units a month we need another staff member: +$500”, and see where you break even.')}

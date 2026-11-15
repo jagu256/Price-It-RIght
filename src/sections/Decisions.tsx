@@ -62,7 +62,7 @@ function SpecialOrder() {
 
   return (
     <section aria-labelledby="special-title" className="card space-y-5 p-5 sm:p-8">
-      <SubHeader id="special-title" emoji="📨" title={t('Special order')} subtitle={t('A customer offers to buy a one-off batch at a special price. Does it add to profit, and can your stock cover it?')} />
+      <SubHeader id="special-title" emoji="📨" title={t('Special order')} term="incrementalProfit" subtitle={t('A customer offers to buy a one-off batch at a special price. Does it add to profit, and can your stock cover it?')} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <label htmlFor="so-product" className="block text-sm font-semibold text-sage-900">{t('Product')}</label>
@@ -193,7 +193,7 @@ function MakeOrBuy() {
 
   return (
     <section aria-labelledby="mob-title" className="card space-y-5 p-5 sm:p-8">
-      <SubHeader id="mob-title" emoji="⚖️" title={t('Make or buy')} subtitle={t('Should you make an item yourself or buy it from a supplier? Compare only the costs that would change.')} />
+      <SubHeader id="mob-title" emoji="⚖️" title={t('Make or buy')} term="relevantCost" subtitle={t('Should you make an item yourself or buy it from a supplier? Compare only the costs that would change.')} />
       {first && (
         <label className="flex flex-wrap items-center gap-2 text-sm font-semibold text-sage-900">
           {t('Start from a product')}

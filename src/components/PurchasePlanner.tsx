@@ -42,7 +42,7 @@ export default function PurchasePlanner() {
 
   return (
     <section aria-labelledby="buy-title" className="space-y-5">
-      <SubHeader id="buy-title" emoji="🛒" title={t('What should I buy?')} subtitle={t('A shopping list so your inventory covers expected sales for every product with a recipe.')} />
+      <SubHeader id="buy-title" emoji="🛒" title={t('What should I buy?')} term="safetyStock" subtitle={t('A shopping list so your inventory covers expected sales for every product with a recipe.')} />
       <div className="card space-y-4 p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="buy-buffer" className="text-sm font-semibold text-sage-800">{t('Safety buffer (extra % above expected needs)')}</label>

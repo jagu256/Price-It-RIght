@@ -275,6 +275,32 @@ describe('decisions', () => {
   });
 });
 
+describe('Term tooltips', () => {
+  it('shows a one-line definition when the ⓘ next to a term is tapped, and closes on a second tap, Escape or a click elsewhere', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const dash = within(panel('dashboard'));
+    const tip = dash.getByRole('button', { name: 'What is “Contribution margin”?' });
+    expect(tip).toHaveAttribute('aria-expanded', 'false');
+    await user.click(tip);
+    expect(tip).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('note')).toHaveTextContent('Contribution margin: Selling price − variable cost.');
+    await user.click(tip);
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+
+    await user.click(dash.getByRole('button', { name: 'What is “Operating profit”?' }));
+    expect(screen.getByRole('note')).toHaveTextContent('It is not net income');
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+
+    await user.click(dash.getByRole('button', { name: 'What is “Margin of safety”?' }));
+    expect(screen.getByRole('note')).toBeInTheDocument();
+    await user.click(dash.getByRole('heading', { name: /Your Business at a Glance/ }));
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    // Headings keep their own names (the ⓘ sits next to them, not inside).
+    expect(dash.getByRole('heading', { name: 'Projected Operating Profit' })).toBeInTheDocument();
+  });
+});
+
 describe('Guided tour', () => {
   const tourCard = () => screen.queryByRole('dialog', { name: /Welcome to Price It Right|\d\. / });
   const navLink = (id: string) => document.querySelector(`nav a[href="#${id}"]`)!;

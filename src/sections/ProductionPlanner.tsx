@@ -201,7 +201,7 @@ function ResourceRanking({ resource, setResource, bindingId }: { resource: strin
 
   return (
     <section aria-labelledby="rank-title" className="card space-y-4 p-5 sm:p-8">
-      <SubHeader id="rank-title" emoji="🥇" title={t('Contribution margin per unit of a scarce resource')} subtitle={t('CM per unit ÷ amount of the scarce item used. When ONE item limits production, this shows which products use it best.')} />
+      <SubHeader id="rank-title" emoji="🥇" title={t('Contribution margin per unit of a scarce resource')} term="scarceResource" subtitle={t('CM per unit ÷ amount of the scarce item used. When ONE item limits production, this shows which products use it best.')} />
       <label className="flex flex-wrap items-center gap-2 text-sm font-semibold">
         {t('Scarce inventory item')}
         <select className="select" value={resource ?? ''} onChange={(e) => setResource(e.target.value)}>

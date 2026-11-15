@@ -45,6 +45,7 @@ export default function AfterTaxTarget({ plan, onChange }: { plan: TaxPlanInput;
     <section aria-labelledby="tax-title" className="card space-y-5 p-5 sm:p-8">
       <SubHeader
         id="tax-title"
+        term="afterTax"
         emoji="🧾"
         title={t('After-tax target profit (optional)')}
         subtitle={t('Plan for the profit you want to keep after income tax. The tools below then aim for the pre-tax profit needed.')}

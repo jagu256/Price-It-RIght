@@ -72,6 +72,7 @@ export default function VarianceAnalysis() {
     <section aria-labelledby="variance-title" className="card space-y-5 p-5 sm:p-8">
       <SubHeader
         id="variance-title"
+        term="variance"
         emoji="📋"
         title={t('Budget vs actual')}
         subtitle={t('After a month, type in what really happened. The app explains the difference from your plan (the budget) as variances. Nothing here changes your business.')}

@@ -1,6 +1,8 @@
 /** Small shared building blocks so every section looks and behaves the same. */
 import type { ReactNode } from 'react';
 import { t, tx } from '../i18n/i18n';
+import type { TermId } from '../lib/glossary';
+import TermTip from './TermTip';
 import type { StockStatus } from '../lib/planning';
 
 export function SectionHeader({ emoji, title, subtitle, eyebrow, id }: { emoji?: string; title: string; subtitle?: string; eyebrow?: string; id?: string }) {
@@ -16,13 +18,17 @@ export function SectionHeader({ emoji, title, subtitle, eyebrow, id }: { emoji?:
   );
 }
 
-export function SubHeader({ emoji, title, subtitle, id }: { emoji?: string; title: string; subtitle?: ReactNode; id?: string }) {
+/** `term`: shows an ⓘ button with a one-line definition next to the heading. */
+export function SubHeader({ emoji, title, subtitle, id, term }: { emoji?: string; title: string; subtitle?: ReactNode; id?: string; term?: TermId }) {
   return (
     <div>
-      <h3 id={id} className="text-2xl font-bold text-sage-900">
-        {emoji && <span aria-hidden="true">{emoji} </span>}
-        {title}
-      </h3>
+      <div className="flex flex-wrap items-center gap-1">
+        <h3 id={id} className="text-2xl font-bold text-sage-900">
+          {emoji && <span aria-hidden="true">{emoji} </span>}
+          {title}
+        </h3>
+        {term && <TermTip id={term} />}
+      </div>
       {subtitle && <p className="mt-1 max-w-3xl text-sage-700">{subtitle}</p>}
     </div>
   );
