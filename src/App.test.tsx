@@ -275,6 +275,39 @@ describe('decisions', () => {
   });
 });
 
+describe('Live profit bar', () => {
+  it('updates as you type in My Business, and pauses (never shows 0) when a value is invalid', async () => {
+    const { user } = setup('my-business', 'demo');
+    const mb = within(panel('my-business'));
+    const bar = () => mb.getByRole('complementary', { name: 'Live results' });
+    expect(bar()).toHaveTextContent('Revenue $3,900');
+    expect(bar()).toHaveTextContent('Operating profit $975');
+
+    const price = mb.getByLabelText('Selling price per unit for Coffee');
+    await user.clear(price);
+    await user.type(price, '7'); // +$1 × 300
+    expect(bar()).toHaveTextContent('Revenue $4,200');
+    expect(bar()).toHaveTextContent('Operating profit $1,275');
+
+    await user.clear(price);
+    await user.type(price, 'abc');
+    expect(bar()).toHaveTextContent('Fix 1 highlighted field to see your results.');
+    expect(bar()).not.toHaveTextContent('$');
+
+    const fixed = document.getElementById('fixed-costs') as HTMLInputElement;
+    await user.clear(fixed);
+    await user.type(fixed, '-5');
+    expect(bar()).toHaveTextContent('Fix 2 highlighted fields to see your results.');
+
+    await user.clear(price);
+    await user.type(price, '1');
+    await user.clear(fixed);
+    await user.type(fixed, '1500'); // Coffee CM now −$1 × 300 → profit $975 − $1,500 = −$525
+    expect(bar()).toHaveTextContent('Operating loss −$525');
+    expect(bar().querySelector('a')).toHaveAttribute('href', '#dashboard');
+  });
+});
+
 describe('Term tooltips', () => {
   it('shows a one-line definition when the ⓘ next to a term is tapped, and closes on a second tap, Escape or a click elsewhere', async () => {
     const { user } = setup('dashboard', 'demo');

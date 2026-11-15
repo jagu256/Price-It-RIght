@@ -1700,4 +1700,13 @@ export const FR: Record<string, string> = {
   'Extra inventory kept above expected needs, in case sales are higher or deliveries are late.': 'Stock supplémentaire gardé au-delà des besoins prévus, au cas où les ventes seraient plus élevées ou les livraisons en retard.',
   'After-tax profit': 'Bénéfice après impôts',
   'Operating profit minus estimated income tax. Required pre-tax profit = after-tax target ÷ (1 − tax rate).': 'Bénéfice d’exploitation moins l’impôt sur le revenu estimé. Bénéfice avant impôts requis = cible après impôts ÷ (1 − taux d’imposition).',
+  /* Live profit bar */
+  'Live results': 'Résultats en direct',
+  'CM': 'MCV',
+  'Operating loss': 'Perte d’exploitation',
+  'Add a product to see your results.': 'Ajoutez un produit pour voir vos résultats.',
+  'Results are paused until every value is valid.': 'Les résultats sont en pause tant que toutes les valeurs ne sont pas valides.',
+  'See the dashboard': 'Voir le tableau de bord',
+  'Fix {n} highlighted field to see your results.': 'Corrigez {n} champ en surbrillance pour voir vos résultats.',
+  'Fix {n} highlighted fields to see your results.': 'Corrigez {n} champs en surbrillance pour voir vos résultats.',
 };

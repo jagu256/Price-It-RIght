@@ -7,6 +7,7 @@ import SaveMyWork from '../components/SaveMyWork';
 import { Notice, Rich, SectionHeader } from '../components/ui';
 import { t } from '../i18n/i18n';
 import { getBusiness, type BusinessId } from '../lib/businesses';
+import LiveProfitBar from '../components/LiveProfitBar';
 import { hasUnsavedWork } from '../lib/store';
 
 export default function MyBusiness() {
@@ -90,6 +91,7 @@ export default function MyBusiness() {
 
       <ProductCollection />
       <SaveMyWork />
+      <LiveProfitBar />
     </div>
   );
 }

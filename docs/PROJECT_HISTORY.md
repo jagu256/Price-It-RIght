@@ -223,6 +223,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 360 tests in 29 files passed; build passed.
 
+### UI/UX – 8. Live profit bar (15 Nov 2026)
+- New `components/LiveProfitBar.tsx`: a sticky bar at the bottom of My Business showing revenue, CM and operating profit/loss from `model.summary` (no maths of its own), plus a dashboard link. When values are invalid it says how many fields need fixing (counted per field, not per product), and it never shows $0 in place of an unknown result.
+- On the dark bar it uses light colours instead of the usual green/red money colours, which would have been hard to read. Checked at 375 px: it stays at the bottom while scrolling, within the screen width.
+
+**Checks:** 361 tests in 29 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
