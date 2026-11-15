@@ -236,6 +236,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 369 tests in 30 files passed; build passed.
 
+### UI/UX – 10. Setup checklist on Home (15 Nov 2026)
+- New `src/lib/setupChecklist.ts` (5 items from the validated model: name, fixed costs, valid products, and inventory and recipes, both marked optional) and `components/SetupChecklist.tsx` under the Home hero: "x of 5 done", an accessible progress bar, ✅/⬜ per item with screen-reader "Done:/To do:", and a Go → link to the right section for anything missing.
+- Nothing is assumed: an invalid value or a product without a recipe is never ticked. The Coffee Shop example shows 4 of 5 because its Sandwich has no recipe, on purpose.
+
+**Checks:** 374 tests in 31 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

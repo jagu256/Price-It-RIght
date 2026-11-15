@@ -275,6 +275,26 @@ describe('decisions', () => {
   });
 });
 
+describe('Setup checklist', () => {
+  it('ticks itself off as the business is set up, with links to what is missing', async () => {
+    const { user } = setup('home', 'coffee');
+    const card = within(within(panel('home')).getByRole('heading', { name: /Your setup checklist/ }).closest('section')!);
+    expect(card.getByText('4 of 5 done')).toBeInTheDocument(); // Sandwich has no recipe
+    expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '4');
+    expect(card.getByRole('link', { name: 'Go to: Give every product a recipe' })).toHaveAttribute('href', '#inventory');
+    expect(card.getByText(/The essentials are done/)).toBeInTheDocument();
+
+    await go('my-business');
+    const fixed = document.getElementById('fixed-costs') as HTMLInputElement;
+    await user.clear(fixed);
+    await user.type(fixed, 'abc');
+    await go('home');
+    expect(card.getByText('3 of 5 done')).toBeInTheDocument();
+    expect(card.getByRole('link', { name: 'Go to: Enter monthly fixed costs' })).toHaveAttribute('href', '#my-business');
+    expect(card.queryByText(/The essentials are done/)).not.toBeInTheDocument();
+  });
+});
+
 describe('Undo', () => {
   const toast = () => document.querySelector<HTMLElement>('[role="status"].fixed');
 

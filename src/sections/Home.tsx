@@ -2,6 +2,7 @@ import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
 import { useTour } from '../components/GuidedTour';
 import LearnSection from '../components/LearnSection';
+import SetupChecklist from '../components/SetupChecklist';
 import { Rich } from '../components/ui';
 import { t, tx } from '../i18n/i18n';
 import { formatCAD } from '../lib/format';
@@ -66,6 +67,8 @@ export default function Home() {
           <HeroCard />
         </div>
       </section>
+
+      <SetupChecklist />
 
       <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6" aria-labelledby="steps-title">
         <h2 id="steps-title" className="sr-only">{t('How it works')}</h2>
