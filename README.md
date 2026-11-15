@@ -507,6 +507,8 @@ A separate AI agent that had **not seen the code or tests** was given only the p
 
 > **TO BE COMPLETED BY THE PROJECT TEAM.** No real user testing has been done yet. Do not fill this in until a real person has used the app.
 
+Use [docs/USER_TESTING_KIT.md](docs/USER_TESTING_KIT.md) (tasks, questions and a record sheet) to run the sessions, and [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for the 5-minute oral demo.
+
 | Item | Details |
 |---|---|
 | Tester (role, not full name) | |
