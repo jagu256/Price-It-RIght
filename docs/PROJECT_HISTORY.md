@@ -170,6 +170,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 - **Every figure matched** (table in README → Independent verification). The checker also pointed out that $13.36 falls short of $200 profit inside the $8.58–$13.40 range. The app already allows for this: it reports only the lowest and highest qualifying price.
 - **Final checks:** 307 tests in 22 files passed; build passed.
 
+### More features – 1. Budget vs actual (15 Nov 2026)
+- The user asked for every item on the list of extra features and UI/UX changes, one at a time. The first was variance analysis, chosen for its accounting value.
+- New `src/lib/variance.ts` (flexible-budget variances in whole cents with BigInt; the quantity variance is rounded to the cent and mix is the remainder, so the variances add up exactly) and the `components/VarianceAnalysis.tsx` panel on the Profit Dashboard, prefilled with the budget and not saved.
+- Hand-worked example: $975 budget → $943 actual (+5 − 32 + 45 − 50), checked directly from the actual figures.
+- **AI slip caught by a test:** the first test multiplied units by 1.1, and in JavaScript 300 × 1.1 is not exactly 330. The test now uses whole-number arithmetic. The app's own inputs are always whole units because they are validated.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

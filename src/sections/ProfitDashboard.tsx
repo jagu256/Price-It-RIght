@@ -8,6 +8,7 @@ import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
 import SeasonalProjection from '../components/SeasonalProjection';
 import Sensitivity from '../components/Sensitivity';
+import VarianceAnalysis from '../components/VarianceAnalysis';
 import ShowMath from '../components/ShowMath';
 import { NeedsValidBusiness, Notice, SectionHeader, SubHeader } from '../components/ui';
 import { t } from '../i18n/i18n';
@@ -82,6 +83,7 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
       <BreakEven s={s} products={products} />
       <Sensitivity s={s} />
       <SeasonalProjection />
+      <VarianceAnalysis />
       <SingleProductBreakEven products={products} fixedCosts={s.fixedCosts} />
     </>
   );

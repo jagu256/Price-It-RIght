@@ -275,6 +275,41 @@ describe('decisions', () => {
   });
 });
 
+describe('Budget vs actual', () => {
+  it('explains the hand-worked month: budget $975 → actual $943, with every variance', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const sec = within(within(panel('dashboard')).getByRole('heading', { name: 'Budget vs actual' }).closest('section')!);
+    const row = (name: string) => sec.getByRole('rowheader', { name }).closest('tr')!;
+    // Starts from the budget: no variance.
+    expect(row('Total variance')).toHaveTextContent('$0');
+    const type = async (label: string, value: string) => {
+      const f = sec.getByLabelText(label);
+      await user.clear(f);
+      await user.type(f, value);
+    };
+    await type('Actual units sold of Coffee', '320');
+    await type('Actual variable cost per unit of Coffee', '2.10');
+    await type('Actual units sold of Muffin', '140');
+    await type('Actual units sold of Sandwich', '90');
+    await type('Actual price of Sandwich', '9.50');
+    await type('Actual fixed costs for the month', '1550');
+    expect(row('+ Sales volume variance')).toHaveTextContent('$5 F');
+    expect(row('of which sales quantity variance')).toHaveTextContent('$0');
+    expect(row('of which sales mix variance')).toHaveTextContent('$5 F');
+    expect(row('+ Selling price variance')).toHaveTextContent('$45 F');
+    expect(row('+ Variable cost variance')).toHaveTextContent('$32 U');
+    expect(row('+ Fixed cost variance')).toHaveTextContent('$50 U');
+    expect(row('= Actual operating profit')).toHaveTextContent('$943');
+    expect(row('Total variance')).toHaveTextContent('$32 U');
+
+    // Invalid input pauses the results instead of becoming 0; the business itself is unchanged.
+    await type('Actual units sold of Cookie', 'abc');
+    expect(sec.getByText('Fix the highlighted values to see the variances.')).toBeInTheDocument();
+    expect(sec.queryByRole('rowheader', { name: 'Total variance' })).not.toBeInTheDocument();
+    expect(within(panel('dashboard')).getByRole('heading', { name: 'Projected Operating Profit' }).closest('article')).toHaveTextContent('$975');
+  });
+});
+
 describe('12-month projection', () => {
   it('starts at 12 normal months, then shows seasonal results, best/worst and loss months', async () => {
     const { user } = setup('dashboard', 'demo');
