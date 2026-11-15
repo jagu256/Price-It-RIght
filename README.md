@@ -594,6 +594,22 @@ A separate AI agent that had **not seen the code or tests** was given only the p
 
 **No discrepancies were found.** The checker's one extra observation (the $13.36 gap inside the ≥ $200 price range) is already how the app behaves. It is why the app shows only the lowest and highest prices that reach a target. The app's milk-shortage figure for 100 coffees was checked in the 2 November verification above.
 
+#### Third independent check – features added on 15 November 2026
+Again a separate AI agent that had **not seen the code or tests** worked only from the problem statements and rules, in exact integer cents with BigInt in Node.js, and also by hand. A temporary script ran the app's own functions on the same inputs and was then deleted.
+
+| # | Scenario | Independent value | App value | Match |
+|---|---|---|---|---|
+| 1 | Budget vs actual (Coffee 320 @ VC $2.10, Muffin 140, Sandwich 90 @ $9.50, Cookie 200, fixed $1,550) | Static $975; volume +$5 (+80 / −25 / −50 / 0); quantity $0, mix +$5; flexible $980; price +$45; VC −$32; fixed −$50; actual **$943** (direct), revenue $3,935 | Same | ✅ |
+| 1 | Variance splits | Coffee 301 → volume $4.00, quantity $3.30, mix $0.70; all units +10 % → $247.50 all quantity, mix $0 | Same | ✅ |
+| 2 | Purchase plan, no buffer | Milk 10 L $20 + butter 1.25 kg $11.25 = **$31.25** (cheese exactly covered) | Same | ✅ |
+| 2 | Purchase plan, 10 % buffer | Milk $32, flour $1.20, butter $15.075 → $15.08, cheese $3.60 = **$51.88** | Same | ✅ |
+| 2 | Pack sizes | 4 L jugs: 3 = 12 L, $24; 2 L cartons: 5 = 10 L, $20 | Same | ✅ |
+| 3 | Cost-plus | $2 + 50 % = **$3.00** (33.33 % margin); $2 at 50 % margin = **$4.00** (100 % markup); $1.50 at 60 % = $3.75 (150 %); $2.10 + 33 % = $2.80 (25 % margin); $2 at 70 % = $6.67 (233.5 %, 70.015 %); café profit at $3 / $4 coffee = $75 / $375 | Same | ✅ |
+| 4 | Saved scenarios | Coffee $7 → $1,275 (+$300, highest); fixed $1,300 → $1,175; 200 muffins → $1,100 | Same | ✅ |
+| 5 | Step fixed costs | None → 455, $975; +$500 above 600 → 455 and **607**, profit $480 / −$16.70 / $3.10 / $475 at 600 / 601 / 607 / 750; +$1,000 above 400 → none, then 758, −$25; steps +$100 > 100 and +$200 > 300 → none, none, 546; +$1 above 500 → upper range profitable from 501 | Same | ✅ |
+
+**No discrepancies were found.** The checker read "above 600 units" as *more than* 600, which is how the app works: at exactly 600 units the step has not started yet.
+
 > **For the project team:** also check a few results yourselves, by hand or in Excel, and record them in the manual testing table above.
 
 ## Real user testing and feedback

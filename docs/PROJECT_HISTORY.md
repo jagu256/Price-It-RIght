@@ -249,7 +249,11 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 378 tests in 32 files passed; build passed. The main file is now 1,094 kB (311 kB gzipped), still Vite’s size warning, not an error.
 
-**All 11 items on the extra-features / UI-UX list are built** (15 Nov 2026). Not done: a separate-agent re-check of the new hand-worked examples, and real user testing (still owned by the team).
+**All 11 items on the extra-features / UI-UX list are built** (15 Nov 2026). Not done: real user testing (still owned by the team).
+
+### Independent re-check of the 15 Nov features (15 Nov 2026)
+- The user asked for it. A separate agent with no access to the code recalculated budget vs actual, the purchase plan, cost-plus pricing, saved scenarios and step fixed costs from the problem statements alone, in exact integer arithmetic. A temporary script ran the app’s functions on the same inputs and was deleted afterwards.
+- **Every figure matched** (table in README → Independent verification), including the checker’s extra cases (2 L cartons, profit at 501 units). Its reading of "above 600 units" as strictly more than 600 matches the app.
 
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:

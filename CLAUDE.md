@@ -59,7 +59,8 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
 ## Verified results (don't regress)
 - Demo café (Coffee $6/$2/300, Muffin $4/$1.50/150, Sandwich $9/$4/100, Cookie $3/$1/200, fixed $1,500): revenue $3,900, VC $1,425, CM $2,475, operating profit $975; sales-mix break-even 455 units (182/91/61/121), break-even revenue $2,363.64.
 - Inventory example (2,000 g beans, 5,000 mL milk, 100 cups; 20 g/200 mL/1 per coffee): 25 coffees, milk limiting.
-- These were independently recalculated on 2 Nov 2026 – no discrepancies (see README → Independent verification).
+- 15 Nov features: variance $975 → $943; purchase plan $31.25 (10 % buffer $51.88); cost-plus $3.00 / $4.00; step costs +$500 above 600 → break-even 455 and 607, $475.
+- Independently recalculated by separate agents on 2 Nov, 9 Nov and 15 Nov 2026 – no discrepancies (see README → Independent verification).
 
 ## Design
 Sage green / cream / white / pastel yellow / muted dark green; rounded cards, soft shadows; fonts Bricolage Grotesque (display) + Figtree. Colours are Tailwind tokens in `tailwind.config.js` (`sage`, `cream`, `butter`, `loss`). Must work at phone width with no sideways page scrolling.
@@ -69,5 +70,5 @@ Sage green / cream / white / pastel yellow / muted dark green; rounded cards, so
 - Run real user testing, record feedback in the README section, and make at least one improvement based on it (required by the brief). Never invent feedback or results.
 - Vercel: remove the `price-it-right.ca` redirect unless the domain is actually owned and its DNS is set (A record @ → 216.198.79.1).
 - Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand, Decisions, Excel export, 12-month projection, Best mix optimizer, French toggle (9 Nov 2026); budget vs actual, purchase plan, cost-plus pricing, saved scenarios, step fixed costs, guided tour, term tooltips, live profit bar, undo, setup checklist, larger text / high contrast (15 Nov 2026).
-- Not yet independently re-verified by a separate agent: the 15 Nov hand checks (variance $975 → $943, purchase plan $31.25 / $51.88, cost-plus $3.00 / $4.00, step costs 455 / 607 / $475).
+
 - Have a French speaker review the translations listed in README → Language.
