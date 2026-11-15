@@ -275,6 +275,36 @@ describe('decisions', () => {
   });
 });
 
+describe('What should I buy?', () => {
+  it('lists milk $20 + butter $11.25 = $31.25 for the demo, then adds a buffer and pack sizes', async () => {
+    const { user } = setup('inventory', 'demo');
+    const sec = within(within(panel('inventory')).getByRole('heading', { name: 'What should I buy?' }).closest('section')!);
+    const row = (name: string) => sec.getByRole('rowheader', { name }).closest('tr')!;
+    expect(row('Milk')).toHaveTextContent('$20');
+    expect(row('Butter')).toHaveTextContent('$11.25');
+    expect(row('Total estimated purchase cost')).toHaveTextContent('$31.25');
+    expect(sec.queryByRole('rowheader', { name: 'Flour' })).not.toBeInTheDocument();
+
+    const buffer = sec.getByLabelText('Safety buffer (extra % above expected needs)');
+    await user.clear(buffer);
+    await user.type(buffer, '10');
+    expect(row('Total estimated purchase cost')).toHaveTextContent('$51.88');
+    expect(row('Flour')).toHaveTextContent('$1.20');
+
+    await user.clear(buffer);
+    await user.type(buffer, '0');
+    await user.type(sec.getByLabelText('Pack size for Milk in L'), '4');
+    expect(row('Milk')).toHaveTextContent('3 packs');
+    expect(row('Milk')).toHaveTextContent('$24');
+
+    // Invalid input pauses the list (never treated as 0).
+    await user.clear(buffer);
+    await user.type(buffer, 'abc');
+    expect(sec.getByText('Fix the highlighted values to see the shopping list.')).toBeInTheDocument();
+    expect(sec.queryByRole('rowheader', { name: 'Milk' })).not.toBeInTheDocument();
+  });
+});
+
 describe('Budget vs actual', () => {
   it('explains the hand-worked month: budget $975 → actual $943, with every variance', async () => {
     const { user } = setup('dashboard', 'demo');

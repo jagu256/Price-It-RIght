@@ -176,6 +176,15 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 - Hand-worked example: $975 budget → $943 actual (+5 − 32 + 45 − 50), checked directly from the actual figures.
 - **AI slip caught by a test:** the first test multiplied units by 1.1, and in JavaScript 300 × 1.1 is not exactly 330. The test now uses whole-number arithmetic. The app's own inputs are always whole units because they are validated.
 
+**Checks:** 319 tests in 23 files passed; build passed; no sideways scrolling at 375 px.
+
+### More features – 2. What should I buy? (15 Nov 2026)
+- New `src/lib/purchasing.ts` (target = need × (1 + buffer) rounded up; whole packs rounded up; cost in whole cents via millionths of a dollar; unknown cost stays unknown) and `components/PurchasePlanner.tsx` in the Smart Inventory Hub. The buffer and pack sizes are not saved.
+- Hand-worked: demo café $20 (milk) + $11.25 (butter) = $31.25; with a 10 % buffer $51.88. All 7 unit tests passed on the first run.
+- The panel says plainly that buying stock is a cash payment, not an expense, so it is not mixed up with operating profit.
+
+**Checks:** 327 tests in 24 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

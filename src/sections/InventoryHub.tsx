@@ -3,6 +3,7 @@ import ImportWizard from '../components/ImportWizard';
 import InventoryTable from '../components/InventoryTable';
 import ProductCosting from '../components/ProductCosting';
 import ProductionCapacity from '../components/ProductionCapacity';
+import PurchasePlanner from '../components/PurchasePlanner';
 import RecipeManager from '../components/RecipeManager';
 import { Notice, SectionHeader, SubHeader } from '../components/ui';
 import { BUSINESS_NOTES } from '../lib/inventory';
@@ -26,6 +27,7 @@ export default function InventoryHub() {
       <RecipeManager />
       <ProductCosting />
       <ProductionCapacity />
+      <PurchasePlanner />
     </div>
   );
 }
