@@ -275,6 +275,33 @@ describe('decisions', () => {
   });
 });
 
+describe('Cost-plus pricing helper', () => {
+  it('prices Coffee ($2 cost) by markup and margin and can try the price in the What-If plan', async () => {
+    const { user } = setup('pricing', 'demo');
+    const lab = within(panel('pricing'));
+    const sec = within(lab.getByRole('heading', { name: 'Cost-plus pricing helper' }).closest('section')!);
+    // Default: 50 % markup → $3.00, a 33.3 % margin; profit 975 − (6 − 3) × 300 = $75.
+    expect(sec.getByText('Cost-plus price').parentElement).toHaveTextContent('$3.00');
+    expect(sec.getByText('A 50% markup on cost is the same as a 33.3% margin on price.')).toBeInTheDocument();
+    expect(sec.getByText('Operating profit at this price').parentElement).toHaveTextContent('$75');
+
+    await user.click(sec.getByRole('radio', { name: 'Margin on price' }));
+    expect(sec.getByText('Cost-plus price').parentElement).toHaveTextContent('$4.00');
+    expect(sec.getByText('Operating profit at this price').parentElement).toHaveTextContent('−$600 vs now');
+
+    await user.click(sec.getByRole('button', { name: 'Try $4.00 in the What-If simulator' }));
+    expect(lab.getByLabelText('Modified price for Coffee')).toHaveValue('4');
+    // Only an experiment: the business (dashboard, a hidden tab here) still shows $975.
+    expect(within(panel('dashboard')).getByRole('heading', { name: 'Projected Operating Profit', hidden: true }).closest('article')).toHaveTextContent('$975');
+
+    const rate = sec.getByLabelText('Target margin %');
+    await user.clear(rate);
+    await user.type(rate, '100');
+    expect(sec.getByText(/A margin must be less than 100 %/)).toBeInTheDocument();
+    expect(sec.queryByText('Cost-plus price')).not.toBeInTheDocument();
+  });
+});
+
 describe('What should I buy?', () => {
   it('lists milk $20 + butter $11.25 = $31.25 for the demo, then adds a buffer and pack sizes', async () => {
     const { user } = setup('inventory', 'demo');

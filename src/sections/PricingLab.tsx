@@ -4,6 +4,7 @@ import ChartContainer from '../components/ChartContainer';
 import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
 import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } from '../components/AfterTaxTarget';
+import CostPlusPricing from '../components/CostPlusPricing';
 import DemandExplorer from '../components/DemandExplorer';
 import ProfitGoal from '../components/ProfitGoal';
 import ShowMath from '../components/ShowMath';
@@ -29,6 +30,7 @@ export default function PricingLab() {
         <WhatIfSimulator />
         <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />
         <SmartPricing linkedTarget={linked} />
+        <CostPlusPricing />
         <ProfitGoal linkedTarget={linked} />
         <SurpriseEvents />
       </NeedsValidBusiness>

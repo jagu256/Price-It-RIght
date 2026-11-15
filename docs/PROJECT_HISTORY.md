@@ -185,6 +185,13 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 327 tests in 24 files passed; build passed.
 
+### More features – 3. Cost-plus pricing helper (15 Nov 2026)
+- New `src/lib/costPlus.ts` (markup and margin prices in whole cents, rounded up so the rate is always reached; markup ↔ margin conversion) and `components/CostPlusPricing.tsx` in the Pricing Lab, with a "try in What-If" button that changes only the experiment.
+- Hand checks: $2 + 50 % = $3.00 (33.3 % margin), $2 at 50 % margin = $4.00 (100 % markup). A grid test confirms the price always reaches the rate and is less than a cent above the exact answer.
+- Prices here are shown with cents ($3.00, not $3) because they are unit prices.
+
+**Checks:** 337 tests in 25 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
