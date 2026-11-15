@@ -198,6 +198,13 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 343 tests in 26 files passed; build passed.
 
+### More features – 5. Step fixed costs (15 Nov 2026)
+- New `src/lib/stepCosts.ts` (ranges, break-even per range at the expected mix using exact BigInt fractions, profit at any unit level, chart points on both sides of each step) and `components/StepFixedCosts.tsx` on the Profit Dashboard (up to 3 steps; duplicate levels are flagged, never merged; not saved).
+- Hand checks: +$500 above 600 → break-even 455 and again 607, −$16.70 at 601 units, $475 at expected sales. This shows the course idea that "fixed" costs are fixed only within a relevant range.
+- The explanation uses the weighted CM calculated in the library, so the UI does no arithmetic of its own.
+
+**Checks:** 352 tests in 27 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

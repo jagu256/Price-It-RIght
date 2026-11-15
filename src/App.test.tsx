@@ -275,6 +275,34 @@ describe('decisions', () => {
   });
 });
 
+describe('Step fixed costs', () => {
+  it('adds a +$500 step above 600 units: break-even 455, again at 607, expected profit $475', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const sec = within(within(panel('dashboard')).getByRole('heading', { name: 'Step fixed costs (relevant range)' }).closest('section')!);
+    await user.click(sec.getByRole('button', { name: /Add a step/ }));
+    const above = sec.getByLabelText('Step 1: above how many units per month');
+    await user.clear(above);
+    await user.type(above, '600');
+    const inc = sec.getByLabelText('Step 1: extra fixed costs per month');
+    await user.clear(inc);
+    await user.type(inc, '500');
+    expect(sec.getByRole('rowheader', { name: '0 to 600' }).closest('tr')).toHaveTextContent('455 units');
+    const upper = sec.getByRole('rowheader', { name: '601 and above' }).closest('tr')!;
+    expect(upper).toHaveTextContent('$2,000');
+    expect(upper).toHaveTextContent('607 units');
+    expect(sec.getByText(/At your expected 750 units/).parentElement).toHaveTextContent('$475');
+    expect(sec.getByText(/profit can fall back below zero/)).toBeInTheDocument();
+
+    // Invalid → results pause (never 0); removing the step brings back one range.
+    await user.clear(inc);
+    await user.type(inc, 'abc');
+    expect(sec.getByText('Fix the highlighted steps to see the results.')).toBeInTheDocument();
+    await user.click(sec.getByRole('button', { name: 'Remove step 1' }));
+    expect(sec.getByText(/No steps yet/)).toBeInTheDocument();
+    expect(sec.getByRole('rowheader', { name: '0 and above' }).closest('tr')).toHaveTextContent('455 units');
+  });
+});
+
 describe('Save and compare scenarios', () => {
   it('saves two What-If plans, compares them, loads one back and deletes one after confirming', async () => {
     const { user } = setup('pricing', 'demo');
