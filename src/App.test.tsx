@@ -275,6 +275,47 @@ describe('decisions', () => {
   });
 });
 
+describe('Save and compare scenarios', () => {
+  it('saves two What-If plans, compares them, loads one back and deletes one after confirming', async () => {
+    const { user } = setup('pricing', 'demo');
+    const lab = within(panel('pricing'));
+    const sec = within(lab.getByRole('heading', { name: 'Save and compare scenarios' }).closest('section')!);
+    expect(sec.getByRole('button', { name: /Save this scenario/ })).toBeDisabled();
+
+    const price = lab.getByLabelText('Modified price for Coffee');
+    await user.clear(price);
+    await user.type(price, '7'); // +$1 × 300 = +$300 → $1,275
+    await user.type(sec.getByLabelText('Scenario name'), 'Coffee $7');
+    await user.click(sec.getByRole('button', { name: /Save this scenario/ }));
+
+    await user.click(lab.getByRole('button', { name: /Reset Scenario/ }));
+    const fixed = lab.getByLabelText('Modified monthly fixed costs');
+    await user.clear(fixed);
+    await user.type(fixed, '1300'); // → $1,175
+    await user.click(sec.getByRole('button', { name: /Save this scenario/ })); // no name → "Scenario 2"
+
+    const header = sec.getByRole('columnheader', { name: /Coffee \$7/ });
+    expect(header).toHaveTextContent('Highest profit of these');
+    expect(sec.getByRole('columnheader', { name: /Scenario 2/ })).not.toHaveTextContent('Highest');
+    const profitRow = sec.getByRole('rowheader', { name: 'Operating profit' }).closest('tr')!;
+    expect(profitRow).toHaveTextContent('$975');
+    expect(profitRow).toHaveTextContent('$1,275');
+    expect(profitRow).toHaveTextContent('$1,175');
+    expect(sec.getByRole('rowheader', { name: 'Change vs current plan' }).closest('tr')).toHaveTextContent('+$300');
+
+    await user.click(sec.getByRole('button', { name: 'Load “Coffee $7” into the What-If simulator' }));
+    expect(lab.getByLabelText('Modified price for Coffee')).toHaveValue('7');
+    expect(lab.getByLabelText('Modified monthly fixed costs')).toHaveValue('1500');
+
+    await user.click(sec.getByRole('button', { name: 'Delete “Scenario 2”' }));
+    const dialog = document.querySelector('[role="dialog"], [role="alertdialog"]') as HTMLElement;
+    await user.click(within(dialog).getByRole('button', { name: 'Delete scenario' }));
+    expect(sec.queryByRole('columnheader', { name: /Scenario 2/ })).not.toBeInTheDocument();
+    // The business itself never changed.
+    expect(within(panel('dashboard')).getByRole('heading', { name: 'Projected Operating Profit', hidden: true }).closest('article')).toHaveTextContent('$975');
+  });
+});
+
 describe('Cost-plus pricing helper', () => {
   it('prices Coffee ($2 cost) by markup and margin and can try the price in the What-If plan', async () => {
     const { user } = setup('pricing', 'demo');

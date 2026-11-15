@@ -56,6 +56,7 @@ export type Action =
   | { type: 'import-recipes'; recipes: Record<string, Omit<RecipeLineInput, 'id'>[]> }
   | { type: 'scenario-set'; productId: string | null; field: 'price' | 'variableCost' | 'units' | 'fixedCosts'; value: string }
   | { type: 'scenario-reset' }
+  | { type: 'scenario-load'; overrides: ScenarioOverrides }
   | { type: 'scenario-apply'; resolved: { fixedCosts?: string; products: Record<string, { price?: string; variableCost?: string; units?: string }> } }
   | { type: 'planner-set-units'; productId: string; value: string }
   | { type: 'planner-set-extra'; itemId: string; value: string }
@@ -71,6 +72,12 @@ function idMaker(state: { nextId: number }) {
 }
 
 const emptyScenario = (): ScenarioOverrides => ({ products: {} });
+
+/** A deep copy of scenario overrides (used to save and load named scenarios). */
+export const copyScenario = (o: ScenarioOverrides): ScenarioOverrides => ({
+  ...(o.fixedCosts !== undefined ? { fixedCosts: o.fixedCosts } : {}),
+  products: Object.fromEntries(Object.entries(o.products).map(([id, v]) => [id, { ...v }])),
+});
 const emptyPlanner = (): PlannerOverrides => ({ units: {}, extra: {} });
 
 export function initialAppState(business: BusinessId | 'demo' = 'coffee'): AppState {
@@ -233,6 +240,9 @@ export function reducer(state: AppState, action: Action): AppState {
     }
     case 'scenario-reset':
       return { ...state, scenario: emptyScenario() };
+    case 'scenario-load':
+      // A saved scenario: a deep copy, so later edits never change the saved one.
+      return { ...state, scenario: copyScenario(action.overrides) };
     case 'scenario-apply': {
       const r = action.resolved;
       const products = b.products.map((p) => {

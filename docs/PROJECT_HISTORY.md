@@ -192,6 +192,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 337 tests in 25 files passed; build passed.
 
+### More features – 4. Save and compare scenarios (15 Nov 2026)
+- New `compareScenarios` in `src/lib/pricing.ts` and a `scenario-load` store action (with a deep copy, so later edits don't change a saved scenario). The UI is `components/SavedScenarios.tsx` under the What-If simulator: save up to 6, compare side by side, load back, and delete with confirmation.
+- Design decision: saved scenarios are kept only while the app is open, following the existing rule that only the business is saved (never experiments). They store the typed changes and are recalculated from the current business. "Highest profit of these" is worded so it is never mistaken for "optimal".
+
+**Checks:** 343 tests in 26 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

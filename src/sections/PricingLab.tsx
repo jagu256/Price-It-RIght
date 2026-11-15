@@ -7,6 +7,7 @@ import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } f
 import CostPlusPricing from '../components/CostPlusPricing';
 import DemandExplorer from '../components/DemandExplorer';
 import ProfitGoal from '../components/ProfitGoal';
+import SavedScenarios from '../components/SavedScenarios';
 import ShowMath from '../components/ShowMath';
 import SmartPricing from '../components/SmartPricing';
 import SurpriseEvents from '../components/SurpriseEvents';
@@ -28,6 +29,7 @@ export default function PricingLab() {
       <SectionHeader emoji="🎯" title={t('Pricing Lab')} subtitle={t('Experiment with prices and discover how your decisions affect profit.')} />
       <NeedsValidBusiness ready={!!model.summary}>
         <WhatIfSimulator />
+        <SavedScenarios />
         <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />
         <SmartPricing linkedTarget={linked} />
         <CostPlusPricing />

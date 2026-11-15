@@ -61,6 +61,52 @@ export function resolveScenario(products: ParsedProduct[], fixedCosts: number, o
 }
 
 /* ------------------------------------------------------------------ */
+/* Saved scenarios, compared side by side                              */
+/* ------------------------------------------------------------------ */
+
+export interface SavedScenario {
+  id: string;
+  name: string;
+  overrides: ScenarioOverrides;
+}
+
+export interface ScenarioComparisonRow {
+  id: string;
+  name: string;
+  /** null when a saved value is no longer valid. */
+  summary: BusinessSummary | null;
+  /** Operating profit − the current plan's operating profit (null if not available). */
+  profitChange: number | null;
+  /** True for the scenario(s) with the most operating profit among the valid ones. */
+  highest: boolean;
+}
+
+/**
+ * Re-calculates every saved scenario from the CURRENT business (a saved
+ * scenario stores only the changes the user typed). "Highest" = most operating
+ * profit among these scenarios – not a claim that it is the best possible plan.
+ */
+export function compareScenarios(products: ParsedProduct[], fixedCosts: number, saved: SavedScenario[]): ScenarioComparisonRow[] {
+  const current = businessSummary(products, fixedCosts);
+  const rows = saved.map((s) => {
+    const summary = resolveScenario(products, fixedCosts, s.overrides).summary;
+    return {
+      id: s.id,
+      name: s.name,
+      summary,
+      profitChange: summary ? (toCents(summary.operatingProfit) - toCents(current.operatingProfit)) / 100 : null,
+      highest: false,
+    };
+  });
+  const valid = rows.filter((r) => r.summary);
+  if (valid.length > 0) {
+    const best = Math.max(...valid.map((r) => toCents(r.summary!.operatingProfit)));
+    for (const r of valid) r.highest = toCents(r.summary!.operatingProfit) === best;
+  }
+  return rows;
+}
+
+/* ------------------------------------------------------------------ */
 /* 💡 What price should I charge?                                     */
 /* ------------------------------------------------------------------ */
 
