@@ -4,7 +4,7 @@ import ShowMath from '../components/ShowMath';
 import { Field } from '../components/SmartPricing';
 import { ErrorList, NeedsValidBusiness, Notice, SectionHeader, SignedMoney, SubHeader } from '../components/ui';
 import { t } from '../i18n/i18n';
-import { makeOrBuy, specialOrder, specialOrderInventory, type Shortage } from '../lib/decisions';
+import { dropProduct, makeOrBuy, specialOrder, specialOrderInventory, type Shortage } from '../lib/decisions';
 import { formatCAD, formatSignedCAD, unitsLabel } from '../lib/format';
 import { formatQuantity } from '../lib/inventory';
 import { makeOrBuyMath, specialOrderMath } from '../lib/showMath';
@@ -19,11 +19,12 @@ export default function Decisions() {
       <SectionHeader
         emoji="🧭"
         title={t('Decisions')}
-        subtitle={t('Should you take a special order? Make it yourself or buy it in? Compare only the costs and revenues that change. Nothing here changes your business.')}
+        subtitle={t('Should you take a special order? Make it yourself or buy it in? Drop a product? Compare only the costs and revenues that change. Nothing here changes your business.')}
       />
       <NeedsValidBusiness ready={!!model.summary}>
         <SpecialOrder />
         <MakeOrBuy />
+        <DropProduct />
       </NeedsValidBusiness>
     </div>
   );
@@ -308,5 +309,81 @@ function Qualitative({ items }: { items: string[] }) {
         {items.map((i) => <li key={i}>{i}</li>)}
       </ul>
     </Notice>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function DropProduct() {
+  const { model } = useStore();
+  const [productId, setProductId] = useState(model.products[0]?.id ?? '');
+  const [avoidText, setAvoidText] = useState('0');
+  const [lostText, setLostText] = useState('0');
+  const [gainText, setGainText] = useState('0');
+  const product = model.products.find((p) => p.id === productId) ?? model.products[0];
+  if (!product || !model.summary) return null;
+
+  const avoid = parseAmount(avoidText, 'avoidable fixed costs');
+  const lost = parseAmount(lostText, 'contribution lost on other products');
+  const gain = parseAmount(gainText, 'contribution gained from the freed capacity');
+  const errors = [errorOf(avoid), errorOf(lost), errorOf(gain)];
+  const r =
+    avoid.ok && lost.ok && gain.ok
+      ? dropProduct(product, model.summary.operatingProfit, { avoidableFixedCosts: avoid.value, lostOtherContribution: lost.value, gainedContribution: gain.value })
+      : null;
+
+  return (
+    <section aria-labelledby="drop-title" className="card space-y-5 p-5 sm:p-8">
+      <SubHeader id="drop-title" emoji="✂️" title={t('Drop a product?')} term="relevantCost" subtitle={t('Would profit go up if you stopped selling a product? Only the contribution you lose and the fixed costs you would really save matter.')} />
+      <label className="flex flex-col gap-1 text-sm font-semibold text-sage-900 sm:max-w-xs">
+        {t('Product to drop')}
+        <select className="select" value={product.id} onChange={(e) => setProductId(e.target.value)}>
+          {model.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+      </label>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field id="drop-avoid" label={t('Fixed costs saved if dropped')} value={avoidText} onChange={setAvoidText} invalid={!avoid.ok} prefix="$" help={t('Only costs that would really stop, e.g. a machine used just for this product. Shared rent stays.')} />
+        <Field id="drop-lost" label={t('Contribution lost on other products')} value={lostText} onChange={setLostText} invalid={!lost.ok} prefix="$" help={t('E.g. customers who would also stop buying a coffee with it. 0 if none.')} />
+        <Field id="drop-gain" label={t('Contribution from using the freed capacity')} value={gainText} onChange={setGainText} invalid={!gain.ok} prefix="$" help={t('E.g. selling more of another product in the space or time freed. 0 if none.')} />
+      </div>
+      <ErrorList messages={errors} />
+
+      {r && (
+        <div className="space-y-3" aria-live="polite">
+          <div className={`rounded-2xl px-5 py-4 text-cream-50 ${r.decision === 'drop' ? 'bg-sage-700' : 'bg-sage-800'}`}>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-90">{t('On the numbers')}</p>
+            <p className="font-display text-3xl font-extrabold">
+              {r.decision === 'drop' ? t('Drop {name}', { name: product.name }) : r.decision === 'keep' ? t('Keep {name}', { name: product.name }) : t('No difference')}
+            </p>
+            <p className="text-sm opacity-95">
+              {t('Operating profit would go from {before} to {after} ({change}).', { before: formatCAD(model.summary.operatingProfit), after: formatCAD(r.newOperatingProfit), change: formatSignedCAD(r.profitChange) })}
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="data-table min-w-[24rem]">
+              <caption className="sr-only">{t('Effect of dropping the product on operating profit')}</caption>
+              <tbody>
+                <tr><th scope="row">− {t('Contribution margin of {name} ({units})', { name: product.name, units: unitsLabel(product.units) })}</th><td className="text-right"><SignedMoney value={-r.lostContribution} text={formatSignedCAD(-r.lostContribution)} /></td></tr>
+                <tr><th scope="row">+ {t('Fixed costs saved')}</th><td className="text-right">{formatSignedCAD(r.avoidableFixedCosts)}</td></tr>
+                <tr><th scope="row">− {t('Contribution lost on other products')}</th><td className="text-right">{formatSignedCAD(-r.lostOtherContribution)}</td></tr>
+                <tr><th scope="row">+ {t('Contribution from using the freed capacity')}</th><td className="text-right">{formatSignedCAD(r.gainedContribution)}</td></tr>
+                <tr className="font-bold"><th scope="row">= {t('Change in operating profit')}</th><td className="text-right"><SignedMoney value={r.profitChange} text={formatSignedCAD(r.profitChange)} /></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <Notice tone="idea" title={t('Decision rule')}>
+            {t('Drop the product only if the fixed costs you would really save (plus anything gained from the freed capacity) are more than the contribution margin you would lose. Fixed costs that continue anyway – like shared rent – are not saved, so a product that looks unprofitable after sharing out fixed costs can still be worth keeping.')}
+          </Notice>
+          <Qualitative
+            items={[
+              t('Do customers come for this product and buy other things too?'),
+              t('Would dropping it hurt your image or your full product range?'),
+              t('Could you raise its price or lower its cost instead?'),
+              t('Will the fixed costs you expect to save really stop?'),
+            ]}
+          />
+        </div>
+      )}
+    </section>
   );
 }

@@ -271,7 +271,35 @@ describe('decisions', () => {
     expect(totals).toHaveTextContent('$4,800');
     expect(totals).toHaveTextContent('$5,000');
     expect(dec.getByRole('rowheader', { name: /Unavoidable fixed costs – irrelevant/ })).toBeInTheDocument();
-    expect(dec.getByText(/depends on qualitative factors too/)).toBeInTheDocument();
+    const mob = within(dec.getByRole('heading', { name: /Make or buy/ }).closest('section')!);
+    expect(mob.getByText(/depends on qualitative factors too/)).toBeInTheDocument();
+  });
+});
+
+describe('Drop a product?', () => {
+  it('keeps the Sandwich when only $300 is saved, drops it when $600 is saved, and keeps it again if other sales suffer', async () => {
+    const { user } = setup('decisions', 'demo');
+    const sec = within(within(panel('decisions')).getByRole('heading', { name: /Drop a product\?/ }).closest('section')!);
+    await user.selectOptions(sec.getByRole('combobox', { name: 'Product to drop' }), within(sec.getByRole('combobox', { name: 'Product to drop' })).getByRole('option', { name: 'Sandwich' }));
+    const type = async (label: string, v: string) => {
+      const f = sec.getByLabelText(label);
+      await user.clear(f);
+      await user.type(f, v);
+    };
+    await type('Fixed costs saved if dropped', '300');
+    expect(sec.getByText('Keep Sandwich')).toBeInTheDocument();
+    expect(sec.getByText('Operating profit would go from $975 to $775 (−$200).')).toBeInTheDocument();
+    expect(sec.getByRole('rowheader', { name: /Contribution margin of Sandwich/ }).closest('tr')).toHaveTextContent('−$500');
+
+    await type('Fixed costs saved if dropped', '600');
+    expect(sec.getByText('Drop Sandwich')).toBeInTheDocument();
+    expect(sec.getByText(/to \$1,075 \(\+\$100\)/)).toBeInTheDocument();
+
+    await type('Contribution lost on other products', '150');
+    expect(sec.getByText('Keep Sandwich')).toBeInTheDocument();
+
+    await type('Contribution lost on other products', 'abc');
+    expect(sec.queryByText(/Keep Sandwich|Drop Sandwich/)).not.toBeInTheDocument();
   });
 });
 

@@ -165,3 +165,48 @@ export function makeOrBuy(i: MakeOrBuyInput): MakeOrBuyResult {
     unavoidableFixedCosts: toCents(i.unavoidableFixedCosts) / 100,
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Drop a product?                                                     */
+/* ------------------------------------------------------------------ */
+
+export interface DropProductInput {
+  /** Fixed costs that would disappear if the product were dropped (e.g. its own equipment lease). */
+  avoidableFixedCosts: number;
+  /** Contribution lost on OTHER products (e.g. customers who buy a coffee with their sandwich). */
+  lostOtherContribution: number;
+  /** Contribution gained by using the freed space, time or stock for something else. */
+  gainedContribution: number;
+}
+
+export interface DropProductResult {
+  /** The product's own total contribution margin, lost if it is dropped. */
+  lostContribution: number;
+  avoidableFixedCosts: number;
+  lostOtherContribution: number;
+  gainedContribution: number;
+  /** Change in operating profit if dropped = avoidable fixed + gained − lost CM − lost other CM. */
+  profitChange: number;
+  /** Operating profit after dropping it. */
+  newOperatingProfit: number;
+  decision: 'drop' | 'keep' | 'indifferent';
+}
+
+/**
+ * Dropping a product loses its contribution margin; only AVOIDABLE fixed costs
+ * are saved – shared fixed costs (rent…) stay, so a product that "loses money"
+ * after an allocation of fixed costs may still be worth keeping. Whole cents.
+ */
+export function dropProduct(product: ParsedProduct, currentOperatingProfit: number, i: DropProductInput): DropProductResult {
+  const lostC = (toCents(product.price) - toCents(product.variableCost)) * product.units;
+  const changeC = toCents(i.avoidableFixedCosts) + toCents(i.gainedContribution) - lostC - toCents(i.lostOtherContribution);
+  return {
+    lostContribution: lostC / 100,
+    avoidableFixedCosts: toCents(i.avoidableFixedCosts) / 100,
+    lostOtherContribution: toCents(i.lostOtherContribution) / 100,
+    gainedContribution: toCents(i.gainedContribution) / 100,
+    profitChange: changeC / 100,
+    newOperatingProfit: (toCents(currentOperatingProfit) + changeC) / 100,
+    decision: changeC > 0 ? 'drop' : changeC < 0 ? 'keep' : 'indifferent',
+  };
+}

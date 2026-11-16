@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { makeOrBuy, specialOrder, specialOrderInventory } from './decisions';
-import { buildModel } from './model';
+import { dropProduct, makeOrBuy, specialOrder, specialOrderInventory } from './decisions';
+import { buildModel, type ParsedProduct } from './model';
 import { makeOrBuyMath, specialOrderMath } from './showMath';
 import { sampleBusiness } from './samples';
 
@@ -124,5 +124,40 @@ describe('make or buy – relevant costs only', () => {
     expect(make.note).toMatch(/Unavoidable fixed costs \(\$2,000\)/);
     expect(buy.withNumbers).toBe('$5 × 1,000 = $5,000');
     expect(diff.withNumbers).toBe('$5,000 − $4,800 = +$200');
+  });
+});
+
+describe('drop a product? – demo café Sandwich (CM $5 × 100 = $500, profit $975)', () => {
+  const sandwich = { price: 9, variableCost: 4, units: 100 } as ParsedProduct;
+  const none = { avoidableFixedCosts: 0, lostOtherContribution: 0, gainedContribution: 0 };
+
+  it('only $300 of fixed costs would be saved → profit falls by $200 to $775: keep it', () => {
+    const r = dropProduct(sandwich, 975, { ...none, avoidableFixedCosts: 300 });
+    expect([r.lostContribution, r.profitChange, r.newOperatingProfit, r.decision]).toEqual([500, -200, 775, 'keep']);
+  });
+
+  it('$600 saved → +$100, profit $1,075: drop it on the numbers', () => {
+    const r = dropProduct(sandwich, 975, { ...none, avoidableFixedCosts: 600 });
+    expect([r.profitChange, r.newOperatingProfit, r.decision]).toEqual([100, 1075, 'drop']);
+  });
+
+  it('…but if sandwich buyers also stop buying $150 of coffee contribution, keep it (−$50)', () => {
+    const r = dropProduct(sandwich, 975, { ...none, avoidableFixedCosts: 600, lostOtherContribution: 150 });
+    expect([r.profitChange, r.decision]).toEqual([-50, 'keep']);
+  });
+
+  it('using the freed capacity for something earning $50 more makes it exactly break even (indifferent)', () => {
+    const r = dropProduct(sandwich, 975, { avoidableFixedCosts: 600, lostOtherContribution: 150, gainedContribution: 50 });
+    expect([r.profitChange, r.decision]).toEqual([0, 'indifferent']);
+  });
+
+  it('a product with a negative contribution margin: dropping it raises profit even with no savings', () => {
+    const r = dropProduct({ price: 2, variableCost: 2.5, units: 40 } as ParsedProduct, 975, none);
+    expect([r.lostContribution, r.profitChange, r.decision]).toEqual([-20, 20, 'drop']);
+  });
+
+  it('whole cents', () => {
+    const r = dropProduct({ price: 0.3, variableCost: 0.1, units: 3 } as ParsedProduct, 0.1, { avoidableFixedCosts: 0.2, lostOtherContribution: 0.1, gainedContribution: 0 });
+    expect([r.lostContribution, r.profitChange, r.newOperatingProfit]).toEqual([0.6, -0.5, -0.4]);
   });
 });

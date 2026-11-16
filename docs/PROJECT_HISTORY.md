@@ -255,6 +255,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 - The user asked for it. A separate agent with no access to the code recalculated budget vs actual, the purchase plan, cost-plus pricing, saved scenarios and step fixed costs from the problem statements alone, in exact integer arithmetic. A temporary script ran the app’s functions on the same inputs and was deleted afterwards.
 - **Every figure matched** (table in README → Independent verification), including the checker’s extra cases (2 L cartons, profit at 501 units). Its reading of "above 600 units" as strictly more than 600 matches the app.
 
+### More ideas – 1. Drop a product? (15 Nov 2026)
+- The user asked for all 10 items in a second list of suggestions. This is the first: `dropProduct` in `src/lib/decisions.ts` (lost CM vs avoidable fixed costs, other products' lost CM and freed-capacity gains, in whole cents) and a `DropProduct` panel in `sections/Decisions.tsx` with the decision rule and qualitative factors.
+- Hand checks: Sandwich $500 CM → keep at $300 saved (−$200), drop at $600 (+$100), keep again if $150 of coffee contribution is lost (−$50).
+
+**Checks:** 385 tests in 32 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
