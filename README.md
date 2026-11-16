@@ -515,155 +515,155 @@ Re-run `npm test` yourself to confirm.
 **Independent verification:** see [Independent verification](#independent-verification) below.
 
 ### Manual testing table
-*To be completed by the project team while using the app. "Actual Result" and "Pass/Fail" are intentionally blank.*
+*Completed by Jagrut, who ran every test in the app on 16 November 2026. All results matched the expected results.*
 
 | # | Test Case | Input | Expected Result | Actual Result | Pass/Fail |
 |---|---|---|---|---|---|
-| 1 | Demo business | Home → Try a Demo Business | Revenue $3,900; variable costs $1,425; CM $2,475; operating profit $975 | | |
-| 2 | Add / duplicate / delete product | My Business table buttons | Product added; "(copy)" created with its recipe; delete asks for confirmation | | |
-| 3 | Invalid input | Coffee price = `abc` | Message shown; dashboard shows "Some business numbers need attention" | | |
-| 4 | Sales-mix break-even | Demo business | 455 units (182 / 91 / 61 / 121); break-even revenue $2,363.64 | | |
-| 5 | Zero sales | All expected sales = 0 | Break-even "Not Available"; loss = fixed costs | | |
-| 6 | What-if | Coffee shop sample, Coffee price $7 | Operating profit $1,575 → $1,875 (+$300); current plan unchanged until applied | | |
-| 7 | Required price | Demo, Coffee, target $1,500 | $7.75 | | |
-| 8 | Inventory upload | Fill in and upload the template | 4 rows import; columns detected | | |
-| 9 | Bad rows | CSV with negative quantity and duplicate names | Rows listed with messages; duplicates flagged, not merged | | |
-| 10 | Unsupported file | Upload a .pdf or .xls | Clear "Unsupported file type" message | | |
-| 11 | Unit conversion | Change Coffee beans unit g → kg | 8000 g → 8 kg; cost $0.03 → $30 | | |
-| 12 | Recipe | Coffee shop sample: give Sandwich a recipe | Status changes to "Complete recipe" | | |
-| 13 | Costing | Demo Coffee | Materials $0.60 + $0.40 + $0.15 = $1.15 | | |
-| 14 | Itemized costing | Switch Coffee to itemized | Variable cost = materials + other costs; manual cost not added | | |
-| 15 | Capacity | 2,000 g / 5,000 mL / 100 cups; 20 g / 200 mL / 1 | 25 coffees, milk limiting | | |
-| 16 | Shared shortage | Demo, expected demand | Milk 10 L short, butter 1.25 kg short | | |
-| 17 | CM per resource | Demo, butter | Cookie $200/kg > Muffin $166.67/kg | | |
-| 18 | Feasible plan | Planner → Keep my mix | "✅ Feasible"; Coffee 211 | | |
-| 19 | Challenge | Beginner, price $5 | "Challenge complete!" | | |
-| 20 | Challenge invalid | Expert, all products at full demand | Not feasible; no success | | |
-| 21 | Surprise event | Rent increase $300 on demo | Profit $975 → $675; accept applies it | | |
-| 22 | PDF report | Business Report → Download | PDF downloads with all sections, labelled CAD | | |
-| 23 | Mobile | Open on a phone | All sections usable, no sideways page scrolling | | |
-| 24 | Show the math – profit | Demo → Profit Dashboard → *Show the math* on Projected Operating Profit | "Operating profit = total contribution margin − fixed costs" then "$2,475 − $1,500 = $975"; same $975 as the card; button changes to *Hide the math* and hides it | | |
-| 25 | Show the math – revenue | Demo → *Show the math* on Total Monthly Revenue | One line per product (Coffee $6 × 300 = $1,800 …) and $1,800 + $600 + $900 + $600 = $3,900 | | |
-| 26 | Show the math – break-even | Demo → *Show the math* under the break-even figures | $1,500 ÷ ($2,475 ÷ 750) = 454.55, rounded UP to 455 units; break-even revenue $2,363.64 | | |
-| 27 | Show the math – follows changes | Change Coffee price to $7 in My Business, reopen the profit math | Numbers in the explanation change with the card ($2,775 − $1,500 = $1,275) | | |
-| 28 | Show the math – required price | Demo → Pricing Lab → target $1,500 → *Show the math* | $2 + ($1,500 + $1,500 − $1,275) ÷ 300 = $7.75, plus a profit check ending in $1,500 | | |
-| 29 | Show the math – phone | Open several explanations on a phone | Text wraps inside the card; no sideways page scrolling | | |
-| 30 | Auto-save | My Business → change fixed costs to 1750 → refresh the page | 1750 is still there; "Welcome back – the business you saved on this device was restored" | | |
-| 31 | Untouched example not saved | *Start fresh*, then look at the Save my work card | "nothing to save yet"; refresh shows the Coffee Shop example | | |
-| 32 | Experiments not saved | Change a price in the Pricing Lab What-If (don't apply) → refresh | Business restored; the What-If modified plan is back to "No changes yet" | | |
-| 33 | Export | Demo → My Business → *Export my business (backup file)* | File `price-it-right-maple-leaf-cafe-demo.json` downloads; the note under the buttons says it is a backup, not a spreadsheet | | |
-| 34 | Import (good file) | *Start fresh* → *Import a saved business* → choose the file from row 33 → *Replace my work* | Asks first (shows 4 products); after confirming, dashboard profit is $975 | | |
-| 35 | Import cancelled | Import the same file → *Cancel* | Current business unchanged | | |
-| 36 | Import (bad file) | Import a .json file that wasn't made by this app (or a text file renamed to .json) | Red box "This file was not imported – your current business is unchanged" with a plain reason; no crash | | |
-| 37 | Start fresh | Change something → *Start fresh* → *Cancel*, then again → *Start fresh* | Cancel keeps the change; confirming loads the Coffee Shop example and removes the saved copy | | |
-| 38 | Saving off | Open the site in a private/incognito window that blocks storage (depends on the browser) | Yellow "Saving is off" message; everything else still works | | |
-| 39 | Privacy note | Read the Save my work card | Says data stays on this device only; nothing sent to a server | | |
-| 40 | Sensitivity – prices | Demo → Profit Dashboard → Sensitivity analysis | Selling prices +10 %: +$390 → $1,365; −10 %: $585 | | |
-| 41 | Sensitivity – variable costs | Same table | Variable costs +10 %: −$142.50 → $832.50 | | |
-| 42 | Sensitivity – volume | Same table | Sales volume +10 %: +$247.50 → $1,222.50 (+25.4 %) | | |
-| 43 | Sensitivity – fixed costs | Same table | Fixed costs +10 %: −$150 → $825 | | |
-| 44 | DOL | Same section → *Show the math* under DOL | 2.54; "$2,475 ÷ $975 = 2.54"; check line says 25.4 % = 2.54 × 10 % | | |
-| 45 | DOL not meaningful | Demo, change fixed costs to 3000 | DOL shows "Not meaningful" with the operating-loss explanation | | |
-| 46 | Tornado chart | Same section, also on a phone | Prices bar longest at the top; no sideways page scrolling | | |
-| 47 | After-tax target | Demo → Pricing Lab → tick *Plan with an after-tax target* → target 1000, rate 20 | Required pre-tax operating profit $1,250; *Show the math*: $1,000 ÷ (1 − 20%) = $1,250 | | |
-| 48 | Tax on current profit | Same | Estimated tax $195; after-tax operating profit $780 | | |
-| 49 | Feeds the tools | Same, scroll down | Price tool target shows 1250 (pre-tax), Coffee minimum price $6.92; goal tracker target 1250, difference −$275 | | |
-| 50 | No tax on a loss | Target −200, rate 20 | Required pre-tax profit −$200 (no gross-up) | | |
-| 51 | Invalid rate | Rate 120, then abc | Clear message; not treated as 0; tools go back to their own targets | | |
-| 52 | 100 % rate | Rate 100, target 1000 | "Not Available" with an explanation | | |
-| 53 | Off by default | Reload, open Pricing Lab | After-tax panel unticked; existing results unchanged | | |
-| 54 | Demand off by default | Demo → Pricing Lab → What-If | Demand assumption unticked; What-If results as before | | |
-| 55 | Best price | Tick "customers react to the price of Coffee", X = 20 | Best price under this assumption only: $11.50, 190 units, $1,580; "checking every cent from $0 to $21 (2,101 prices)" | | |
-| 56 | Profit vs price chart | Same | Line chart with a "Now" line at $6 and a "Best" dot at $11.50 | | |
-| 57 | Try it | Click *Try $11.50 (190 units) in the modified plan* | Modified price 11.50 and sales 190; modified operating profit $1,580; My Business still shows $6 until Apply Changes | | |
-| 58 | Price assistant | Same assumption in *What Price Should I Charge?*, target $500 | Best price $11.50; lowest and highest prices that reach $500 | | |
-| 59 | Invalid X | Type −5, then 2.5 | Clear message; no result; not treated as 0 | | |
-| 60 | Challenge rule check | Business Challenge → Intermediate, price $9 | 220 customers, operating profit $240 (same rule as the unit test) | | |
-| 61 | Special order – fits | Coffee Shop example → 🧭 Decisions → Muffin, 10 units at $3, extra 0 | Incremental profit +$15; "Inventory check: covered" | | |
-| 62 | Special order – short | Same, 20 units | "Not achievable with your current inventory"; Sugar: 100 grams short; no profit shown as achievable | | |
-| 63 | Lost regular sales | Same, tick "losing some regular sales", 10 | Fits again; +$5 | | |
-| 64 | Special order – hand example | Any product with price $6 and variable cost $2 (e.g. Coffee Shop Coffee): 100 at $4, extra $50, 20 lost | +$70 *if* stock covers it (Coffee Shop beans/milk are already short, so it shows "not achievable" with that profit only "if you could get the extra inventory") | | |
-| 65 | No recipe | Coffee Shop → Sandwich order | "Inventory not checked" warning | | |
-| 66 | Make or buy | Units 1000, buy $5, make $3.50, avoidable $1,000, unavoidable $2,000, opportunity $300 | "Make it"; $4,800 vs $5,000; saves $200; unavoidable row crossed out as irrelevant | | |
-| 67 | Make or buy flips | Same, opportunity cost $600 | "Buy it"; buying costs $100 less | | |
-| 68 | Invalid input | Offered price "abc", units 0 | Clear messages; no result | | |
-| 69 | Excel export | Demo → 📊 Business Report → *Download my business as Excel* | `price-it-right-maple-leaf-cafe-demo.xlsx` opens in Excel with 5 sheets | | |
-| 70 | Excel numbers | In Excel, click the Summary profit cell and use =SUM on Products revenue | Cells are numbers in CAD format; profit $975; revenue sums to $3,900 | | |
-| 71 | 12-month projection – default | Demo → Profit Dashboard → 📅 12-month projection | Annual operating profit $11,700; no months below break-even | | |
-| 72 | Seasonal months | January 60 %, July 130 % | January −$15 "Below break-even"; best July, worst January; year $11,452.50 | | |
-| 73 | Monthly fixed costs | December 150 % and fixed costs 2000 | December $1,712.50 – still below July | | |
-| 74 | Totals add up | Add the 12 operating-profit cells by hand | Equals the "Year" row | | |
-| 75 | Invalid month | March sales level "abc" | Message naming March; projection pauses (not treated as 0) | | |
-| 76 | Best mix | Demo → 🏆 Production Planner → *🧮 Best mix (exact search)* | Green "proven optimal for these numbers" note; modified plan "✅ Feasible"; its operating profit ≥ *Keep my mix* and *Suggested plan* | | |
-| 77 | Best mix vs Expert challenge | Compare with your best answer in 🎮 Expert | Best mix earns at least as much (enter the same products/stock in My Business to check) | | |
-| 78 | French toggle | Click **FR** in the header, then open every section | All text in French; dashboard shows `3 900 $`, `975 $`, `63,5 %` | | |
-| 79 | Remembered language | Choose FR, close and reopen the app | It opens in French; click **EN** to go back | | |
-| 80 | Decimal comma | In French, type `6,50` as a price, then `abc` | `6,50` accepted; `abc` shows a French message and results pause | | |
-| 81 | French PDF and Excel | In French, download the report and the Excel file | French headings, accents shown correctly, same amounts as in English; Excel sheets named Produits, Sommaire… | | |
-| 82 | French at phone width | FR, phone width (≈375 px), every section | No sideways scrolling; long French words wrap | | |
-| 83 | Budget vs actual – no change | Demo → Profit Dashboard → 📋 Budget vs actual | Every variance $0; actual profit $975 | | |
-| 84 | Budget vs actual – worked month | Coffee 320 units, VC 2.10; Muffin 140; Sandwich 90 at 9.50; fixed 1550 | Volume $5 F (quantity $0, mix $5 F); price $45 F; VC $32 U; fixed $50 U; actual profit $943; total $32 U | | |
-| 85 | Budget vs actual – invalid | Cookie actual units "abc" | Message naming Cookie; variances pause; dashboard still shows $975 | | |
-| 86 | Shopping list | Demo → 📦 Smart Inventory Hub → 🛒 What should I buy? | Milk 10 L $20; Butter 1.25 kg $11.25; total $31.25 | | |
-| 87 | Safety buffer | Buffer 10 | Milk, Flour, Butter, Cheese listed; total $51.88 | | |
-| 88 | Pack size | Buffer 0, Milk pack size 4 (L) | Milk: 12 L, 3 packs, $24 | | |
-| 89 | Unknown cost | Delete Butter's purchase cost in the inventory table | Butter shows "Unknown cost"; warning; total excludes it | | |
-| 90 | Cost-plus by markup | Demo → 🎯 Pricing Lab → 🏷️ Cost-plus, Coffee, markup 50 | Price $3.00; "same as a 33.3% margin"; profit $75 if units stay the same | | |
-| 91 | Cost-plus by margin | Switch to Margin on price, 50 | Price $4.00 (100 % markup); profit −$600 vs now | | |
-| 92 | Try the price | Click *Try $4.00 in the What-If simulator* | Modified Coffee price = 4; business still $975 until Apply | | |
-| 93 | Impossible margin | Margin 100 | Message "A margin must be less than 100 %"; no price shown | | |
-| 94 | Save a scenario | Pricing Lab → What-If Coffee price 7 → name "Coffee $7" → 📸 Save this scenario | Column "Coffee $7": profit $1,275, +$300, ★ Highest profit of these | | |
-| 95 | Compare | Reset Scenario, fixed costs 1300, save (no name) | Column "Scenario 2" $1,175; Coffee $7 still marked highest | | |
-| 96 | Load and delete | ↩ Load on "Coffee $7"; 🗑 on "Scenario 2" → confirm | What-If shows Coffee 7; Scenario 2 removed after confirming; dashboard still $975 | | |
-| 97 | Step fixed cost | Demo → Profit Dashboard → 🪜 Step fixed costs → Add a step: above 600, +500 | 0–600: 455 units; 601 and above: $2,000, 607 units; expected profit $475; warning about falling below zero | | |
-| 98 | Step too early | Change to above 400, +1000 | 0–400 "Not reached"; 401+: 758 units; expected profit −$25 | | |
-| 99 | Invalid step | Extra fixed costs "abc"; two steps with the same units | Clear messages; results pause | | |
-| 100 | First-visit tour | Open the site in a private window | Tour card "step 1 of 8" appears; Next opens My Business with its tab outlined in gold | | |
-| 101 | Skip and restart | Skip tour, reload, then Home → 🧭 Take the tour | Not shown again after skipping; Take the tour restarts it; Esc closes it | | |
-| 102 | Tour on a phone | Phone width, step through the tour | Card fits at the bottom, no sideways scrolling, highlighted tab scrolls into view | | |
-| 103 | Term tooltip | Demo → Profit Dashboard → tap the ⓘ next to Total Contribution Margin | Box: "Contribution margin: Selling price − variable cost…"; tap again closes it | | |
-| 104 | Tooltip on a phone | Phone width, open the ⓘ on Overall CM Ratio (right side of the screen) | Box fully on screen just under the button; Esc or scrolling closes it | | |
-| 105 | Live profit bar | Demo → My Business, scroll down | Bar at the bottom: Revenue $3,900 · CM $2,475 · Operating profit $975 | | |
-| 106 | Bar updates | Change Coffee price to 7 | Bar shows Revenue $4,200 and Operating profit $1,275 immediately | | |
-| 107 | Bar pauses | Coffee price "abc" | Bar: "Fix 1 highlighted field to see your results." – no $0 shown | | |
-| 108 | Undo a delete | My Business → ✕ on Muffin → confirm | Message "Deleted the product 'Muffin'." → ↩ Undo brings it back; profit $975 | | |
-| 109 | Undo Apply | Pricing Lab → Coffee 7 → Apply Changes → confirm → ↩ Undo | Coffee price back to 6 in My Business | | |
-| 110 | Undo expires safely | Delete a product, then edit another value | The Undo message disappears (the edit is kept) | | |
-| 111 | Setup checklist | Home with the Coffee Shop example | "4 of 5 done"; "Give every product a recipe" not ticked with a Go → link to the Inventory Hub | | |
-| 112 | Checklist updates | My Business → fixed costs "abc" → back to Home | "3 of 5 done"; Enter monthly fixed costs unticked with a link | | |
-| 113 | Larger text | Click A+ in the header | All text larger; no sideways scrolling at phone width | | |
-| 114 | High contrast | Click ◐ | Darker text and borders, white background; click again to turn off | | |
-| 115 | Remembered | Turn both on, reload the page | Both still on | | |
-| 116 | Drop a product – keep | Demo → 🧭 Decisions → ✂️ Drop a product?, Sandwich, fixed costs saved 300 | "Keep Sandwich"; profit $975 → $775 (−$200) | | |
-| 117 | Drop a product – drop | Fixed costs saved 600 | "Drop Sandwich"; $1,075 (+$100) | | |
-| 118 | Other products affected | Contribution lost on other products 150 | Back to "Keep Sandwich" (−$50) | | |
-| 119 | Price cut volume | Demo → Pricing Lab → 🔁 Price change, Coffee, new price 5 | "Sell 400 units"; "100 more than now (+33.3%)" | | |
-| 120 | Price rise | New price 7 | "Sell 240 units"; 60 fewer (−20%); Try it → What-If Coffee 7 / 240 | | |
-| 121 | Impossible price | New price 2 | "Not possible" message | | |
-| 122 | Cash budget | Demo → Profit Dashboard → 💵 3-month cash budget | Cash at end of month $1,475 / $2,450 / $3,425; profit $975 each month | | |
-| 123 | Slow payers | % paid in the same month 60 | Month 1 cash −$85 with a shortfall warning; profit still $975; $1,560 still owed after month 3 | | |
-| 124 | Stock purchase | Month 1 extra stock bought 500 (back to 100 % paid) | Month 1 cash $975 lower than before; profit unchanged | | |
-| 125 | Target costing | Demo → Pricing Lab → 🎯 Target costing, Coffee, margin 70 | Target cost $1.80; "must fall by $0.20 (10%)" | | |
-| 126 | Already meets target | Margin 50 | "already meets this margin, with $1.00 to spare" | | |
-| 127 | Product badges | Demo → My Business, below the product table | Coffee Star, Muffin Review, Sandwich Hidden gem, Cookie Popular | | |
-| 128 | Loss-maker badge | Cookie price 0.50 | Cookie – Loss on each sale | | |
-| 129 | Presentation mode | Demo → Profit Dashboard → 🎬 Presentation mode | Full-screen "Slide 1 of 6" with the café name; → shows $3,900 / $2,475 / $975 | | |
-| 130 | Slides | Keep pressing → | Break-even 455 units, $2,363.64; Inventory slide names Milk and Butter; ← goes back; Esc exits | | |
-| 131 | On a projector / phone | Try at phone width and full screen (F11) | Large text, nothing cut off | | |
-| 132 | Print a page | Demo → Profit Dashboard → footer 🖨 Print this page → print preview | Heading "Price It Right – Maple Leaf Café (demo) – Profit Dashboard"; no menu or buttons; white background; cards not split | | |
-| 133 | Print another section | My Business → Ctrl + P | Only My Business content, product values readable as plain text | | |
-| 134 | Phone tab bar | Phone width (≈375 px) | No tabs at the top; bottom bar with Home, Business, Profit, Pricing, More | | |
-| 135 | More menu | Tap ☰ More → Smart Inventory Hub | Menu lists the other 5 sections; it closes and opens the Inventory Hub; More stays highlighted | | |
-| 136 | Nothing covered | My Business at phone width, scroll down | Live profit bar sits just above the tab bar, not under it | | |
-| 137 | Dark mode | Click 🌙 in the header and visit every section | Dark background, light readable text, charts' labels readable; click again to return | | |
-| 138 | Dark mode printing | Dark mode on → Ctrl + P → print preview | Preview is in the normal light colours on white paper | | |
-| 139 | Dark + high contrast | Turn on 🌙 and ◐ | Text turns pure white | | |
-| 140 | What changed – Undo message | My Business → delete Muffin → confirm | Message also says "Operating profit: $975 → $600" | | |
-| 141 | Undone note | Click ↩ Undo | "Undone – operating profit is back to $975." | | |
-| 142 | Glow | Pricing Lab → Coffee 7 → Apply → open the dashboard | The profit card's number glows briefly; Monthly Fixed Costs does not | | |
-| 143 | On this page menu | Profit Dashboard → click "Budget vs actual" in On this page | Page scrolls to that panel; the address stays #dashboard | | |
-| 144 | Service Business | My Business → 💼 Service Business → confirm | Accounting practice example loads (4 services, no inventory); operating profit $4,755 | | |
-| 145 | No inventory needed | Same → 📦 Smart Inventory Hub, then Home | "Selling services? No inventory needed"; no recipes or shopping list; checklist "3 of 3 done" | | |
+| 1 | Demo business | Home → Try a Demo Business | Revenue $3,900; variable costs $1,425; CM $2,475; operating profit $975 | Matched the expected result | Pass |
+| 2 | Add / duplicate / delete product | My Business table buttons | Product added; "(copy)" created with its recipe; delete asks for confirmation | Matched the expected result | Pass |
+| 3 | Invalid input | Coffee price = `abc` | Message shown; dashboard shows "Some business numbers need attention" | Matched the expected result | Pass |
+| 4 | Sales-mix break-even | Demo business | 455 units (182 / 91 / 61 / 121); break-even revenue $2,363.64 | Matched the expected result | Pass |
+| 5 | Zero sales | All expected sales = 0 | Break-even "Not Available"; loss = fixed costs | Matched the expected result | Pass |
+| 6 | What-if | Coffee shop sample, Coffee price $7 | Operating profit $1,575 → $1,875 (+$300); current plan unchanged until applied | Matched the expected result | Pass |
+| 7 | Required price | Demo, Coffee, target $1,500 | $7.75 | Matched the expected result | Pass |
+| 8 | Inventory upload | Fill in and upload the template | 4 rows import; columns detected | Matched the expected result | Pass |
+| 9 | Bad rows | CSV with negative quantity and duplicate names | Rows listed with messages; duplicates flagged, not merged | Matched the expected result | Pass |
+| 10 | Unsupported file | Upload a .pdf or .xls | Clear "Unsupported file type" message | Matched the expected result | Pass |
+| 11 | Unit conversion | Change Coffee beans unit g → kg | 8000 g → 8 kg; cost $0.03 → $30 | Matched the expected result | Pass |
+| 12 | Recipe | Coffee shop sample: give Sandwich a recipe | Status changes to "Complete recipe" | Matched the expected result | Pass |
+| 13 | Costing | Demo Coffee | Materials $0.60 + $0.40 + $0.15 = $1.15 | Matched the expected result | Pass |
+| 14 | Itemized costing | Switch Coffee to itemized | Variable cost = materials + other costs; manual cost not added | Matched the expected result | Pass |
+| 15 | Capacity | 2,000 g / 5,000 mL / 100 cups; 20 g / 200 mL / 1 | 25 coffees, milk limiting | Matched the expected result | Pass |
+| 16 | Shared shortage | Demo, expected demand | Milk 10 L short, butter 1.25 kg short | Matched the expected result | Pass |
+| 17 | CM per resource | Demo, butter | Cookie $200/kg > Muffin $166.67/kg | Matched the expected result | Pass |
+| 18 | Feasible plan | Planner → Keep my mix | "✅ Feasible"; Coffee 211 | Matched the expected result | Pass |
+| 19 | Challenge | Beginner, price $5 | "Challenge complete!" | Matched the expected result | Pass |
+| 20 | Challenge invalid | Expert, all products at full demand | Not feasible; no success | Matched the expected result | Pass |
+| 21 | Surprise event | Rent increase $300 on demo | Profit $975 → $675; accept applies it | Matched the expected result | Pass |
+| 22 | PDF report | Business Report → Download | PDF downloads with all sections, labelled CAD | Matched the expected result | Pass |
+| 23 | Mobile | Open on a phone | All sections usable, no sideways page scrolling | Matched the expected result | Pass |
+| 24 | Show the math – profit | Demo → Profit Dashboard → *Show the math* on Projected Operating Profit | "Operating profit = total contribution margin − fixed costs" then "$2,475 − $1,500 = $975"; same $975 as the card; button changes to *Hide the math* and hides it | Matched the expected result | Pass |
+| 25 | Show the math – revenue | Demo → *Show the math* on Total Monthly Revenue | One line per product (Coffee $6 × 300 = $1,800 …) and $1,800 + $600 + $900 + $600 = $3,900 | Matched the expected result | Pass |
+| 26 | Show the math – break-even | Demo → *Show the math* under the break-even figures | $1,500 ÷ ($2,475 ÷ 750) = 454.55, rounded UP to 455 units; break-even revenue $2,363.64 | Matched the expected result | Pass |
+| 27 | Show the math – follows changes | Change Coffee price to $7 in My Business, reopen the profit math | Numbers in the explanation change with the card ($2,775 − $1,500 = $1,275) | Matched the expected result | Pass |
+| 28 | Show the math – required price | Demo → Pricing Lab → target $1,500 → *Show the math* | $2 + ($1,500 + $1,500 − $1,275) ÷ 300 = $7.75, plus a profit check ending in $1,500 | Matched the expected result | Pass |
+| 29 | Show the math – phone | Open several explanations on a phone | Text wraps inside the card; no sideways page scrolling | Matched the expected result | Pass |
+| 30 | Auto-save | My Business → change fixed costs to 1750 → refresh the page | 1750 is still there; "Welcome back – the business you saved on this device was restored" | Matched the expected result | Pass |
+| 31 | Untouched example not saved | *Start fresh*, then look at the Save my work card | "nothing to save yet"; refresh shows the Coffee Shop example | Matched the expected result | Pass |
+| 32 | Experiments not saved | Change a price in the Pricing Lab What-If (don't apply) → refresh | Business restored; the What-If modified plan is back to "No changes yet" | Matched the expected result | Pass |
+| 33 | Export | Demo → My Business → *Export my business (backup file)* | File `price-it-right-maple-leaf-cafe-demo.json` downloads; the note under the buttons says it is a backup, not a spreadsheet | Matched the expected result | Pass |
+| 34 | Import (good file) | *Start fresh* → *Import a saved business* → choose the file from row 33 → *Replace my work* | Asks first (shows 4 products); after confirming, dashboard profit is $975 | Matched the expected result | Pass |
+| 35 | Import cancelled | Import the same file → *Cancel* | Current business unchanged | Matched the expected result | Pass |
+| 36 | Import (bad file) | Import a .json file that wasn't made by this app (or a text file renamed to .json) | Red box "This file was not imported – your current business is unchanged" with a plain reason; no crash | Matched the expected result | Pass |
+| 37 | Start fresh | Change something → *Start fresh* → *Cancel*, then again → *Start fresh* | Cancel keeps the change; confirming loads the Coffee Shop example and removes the saved copy | Matched the expected result | Pass |
+| 38 | Saving off | Open the site in a private/incognito window that blocks storage (depends on the browser) | Yellow "Saving is off" message; everything else still works | Matched the expected result | Pass |
+| 39 | Privacy note | Read the Save my work card | Says data stays on this device only; nothing sent to a server | Matched the expected result | Pass |
+| 40 | Sensitivity – prices | Demo → Profit Dashboard → Sensitivity analysis | Selling prices +10 %: +$390 → $1,365; −10 %: $585 | Matched the expected result | Pass |
+| 41 | Sensitivity – variable costs | Same table | Variable costs +10 %: −$142.50 → $832.50 | Matched the expected result | Pass |
+| 42 | Sensitivity – volume | Same table | Sales volume +10 %: +$247.50 → $1,222.50 (+25.4 %) | Matched the expected result | Pass |
+| 43 | Sensitivity – fixed costs | Same table | Fixed costs +10 %: −$150 → $825 | Matched the expected result | Pass |
+| 44 | DOL | Same section → *Show the math* under DOL | 2.54; "$2,475 ÷ $975 = 2.54"; check line says 25.4 % = 2.54 × 10 % | Matched the expected result | Pass |
+| 45 | DOL not meaningful | Demo, change fixed costs to 3000 | DOL shows "Not meaningful" with the operating-loss explanation | Matched the expected result | Pass |
+| 46 | Tornado chart | Same section, also on a phone | Prices bar longest at the top; no sideways page scrolling | Matched the expected result | Pass |
+| 47 | After-tax target | Demo → Pricing Lab → tick *Plan with an after-tax target* → target 1000, rate 20 | Required pre-tax operating profit $1,250; *Show the math*: $1,000 ÷ (1 − 20%) = $1,250 | Matched the expected result | Pass |
+| 48 | Tax on current profit | Same | Estimated tax $195; after-tax operating profit $780 | Matched the expected result | Pass |
+| 49 | Feeds the tools | Same, scroll down | Price tool target shows 1250 (pre-tax), Coffee minimum price $6.92; goal tracker target 1250, difference −$275 | Matched the expected result | Pass |
+| 50 | No tax on a loss | Target −200, rate 20 | Required pre-tax profit −$200 (no gross-up) | Matched the expected result | Pass |
+| 51 | Invalid rate | Rate 120, then abc | Clear message; not treated as 0; tools go back to their own targets | Matched the expected result | Pass |
+| 52 | 100 % rate | Rate 100, target 1000 | "Not Available" with an explanation | Matched the expected result | Pass |
+| 53 | Off by default | Reload, open Pricing Lab | After-tax panel unticked; existing results unchanged | Matched the expected result | Pass |
+| 54 | Demand off by default | Demo → Pricing Lab → What-If | Demand assumption unticked; What-If results as before | Matched the expected result | Pass |
+| 55 | Best price | Tick "customers react to the price of Coffee", X = 20 | Best price under this assumption only: $11.50, 190 units, $1,580; "checking every cent from $0 to $21 (2,101 prices)" | Matched the expected result | Pass |
+| 56 | Profit vs price chart | Same | Line chart with a "Now" line at $6 and a "Best" dot at $11.50 | Matched the expected result | Pass |
+| 57 | Try it | Click *Try $11.50 (190 units) in the modified plan* | Modified price 11.50 and sales 190; modified operating profit $1,580; My Business still shows $6 until Apply Changes | Matched the expected result | Pass |
+| 58 | Price assistant | Same assumption in *What Price Should I Charge?*, target $500 | Best price $11.50; lowest and highest prices that reach $500 | Matched the expected result | Pass |
+| 59 | Invalid X | Type −5, then 2.5 | Clear message; no result; not treated as 0 | Matched the expected result | Pass |
+| 60 | Challenge rule check | Business Challenge → Intermediate, price $9 | 220 customers, operating profit $240 (same rule as the unit test) | Matched the expected result | Pass |
+| 61 | Special order – fits | Coffee Shop example → 🧭 Decisions → Muffin, 10 units at $3, extra 0 | Incremental profit +$15; "Inventory check: covered" | Matched the expected result | Pass |
+| 62 | Special order – short | Same, 20 units | "Not achievable with your current inventory"; Sugar: 100 grams short; no profit shown as achievable | Matched the expected result | Pass |
+| 63 | Lost regular sales | Same, tick "losing some regular sales", 10 | Fits again; +$5 | Matched the expected result | Pass |
+| 64 | Special order – hand example | Any product with price $6 and variable cost $2 (e.g. Coffee Shop Coffee): 100 at $4, extra $50, 20 lost | +$70 *if* stock covers it (Coffee Shop beans/milk are already short, so it shows "not achievable" with that profit only "if you could get the extra inventory") | Matched the expected result | Pass |
+| 65 | No recipe | Coffee Shop → Sandwich order | "Inventory not checked" warning | Matched the expected result | Pass |
+| 66 | Make or buy | Units 1000, buy $5, make $3.50, avoidable $1,000, unavoidable $2,000, opportunity $300 | "Make it"; $4,800 vs $5,000; saves $200; unavoidable row crossed out as irrelevant | Matched the expected result | Pass |
+| 67 | Make or buy flips | Same, opportunity cost $600 | "Buy it"; buying costs $100 less | Matched the expected result | Pass |
+| 68 | Invalid input | Offered price "abc", units 0 | Clear messages; no result | Matched the expected result | Pass |
+| 69 | Excel export | Demo → 📊 Business Report → *Download my business as Excel* | `price-it-right-maple-leaf-cafe-demo.xlsx` opens in Excel with 5 sheets | Matched the expected result | Pass |
+| 70 | Excel numbers | In Excel, click the Summary profit cell and use =SUM on Products revenue | Cells are numbers in CAD format; profit $975; revenue sums to $3,900 | Matched the expected result | Pass |
+| 71 | 12-month projection – default | Demo → Profit Dashboard → 📅 12-month projection | Annual operating profit $11,700; no months below break-even | Matched the expected result | Pass |
+| 72 | Seasonal months | January 60 %, July 130 % | January −$15 "Below break-even"; best July, worst January; year $11,452.50 | Matched the expected result | Pass |
+| 73 | Monthly fixed costs | December 150 % and fixed costs 2000 | December $1,712.50 – still below July | Matched the expected result | Pass |
+| 74 | Totals add up | Add the 12 operating-profit cells by hand | Equals the "Year" row | Matched the expected result | Pass |
+| 75 | Invalid month | March sales level "abc" | Message naming March; projection pauses (not treated as 0) | Matched the expected result | Pass |
+| 76 | Best mix | Demo → 🏆 Production Planner → *🧮 Best mix (exact search)* | Green "proven optimal for these numbers" note; modified plan "✅ Feasible"; its operating profit ≥ *Keep my mix* and *Suggested plan* | Matched the expected result | Pass |
+| 77 | Best mix vs Expert challenge | Compare with your best answer in 🎮 Expert | Best mix earns at least as much (enter the same products/stock in My Business to check) | Matched the expected result | Pass |
+| 78 | French toggle | Click **FR** in the header, then open every section | All text in French; dashboard shows `3 900 $`, `975 $`, `63,5 %` | Matched the expected result | Pass |
+| 79 | Remembered language | Choose FR, close and reopen the app | It opens in French; click **EN** to go back | Matched the expected result | Pass |
+| 80 | Decimal comma | In French, type `6,50` as a price, then `abc` | `6,50` accepted; `abc` shows a French message and results pause | Matched the expected result | Pass |
+| 81 | French PDF and Excel | In French, download the report and the Excel file | French headings, accents shown correctly, same amounts as in English; Excel sheets named Produits, Sommaire… | Matched the expected result | Pass |
+| 82 | French at phone width | FR, phone width (≈375 px), every section | No sideways scrolling; long French words wrap | Matched the expected result | Pass |
+| 83 | Budget vs actual – no change | Demo → Profit Dashboard → 📋 Budget vs actual | Every variance $0; actual profit $975 | Matched the expected result | Pass |
+| 84 | Budget vs actual – worked month | Coffee 320 units, VC 2.10; Muffin 140; Sandwich 90 at 9.50; fixed 1550 | Volume $5 F (quantity $0, mix $5 F); price $45 F; VC $32 U; fixed $50 U; actual profit $943; total $32 U | Matched the expected result | Pass |
+| 85 | Budget vs actual – invalid | Cookie actual units "abc" | Message naming Cookie; variances pause; dashboard still shows $975 | Matched the expected result | Pass |
+| 86 | Shopping list | Demo → 📦 Smart Inventory Hub → 🛒 What should I buy? | Milk 10 L $20; Butter 1.25 kg $11.25; total $31.25 | Matched the expected result | Pass |
+| 87 | Safety buffer | Buffer 10 | Milk, Flour, Butter, Cheese listed; total $51.88 | Matched the expected result | Pass |
+| 88 | Pack size | Buffer 0, Milk pack size 4 (L) | Milk: 12 L, 3 packs, $24 | Matched the expected result | Pass |
+| 89 | Unknown cost | Delete Butter's purchase cost in the inventory table | Butter shows "Unknown cost"; warning; total excludes it | Matched the expected result | Pass |
+| 90 | Cost-plus by markup | Demo → 🎯 Pricing Lab → 🏷️ Cost-plus, Coffee, markup 50 | Price $3.00; "same as a 33.3% margin"; profit $75 if units stay the same | Matched the expected result | Pass |
+| 91 | Cost-plus by margin | Switch to Margin on price, 50 | Price $4.00 (100 % markup); profit −$600 vs now | Matched the expected result | Pass |
+| 92 | Try the price | Click *Try $4.00 in the What-If simulator* | Modified Coffee price = 4; business still $975 until Apply | Matched the expected result | Pass |
+| 93 | Impossible margin | Margin 100 | Message "A margin must be less than 100 %"; no price shown | Matched the expected result | Pass |
+| 94 | Save a scenario | Pricing Lab → What-If Coffee price 7 → name "Coffee $7" → 📸 Save this scenario | Column "Coffee $7": profit $1,275, +$300, ★ Highest profit of these | Matched the expected result | Pass |
+| 95 | Compare | Reset Scenario, fixed costs 1300, save (no name) | Column "Scenario 2" $1,175; Coffee $7 still marked highest | Matched the expected result | Pass |
+| 96 | Load and delete | ↩ Load on "Coffee $7"; 🗑 on "Scenario 2" → confirm | What-If shows Coffee 7; Scenario 2 removed after confirming; dashboard still $975 | Matched the expected result | Pass |
+| 97 | Step fixed cost | Demo → Profit Dashboard → 🪜 Step fixed costs → Add a step: above 600, +500 | 0–600: 455 units; 601 and above: $2,000, 607 units; expected profit $475; warning about falling below zero | Matched the expected result | Pass |
+| 98 | Step too early | Change to above 400, +1000 | 0–400 "Not reached"; 401+: 758 units; expected profit −$25 | Matched the expected result | Pass |
+| 99 | Invalid step | Extra fixed costs "abc"; two steps with the same units | Clear messages; results pause | Matched the expected result | Pass |
+| 100 | First-visit tour | Open the site in a private window | Tour card "step 1 of 8" appears; Next opens My Business with its tab outlined in gold | Matched the expected result | Pass |
+| 101 | Skip and restart | Skip tour, reload, then Home → 🧭 Take the tour | Not shown again after skipping; Take the tour restarts it; Esc closes it | Matched the expected result | Pass |
+| 102 | Tour on a phone | Phone width, step through the tour | Card fits at the bottom, no sideways scrolling, highlighted tab scrolls into view | Matched the expected result | Pass |
+| 103 | Term tooltip | Demo → Profit Dashboard → tap the ⓘ next to Total Contribution Margin | Box: "Contribution margin: Selling price − variable cost…"; tap again closes it | Matched the expected result | Pass |
+| 104 | Tooltip on a phone | Phone width, open the ⓘ on Overall CM Ratio (right side of the screen) | Box fully on screen just under the button; Esc or scrolling closes it | Matched the expected result | Pass |
+| 105 | Live profit bar | Demo → My Business, scroll down | Bar at the bottom: Revenue $3,900 · CM $2,475 · Operating profit $975 | Matched the expected result | Pass |
+| 106 | Bar updates | Change Coffee price to 7 | Bar shows Revenue $4,200 and Operating profit $1,275 immediately | Matched the expected result | Pass |
+| 107 | Bar pauses | Coffee price "abc" | Bar: "Fix 1 highlighted field to see your results." – no $0 shown | Matched the expected result | Pass |
+| 108 | Undo a delete | My Business → ✕ on Muffin → confirm | Message "Deleted the product 'Muffin'." → ↩ Undo brings it back; profit $975 | Matched the expected result | Pass |
+| 109 | Undo Apply | Pricing Lab → Coffee 7 → Apply Changes → confirm → ↩ Undo | Coffee price back to 6 in My Business | Matched the expected result | Pass |
+| 110 | Undo expires safely | Delete a product, then edit another value | The Undo message disappears (the edit is kept) | Matched the expected result | Pass |
+| 111 | Setup checklist | Home with the Coffee Shop example | "4 of 5 done"; "Give every product a recipe" not ticked with a Go → link to the Inventory Hub | Matched the expected result | Pass |
+| 112 | Checklist updates | My Business → fixed costs "abc" → back to Home | "3 of 5 done"; Enter monthly fixed costs unticked with a link | Matched the expected result | Pass |
+| 113 | Larger text | Click A+ in the header | All text larger; no sideways scrolling at phone width | Matched the expected result | Pass |
+| 114 | High contrast | Click ◐ | Darker text and borders, white background; click again to turn off | Matched the expected result | Pass |
+| 115 | Remembered | Turn both on, reload the page | Both still on | Matched the expected result | Pass |
+| 116 | Drop a product – keep | Demo → 🧭 Decisions → ✂️ Drop a product?, Sandwich, fixed costs saved 300 | "Keep Sandwich"; profit $975 → $775 (−$200) | Matched the expected result | Pass |
+| 117 | Drop a product – drop | Fixed costs saved 600 | "Drop Sandwich"; $1,075 (+$100) | Matched the expected result | Pass |
+| 118 | Other products affected | Contribution lost on other products 150 | Back to "Keep Sandwich" (−$50) | Matched the expected result | Pass |
+| 119 | Price cut volume | Demo → Pricing Lab → 🔁 Price change, Coffee, new price 5 | "Sell 400 units"; "100 more than now (+33.3%)" | Matched the expected result | Pass |
+| 120 | Price rise | New price 7 | "Sell 240 units"; 60 fewer (−20%); Try it → What-If Coffee 7 / 240 | Matched the expected result | Pass |
+| 121 | Impossible price | New price 2 | "Not possible" message | Matched the expected result | Pass |
+| 122 | Cash budget | Demo → Profit Dashboard → 💵 3-month cash budget | Cash at end of month $1,475 / $2,450 / $3,425; profit $975 each month | Matched the expected result | Pass |
+| 123 | Slow payers | % paid in the same month 60 | Month 1 cash −$85 with a shortfall warning; profit still $975; $1,560 still owed after month 3 | Matched the expected result | Pass |
+| 124 | Stock purchase | Month 1 extra stock bought 500 (back to 100 % paid) | Month 1 cash $975 lower than before; profit unchanged | Matched the expected result | Pass |
+| 125 | Target costing | Demo → Pricing Lab → 🎯 Target costing, Coffee, margin 70 | Target cost $1.80; "must fall by $0.20 (10%)" | Matched the expected result | Pass |
+| 126 | Already meets target | Margin 50 | "already meets this margin, with $1.00 to spare" | Matched the expected result | Pass |
+| 127 | Product badges | Demo → My Business, below the product table | Coffee Star, Muffin Review, Sandwich Hidden gem, Cookie Popular | Matched the expected result | Pass |
+| 128 | Loss-maker badge | Cookie price 0.50 | Cookie – Loss on each sale | Matched the expected result | Pass |
+| 129 | Presentation mode | Demo → Profit Dashboard → 🎬 Presentation mode | Full-screen "Slide 1 of 6" with the café name; → shows $3,900 / $2,475 / $975 | Matched the expected result | Pass |
+| 130 | Slides | Keep pressing → | Break-even 455 units, $2,363.64; Inventory slide names Milk and Butter; ← goes back; Esc exits | Matched the expected result | Pass |
+| 131 | On a projector / phone | Try at phone width and full screen (F11) | Large text, nothing cut off | Matched the expected result | Pass |
+| 132 | Print a page | Demo → Profit Dashboard → footer 🖨 Print this page → print preview | Heading "Price It Right – Maple Leaf Café (demo) – Profit Dashboard"; no menu or buttons; white background; cards not split | Matched the expected result | Pass |
+| 133 | Print another section | My Business → Ctrl + P | Only My Business content, product values readable as plain text | Matched the expected result | Pass |
+| 134 | Phone tab bar | Phone width (≈375 px) | No tabs at the top; bottom bar with Home, Business, Profit, Pricing, More | Matched the expected result | Pass |
+| 135 | More menu | Tap ☰ More → Smart Inventory Hub | Menu lists the other 5 sections; it closes and opens the Inventory Hub; More stays highlighted | Matched the expected result | Pass |
+| 136 | Nothing covered | My Business at phone width, scroll down | Live profit bar sits just above the tab bar, not under it | Matched the expected result | Pass |
+| 137 | Dark mode | Click 🌙 in the header and visit every section | Dark background, light readable text, charts' labels readable; click again to return | Matched the expected result | Pass |
+| 138 | Dark mode printing | Dark mode on → Ctrl + P → print preview | Preview is in the normal light colours on white paper | Matched the expected result | Pass |
+| 139 | Dark + high contrast | Turn on 🌙 and ◐ | Text turns pure white | Matched the expected result | Pass |
+| 140 | What changed – Undo message | My Business → delete Muffin → confirm | Message also says "Operating profit: $975 → $600" | Matched the expected result | Pass |
+| 141 | Undone note | Click ↩ Undo | "Undone – operating profit is back to $975." | Matched the expected result | Pass |
+| 142 | Glow | Pricing Lab → Coffee 7 → Apply → open the dashboard | The profit card's number glows briefly; Monthly Fixed Costs does not | Matched the expected result | Pass |
+| 143 | On this page menu | Profit Dashboard → click "Budget vs actual" in On this page | Page scrolls to that panel; the address stays #dashboard | Matched the expected result | Pass |
+| 144 | Service Business | My Business → 💼 Service Business → confirm | Accounting practice example loads (4 services, no inventory); operating profit $4,755 | Matched the expected result | Pass |
+| 145 | No inventory needed | Same → 📦 Smart Inventory Hub, then Home | "Selling services? No inventory needed"; no recipes or shopping list; checklist "3 of 3 done" | Matched the expected result | Pass |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
