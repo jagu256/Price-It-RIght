@@ -7,6 +7,7 @@ import PriceSlider from '../components/PriceSlider';
 import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
 import CashBudget from '../components/CashBudget';
+import JumpMenu from '../components/JumpMenu';
 import { PresentButton } from '../components/Presentation';
 import SeasonalProjection from '../components/SeasonalProjection';
 import Sensitivity from '../components/Sensitivity';
@@ -87,6 +88,18 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
         />
       </div>
 
+      <JumpMenu
+        items={[
+          { id: 'charts-title', label: t('Financial charts') },
+          { id: 'breakeven-title', label: t('Break-even analysis (whole business)') },
+          { id: 'stepcosts-title', label: t('Step fixed costs (relevant range)') },
+          { id: 'sensitivity-title', label: t('Sensitivity analysis') },
+          { id: 'projection-title', label: t('12-month projection') },
+          { id: 'cash-title', label: t('3-month cash budget') },
+          { id: 'variance-title', label: t('Budget vs actual') },
+          { id: 'single-be-title', label: t('Interactive break-even calculator (one product)') },
+        ]}
+      />
       <ProfitLenses />
       <Charts s={s} products={products} />
       <BreakEven s={s} products={products} />

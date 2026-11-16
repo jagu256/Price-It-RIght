@@ -5,6 +5,7 @@ import { useConfirm } from '../app/Confirm';
 import { useStore } from '../app/StoreContext';
 import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } from '../components/AfterTaxTarget';
 import CostPlusPricing from '../components/CostPlusPricing';
+import JumpMenu from '../components/JumpMenu';
 import DemandExplorer from '../components/DemandExplorer';
 import PriceChangeVolume from '../components/PriceChangeVolume';
 import ProfitGoal from '../components/ProfitGoal';
@@ -30,6 +31,19 @@ export default function PricingLab() {
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <SectionHeader emoji="🎯" title={t('Pricing Lab')} subtitle={t('Experiment with prices and discover how your decisions affect profit.')} />
       <NeedsValidBusiness ready={!!model.summary}>
+        <JumpMenu
+          items={[
+            { id: 'whatif-title', label: t('What-If Pricing Simulator') },
+            { id: 'saved-scenarios-title', label: t('Save and compare scenarios') },
+            { id: 'tax-title', label: t('After-tax target profit (optional)') },
+            { id: 'smart-title', label: t('What Price Should I Charge?') },
+            { id: 'costplus-title', label: t('Cost-plus pricing helper') },
+            { id: 'target-cost-title', label: t('Target costing') },
+            { id: 'pcv-title', label: t('Price change: how many must I sell?') },
+            { id: 'goal-title', label: t('Profit Goal Tracker') },
+            { id: 'events-title', label: t('Surprise Business Events') },
+          ]}
+        />
         <WhatIfSimulator />
         <SavedScenarios />
         <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />

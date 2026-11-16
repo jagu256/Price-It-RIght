@@ -40,9 +40,9 @@ export default function StepFixedCosts() {
   const update = (id: number, key: 'above' | 'increase', v: string) => setSteps((list) => list.map((x) => (x.id === id ? { ...x, [key]: v } : x)));
 
   return (
-    <section aria-labelledby="steps-title" className="card space-y-5 p-5 sm:p-8">
+    <section aria-labelledby="stepcosts-title" className="card space-y-5 p-5 sm:p-8">
       <SubHeader
-        id="steps-title"
+        id="stepcosts-title"
         term="relevantRange"
         emoji="🪜"
         title={t('Step fixed costs (relevant range)')}

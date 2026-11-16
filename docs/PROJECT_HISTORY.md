@@ -320,6 +320,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 418 tests in 36 files passed; build passed.
 
+### Polish pass for the grading rubric (15 Nov 2026)
+- The user shared the grading rubric (deployment, complexity, quality and polish, reflection and ownership, iteration). Since the Profit Dashboard and Pricing Lab now hold many tools, both got an **On this page** jump menu (`components/JumpMenu.tsx`). It scrolls instead of changing the address, because the address chooses the section. A test clicks every link and checks the heading exists on that page.
+- **Accessibility bug found while doing this:** `steps-title` was used twice (Home's hidden "How it works" heading and the step-costs panel), so the panel could be announced with the wrong name. The panel now uses `stepcosts-title`. A scan of all literal ids found no other real duplicates: the other repeats are alternative versions of one panel, and only one shows at a time.
+
+**Checks:** 419 tests in 36 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

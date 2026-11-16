@@ -609,6 +609,29 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('On this page menus', () => {
+  it('list the tools on the dashboard and Pricing Lab, and every link points at a heading that exists', async () => {
+    const scrolled: string[] = [];
+    const original = HTMLElement.prototype.scrollIntoView;
+    HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) { scrolled.push(this.id); };
+    const { user } = setup('dashboard', 'demo');
+    for (const id of ['dashboard', 'pricing']) {
+      await go(id);
+      const menu = within(within(panel(id)).getByRole('navigation', { name: 'On this page' }));
+      for (const b of menu.getAllByRole('button')) {
+        await user.click(b);
+        const target = document.getElementById(scrolled[scrolled.length - 1]);
+        expect(target, b.textContent!).not.toBeNull();
+        expect(panel(id).contains(target)).toBe(true);
+      }
+    }
+    expect(scrolled).toContain('variance-title');
+    expect(scrolled).toContain('pcv-title');
+    expect(window.location.hash).toBe('#pricing'); // jumping never changes the section
+    HTMLElement.prototype.scrollIntoView = original;
+  });
+});
+
 describe('What changed?', () => {
   const toast = () => document.querySelector<HTMLElement>('[role="status"].fixed');
 

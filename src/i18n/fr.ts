@@ -1879,4 +1879,6 @@ export const FR: Record<string, string> = {
   'Undone.': 'Annulé.',
   'Undone – operating profit is back to {profit}.': 'Annulé – le bénéfice d’exploitation est revenu à {profit}.',
   'Operating profit: {before} → {after}': 'Bénéfice d’exploitation : {before} → {after}',
+  /* Jump menu */
+  'On this page': 'Sur cette page',
 };
