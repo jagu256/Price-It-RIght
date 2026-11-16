@@ -276,6 +276,30 @@ describe('decisions', () => {
   });
 });
 
+describe('3-month cash budget', () => {
+  it('shows +$975 a month when customers pay at once, and a month-1 shortfall of −$85 when only 60 % is paid straight away', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const sec = within(within(panel('dashboard')).getByRole('heading', { name: '3-month cash budget' }).closest('section')!);
+    const end = () => sec.getByRole('rowheader', { name: 'Cash at the end of the month' }).closest('tr')!;
+    expect(end()).toHaveTextContent('$1,475');
+    expect(end()).toHaveTextContent('$3,425');
+
+    const pct = sec.getByLabelText('% of sales paid in the same month');
+    await user.clear(pct);
+    await user.type(pct, '60');
+    expect(end()).toHaveTextContent('−$85');
+    expect(end()).toHaveTextContent('$1,865');
+    expect(sec.getByRole('rowheader', { name: 'Operating profit (for comparison)' }).closest('tr')).toHaveTextContent('$975');
+    expect(sec.getByText(/Cash runs below \$0 in month 1/)).toBeInTheDocument();
+    expect(sec.getByText('After month 3, customers still owe $1,560.')).toBeInTheDocument();
+
+    await user.clear(pct);
+    await user.type(pct, '150');
+    expect(sec.getByText('Fix the highlighted values to see the cash budget.')).toBeInTheDocument();
+    expect(sec.queryByRole('rowheader', { name: 'Cash at the end of the month' })).not.toBeInTheDocument();
+  });
+});
+
 describe('Drop a product?', () => {
   it('keeps the Sandwich when only $300 is saved, drops it when $600 is saved, and keeps it again if other sales suffer', async () => {
     const { user } = setup('decisions', 'demo');

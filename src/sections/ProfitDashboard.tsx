@@ -6,6 +6,7 @@ import { CoinsIcon, PieIcon, ShieldIcon, TagIcon, TrendDownIcon, TrendIcon } fro
 import PriceSlider from '../components/PriceSlider';
 import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
+import CashBudget from '../components/CashBudget';
 import SeasonalProjection from '../components/SeasonalProjection';
 import Sensitivity from '../components/Sensitivity';
 import StepFixedCosts from '../components/StepFixedCosts';
@@ -88,6 +89,7 @@ function Dashboard({ s, products }: { s: BusinessSummary; products: ParsedProduc
       <StepFixedCosts />
       <Sensitivity s={s} />
       <SeasonalProjection />
+      <CashBudget />
       <VarianceAnalysis />
       <SingleProductBreakEven products={products} fixedCosts={s.fixedCosts} />
     </>

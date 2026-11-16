@@ -7,7 +7,7 @@ Small-business pricing, inventory and profitability simulator for an **ACCT 4500
 ## Commands
 - `npm install` – install dependencies (first time)
 - `npm run dev` – local dev server (http://localhost:5173)
-- `npm test` – Vitest suite (392 tests as of 15 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
+- `npm test` – Vitest suite (399 tests as of 15 Nov 2026; all must pass; the test timeout is 15 s because click-through tests are slow on this machine)
 - `npm run build` – type-check (`tsc -b`) + production build; must succeed before pushing
 - Deployment: Vercel builds automatically on every push to `main` (GitHub repo `jagu256/Price-It-RIght`, live at https://price-it-r-ight.vercel.app). Never push a failing build.
 

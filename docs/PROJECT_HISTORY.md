@@ -268,6 +268,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 392 tests in 33 files passed; build passed.
 
+### More ideas – 3. 3-month cash budget (15 Nov 2026)
+- New `src/lib/cashBudget.ts` (reuses the projection's monthly units rounding; collections split by % paid now, rounded to the cent with the remainder collected next month, so no cent is lost) and `components/CashBudget.tsx` on the Profit Dashboard.
+- Teaching point it demonstrates: with 60 % paid in the same month, the café is profitable ($975) yet has −$85 cash at the end of month 1.
+
+**Checks:** 399 tests in 34 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).
