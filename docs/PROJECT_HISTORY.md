@@ -261,6 +261,13 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 385 tests in 32 files passed; build passed.
 
+### More ideas – 2. Price change: how many must I sell? (15 Nov 2026)
+- `volumeForPrice` in `src/lib/pricing.ts` (current total CM ÷ new CM per unit, rounded up, in whole cents with BigInt; *not possible* when the new CM ≤ $0) and `components/PriceChangeVolume.tsx` in the Pricing Lab, with "try it in What-If".
+- Hand checks: Coffee $6 → $5 needs 400 units (+100); $7 needs 240 (−60); $5.50 needs 343.
+- Kept to the project rule: the first version of the screen worked out the current contribution itself. It now comes from the library function.
+
+**Checks:** 392 tests in 33 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

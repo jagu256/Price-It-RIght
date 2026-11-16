@@ -215,3 +215,54 @@ export function planForTarget(products: ParsedProduct[], fixedCosts: number, tar
   }));
   return unitsForContribution(weights, toCents(fixedCosts) + toCents(target));
 }
+
+/* ------------------------------------------------------------------ */
+/* Price change: how many units keep the same profit?                  */
+/* ------------------------------------------------------------------ */
+
+export type VolumeForPriceResult =
+  | {
+      status: 'ok';
+      /** The product’s total contribution margin now. */
+      currentContribution: number;
+      oldCMPerUnit: number;
+      newCMPerUnit: number;
+      /** Units needed at the new price to earn at least the same total contribution (rounded UP). */
+      requiredUnits: number;
+      /** requiredUnits − current units (negative: you could sell this many fewer). */
+      unitChange: number;
+      /** unitChange as % of current units, or null when current units are 0. */
+      percentChange: number | null;
+      /** Contribution at requiredUnits − the current contribution (≥ $0, less than one unit’s CM). */
+      roundingExtra: number;
+    }
+  | { status: 'not-possible'; newCMPerUnit: number };
+
+/**
+ * At a new price, how many units of this product earn the SAME total
+ * contribution margin – and so the same operating profit, since fixed costs
+ * don’t change? Required units = current total CM ÷ new CM per unit, rounded UP.
+ * Assumes variable cost per unit stays the same. Whole cents.
+ */
+export function volumeForPrice(product: ParsedProduct, newPrice: number): VolumeForPriceResult {
+  const vc = toCents(product.variableCost);
+  const oldCM = toCents(product.price) - vc;
+  const newCM = toCents(newPrice) - vc;
+  const currentTotal = BigInt(oldCM) * BigInt(product.units);
+  let required: bigint;
+  if (currentTotal <= 0n) required = 0n; // nothing to protect: any volume keeps at least the current contribution
+  else if (newCM <= 0) return { status: 'not-possible', newCMPerUnit: newCM / 100 };
+  else required = (currentTotal + BigInt(newCM) - 1n) / BigInt(newCM);
+  const requiredUnits = Number(required);
+  const unitChange = requiredUnits - product.units;
+  return {
+    status: 'ok',
+    currentContribution: Number(currentTotal) / 100,
+    oldCMPerUnit: oldCM / 100,
+    newCMPerUnit: newCM / 100,
+    requiredUnits,
+    unitChange,
+    percentChange: product.units === 0 ? null : (unitChange / product.units) * 100,
+    roundingExtra: Number(required * BigInt(newCM) - currentTotal) / 100,
+  };
+}

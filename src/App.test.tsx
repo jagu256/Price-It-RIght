@@ -576,6 +576,35 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Price change: how many must I sell?', () => {
+  it('Coffee $6 → $5 needs 400 units (+100); $7 needs 240 (60 fewer); $2 is not possible; can be tried in What-If', async () => {
+    const { user } = setup('pricing', 'demo');
+    const lab = within(panel('pricing'));
+    const sec = within(lab.getByRole('heading', { name: 'Price change: how many must I sell?' }).closest('section')!);
+    const price = sec.getByLabelText('New price');
+    expect(price).toHaveValue('6');
+    expect(sec.getByText('The same number as now.')).toBeInTheDocument();
+
+    await user.clear(price);
+    await user.type(price, '5');
+    expect(sec.getByText('Sell 400 units')).toBeInTheDocument();
+    expect(sec.getByText('100 more than now (+33.3%).')).toBeInTheDocument();
+
+    await user.clear(price);
+    await user.type(price, '7');
+    expect(sec.getByText('Sell 240 units')).toBeInTheDocument();
+    expect(sec.getByText('You could sell 60 fewer (-20%) and still earn the same.')).toBeInTheDocument();
+
+    await user.click(sec.getByRole('button', { name: 'Try it in the What-If simulator' }));
+    expect(lab.getByLabelText('Modified price for Coffee')).toHaveValue('7');
+    expect(lab.getByLabelText('Modified expected sales for Coffee')).toHaveValue('240');
+
+    await user.clear(price);
+    await user.type(price, '2');
+    expect(sec.getByText(/no number of sales can replace/)).toBeInTheDocument();
+  });
+});
+
 describe('Cost-plus pricing helper', () => {
   it('prices Coffee ($2 cost) by markup and margin and can try the price in the What-If plan', async () => {
     const { user } = setup('pricing', 'demo');

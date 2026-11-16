@@ -6,6 +6,7 @@ import { useStore } from '../app/StoreContext';
 import AfterTaxTarget, { EMPTY_TAX_PLAN, linkedTargetFrom, type TaxPlanInput } from '../components/AfterTaxTarget';
 import CostPlusPricing from '../components/CostPlusPricing';
 import DemandExplorer from '../components/DemandExplorer';
+import PriceChangeVolume from '../components/PriceChangeVolume';
 import ProfitGoal from '../components/ProfitGoal';
 import SavedScenarios from '../components/SavedScenarios';
 import ShowMath from '../components/ShowMath';
@@ -33,6 +34,7 @@ export default function PricingLab() {
         <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />
         <SmartPricing linkedTarget={linked} />
         <CostPlusPricing />
+        <PriceChangeVolume />
         <ProfitGoal linkedTarget={linked} />
         <SurpriseEvents />
       </NeedsValidBusiness>
