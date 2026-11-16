@@ -53,7 +53,7 @@ export default function ProductionCapacity() {
                     <tbody>
                       {cap.items.map((i) => (
                         <tr key={i.id} className={i.isLimiting ? 'bg-butter-100/70 font-bold' : ''}>
-                          <th scope="row" className="font-semibold">{i.name}{i.isLimiting && <span className="ml-2 rounded-full bg-butter-300 px-2 py-0.5 text-[10px] uppercase tracking-wider text-butter-700">{t('Limiting')}</span>}</th>
+                          <th scope="row" className="font-semibold">{i.name}{i.isLimiting && <span className="ml-2 rounded-full bg-butter-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-butter-700">{t('Limiting')}</span>}</th>
                           <td className="text-right">{formatQuantity(i.availableBase, i.dimension, 'short')}</td>
                           <td className="text-right">{formatQuantity(i.requiredBase, i.dimension, 'short')}</td>
                           <td className="text-right">{formatNumber(i.maxProducts)}</td>

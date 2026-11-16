@@ -305,6 +305,15 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 412 tests in 35 files passed; build passed.
 
+### More ideas – 9. Dark mode (15 Nov 2026) and a readability check of the whole app
+- `darkMode` added to `src/lib/display.ts` (stored like the other options; `data-theme="dark"`), a 🌙 button in the header, and dark rules in `index.css` for the shared components, Tailwind colour classes (including their transparent variants) and chart labels. `lightWhilePrinting` switches back to light colours for printing (beforeprint/afterprint), with a unit test.
+- **Readability check (new for the polish criterion):** a script measured the contrast ratio of every visible piece of text on all 9 screens against its real background (WCAG AA: 4.5 : 1, or 3 : 1 for large text).
+  - Dark mode, first version: 13 failures (transparent backgrounds such as `bg-butter-100/70` and chart legends). After the fixes: **0 of 1,815**.
+  - The same check on the **existing light theme** also found faint text from before today: the small "$" signs in inputs, the crossed-out planner figures, chart legends drawn in light series colours, and a badge at 4.48 : 1. These were fixed (darker `text-sage-500` / `text-sage-400`, legend text in sage, a lighter badge background), giving **0 of 1,815**.
+  - One measuring mistake was noticed and redone: switching the theme by hand without reloading gave false failures on the header tabs. A clean reload showed 0.
+
+**Checks:** 413 tests in 35 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

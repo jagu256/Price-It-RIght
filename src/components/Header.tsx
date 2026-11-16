@@ -41,6 +41,9 @@ export default function Header({ route }: { route: SectionId }) {
             <button type="button" aria-pressed={display.highContrast} aria-label={t('High contrast')} title={t('High contrast')} onClick={() => toggle('highContrast')} className={`px-2 py-0.5 text-xs font-bold transition ${display.highContrast ? 'bg-sage-700 text-cream-50' : 'bg-white text-sage-700 hover:bg-sage-100'}`}>
               ◐
             </button>
+            <button type="button" aria-pressed={display.darkMode} aria-label={t('Dark mode')} title={t('Dark mode')} onClick={() => toggle('darkMode')} className={`px-2 py-0.5 text-xs font-bold transition ${display.darkMode ? 'bg-sage-700 text-cream-50' : 'bg-white text-sage-700 hover:bg-sage-100'}`}>
+              🌙
+            </button>
           </div>
           <div role="group" aria-label={t('Language')} className="flex shrink-0 overflow-hidden rounded-full ring-1 ring-sage-200">
             {(['en', 'fr'] as const).map((l) => (

@@ -331,6 +331,7 @@ describe('Larger text and high contrast', () => {
   afterEach(() => {
     document.documentElement.removeAttribute('data-text');
     document.documentElement.removeAttribute('data-contrast');
+    document.documentElement.removeAttribute('data-theme');
   });
 
   it('turns each option on and off from the header, keeps both after quick clicks, and remembers them', async () => {
@@ -345,7 +346,14 @@ describe('Larger text and high contrast', () => {
     expect(html).toHaveAttribute('data-text', 'large');
     expect(html).toHaveAttribute('data-contrast', 'high');
     expect(large).toHaveAttribute('aria-pressed', 'true');
-    expect(JSON.parse(window.localStorage.getItem('price-it-right:display')!)).toEqual({ largeText: true, highContrast: true });
+    expect(JSON.parse(window.localStorage.getItem('price-it-right:display')!)).toEqual({ largeText: true, highContrast: true, darkMode: false });
+
+    const dark = screen.getByRole('button', { name: 'Dark mode' });
+    await user.click(dark);
+    expect(html).toHaveAttribute('data-theme', 'dark');
+    expect(dark).toHaveAttribute('aria-pressed', 'true');
+    await user.click(dark);
+    expect(html).not.toHaveAttribute('data-theme');
 
     // Remembered next time.
     unmount();

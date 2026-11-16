@@ -234,3 +234,117 @@ html[data-contrast='high'] :focus-visible {
     overflow: visible !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Dark mode (header button 🌙) – sage on charcoal-green               */
+/* ------------------------------------------------------------------ */
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+html[data-theme='dark'] body {
+  background-color: #111a13;
+  color: #e8efe5;
+}
+/* Surfaces */
+html[data-theme='dark'] :is(.card, .bg-white, .btn-secondary, .btn-small, .select, .text-input) {
+  background-color: #1b281e;
+}
+html[data-theme='dark'] :is(.bg-cream-50, .bg-cream-100, .bg-cream-200) {
+  background-color: #17221a;
+}
+html[data-theme='dark'] :is(.bg-cream-50\/95, .bg-cream-100\/90) {
+  background-color: rgba(23, 34, 26, 0.95);
+}
+html[data-theme='dark'] :is(.bg-sage-50, .bg-sage-100, .bg-sage-200) {
+  background-color: #223326;
+}
+html[data-theme='dark'] :is(.bg-butter-100) {
+  background-color: #352e12;
+}
+html[data-theme='dark'] :is(.bg-loss-50, .bg-loss-100) {
+  background-color: #3a1a22;
+}
+/* Text */
+html[data-theme='dark'] :is(.text-ink, .text-sage-900, .text-sage-800, .section-title, .btn-secondary, .btn-small, .select, .text-input) {
+  color: #eef3ea;
+}
+html[data-theme='dark'] :is(.text-sage-700, .text-sage-600, .eyebrow) {
+  color: #c4d3be;
+}
+html[data-theme='dark'] :is(.text-sage-500, .text-sage-400) {
+  color: #a3b59d;
+}
+html[data-theme='dark'] .text-butter-700 {
+  color: #f0d98a;
+}
+html[data-theme='dark'] .text-loss-700 {
+  color: #ff9db3;
+}
+/* Light text on the butter-yellow highlights stays dark, so it remains readable. */
+html[data-theme='dark'] :is(.bg-butter-200, .bg-butter-300) {
+  color: #1b281e;
+}
+/* Borders and rings */
+html[data-theme='dark'] :is(.border-sage-100, .border-sage-200, .border-sage-300, .card, .btn-secondary, .btn-small, .select, .text-input) {
+  border-color: #36503c;
+}
+html[data-theme='dark'] :is(.ring-sage-100, .ring-sage-200, .ring-sage-300) {
+  --tw-ring-color: #36503c;
+}
+html[data-theme='dark'] .data-table :is(th, td) {
+  border-color: #2c4231;
+}
+html[data-theme='dark'] ::placeholder {
+  color: #8fa389;
+}
+/* Charts: axis labels and grid lines */
+html[data-theme='dark'] .recharts-text {
+  fill: #c4d3be;
+}
+html[data-theme='dark'] .recharts-cartesian-grid line {
+  stroke: #2c4231;
+}
+html[data-theme='dark'] .recharts-default-tooltip {
+  background-color: #1b281e !important;
+  color: #eef3ea;
+}
+/* Dark + high contrast: pure white text. */
+html[data-theme='dark'][data-contrast='high'] :is(.text-sage-500, .text-sage-600, .text-sage-700, .text-sage-800, .text-sage-900, .text-ink, body) {
+  color: #ffffff;
+}
+/* Printing in dark mode: main.tsx switches to the light colours just before printing (lightWhilePrinting). */
+/* Dark mode: the semi-transparent variants (e.g. bg-butter-100/70) and chart legends. */
+html[data-theme='dark'] :is([class*='bg-cream-50/'], [class*='bg-cream-100/'], [class*='bg-white/']):not(.bg-cream-50\/10, .bg-cream-50\/20) {
+  background-color: rgba(23, 34, 26, 0.9);
+}
+html[data-theme='dark'] :is([class*='bg-sage-50/'], [class*='bg-sage-100/']) {
+  background-color: rgba(34, 51, 38, 0.9);
+}
+html[data-theme='dark'] :is([class*='bg-butter-50/'], [class*='bg-butter-100/']) {
+  background-color: rgba(53, 46, 18, 0.9);
+}
+html[data-theme='dark'] :is([class*='bg-loss-50/'], [class*='bg-loss-100/']) {
+  background-color: rgba(58, 26, 34, 0.9);
+}
+html[data-theme='dark'] :is([class*='text-sage-700/'], [class*='text-sage-800/'], [class*='text-sage-900/']) {
+  color: #dfe8db;
+}
+html[data-theme='dark'] .recharts-legend-item-text {
+  color: #dfe8db !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Readability fixes (light theme), found with a contrast check:       */
+/* small text must reach 4.5 : 1 against its background (WCAG AA).     */
+/* ------------------------------------------------------------------ */
+.text-sage-500 {
+  color: #4f6f50;
+}
+/* Crossed-out "not achievable" figures stay muted but readable. */
+.text-sage-400 {
+  color: #587757;
+}
+/* Chart legends use the series colours for their swatch only, not the text. */
+.recharts-legend-item-text {
+  color: #304633 !important;
+}

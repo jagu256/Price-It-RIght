@@ -1873,4 +1873,6 @@ export const FR: Record<string, string> = {
   'Pricing': 'Prix',
   'Main sections': 'Sections principales',
   'More': 'Plus',
+  /* Dark mode */
+  'Dark mode': 'Mode sombre',
 };

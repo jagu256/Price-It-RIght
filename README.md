@@ -64,6 +64,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **🔠 Larger text / ◐ high contrast** (header) | Two buttons next to EN/FR. **A+** makes all text 12.5 % larger. **◐** switches to high contrast: darker text and borders, a white background and stronger focus outlines, which also helps on a projector. Each is a toggle (`aria-pressed`), remembered in this browser (try/catch), and applied before the page first appears. |
 | **🖨 Print-friendly pages** (footer) | **Print this page** (or Ctrl/Cmd + P) prints the current section on white paper. Menus, buttons and pop-ups are hidden, cards are kept together, typed values print as plain text, and a heading appears on paper only (business name, section, date, "All amounts in CAD", fictional data). |
 | **📱 Phone tab bar** | On phones, the sideways-scrolling tabs at the top are replaced by a bar at the bottom within thumb reach: Home, Business, Profit, Pricing and **☰ More** (the other five sections). The current section is highlighted, "More" is highlighted when you are in one of its sections, and the guided tour highlights the right tab. Desktop and tablet keep the top tabs. |
+| **🌙 Dark mode** (header) | A third display button next to A+ and ◐: sage green on charcoal for cards, text, inputs, tables and chart labels, remembered like the other options. It combines with high contrast (white text), and printing automatically uses the light colours. Every screen was checked for readable text in both themes. |
 | **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. **📊 Download my business as Excel** gives an .xlsx file with five sheets of real number cells. |
 | **🇫🇷 EN / FR** (header) | Switches the whole app – screens, messages, Show the math, the PDF report and the Excel file – between English and **French (Canada)**. Amounts use fr-CA formats (`1 800 $`, `63,5 %`, `6,50 $`) and a French decimal comma can be typed (`6,50`). The choice is remembered in this browser. |
 
@@ -469,6 +470,7 @@ npm run test:watch  # re-run while editing
 - 15 November 2026, after adding presentation mode: **410 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding print-friendly pages: **411 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding the phone tab bar: **412 tests in 35 files passed**. `npm run build` completed (same size warning).
+- 15 November 2026, after adding dark mode and the readability fixes: **413 tests in 35 files passed**. `npm run build` completed (same size warning).
 
 Re-run `npm test` yourself to confirm.
 
@@ -615,6 +617,9 @@ Re-run `npm test` yourself to confirm.
 | 134 | Phone tab bar | Phone width (≈375 px) | No tabs at the top; bottom bar with Home, Business, Profit, Pricing, More | | |
 | 135 | More menu | Tap ☰ More → Smart Inventory Hub | Menu lists the other 5 sections; it closes and opens the Inventory Hub; More stays highlighted | | |
 | 136 | Nothing covered | My Business at phone width, scroll down | Live profit bar sits just above the tab bar, not under it | | |
+| 137 | Dark mode | Click 🌙 in the header and visit every section | Dark background, light readable text, charts' labels readable; click again to return | | |
+| 138 | Dark mode printing | Dark mode on → Ctrl + P → print preview | Preview is in the normal light colours on white paper | | |
+| 139 | Dark + high contrast | Turn on 🌙 and ◐ | Text turns pure white | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
