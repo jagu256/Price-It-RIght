@@ -14,7 +14,7 @@ export default function LiveProfitBar() {
   const problems = Object.values(model.productErrors).reduce((n, e) => n + Object.keys(e).length, 0) + (model.fixedError ? 1 : 0);
 
   return (
-    <aside aria-label={t('Live results')} className="sticky bottom-3 z-20 mx-auto max-w-3xl">
+    <aside aria-label={t('Live results')} className="sticky bottom-20 sm:bottom-3 z-20 mx-auto max-w-3xl">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl bg-sage-800 px-4 py-2.5 text-sm text-cream-50 shadow-lift ring-1 ring-sage-900/20">
         {s ? (
           <>

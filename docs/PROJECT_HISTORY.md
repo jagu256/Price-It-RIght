@@ -299,6 +299,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 411 tests in 35 files passed; build passed.
 
+### More ideas – 8. Phone tab bar at the bottom (15 Nov 2026)
+- New `components/BottomNav.tsx` (phone only, `sm:hidden`): four tabs plus a ☰ More menu (closes on choosing, Esc or a tap outside). It follows the tour highlight, and More takes it for sections inside the menu. The top tabs are hidden below the `sm` breakpoint, the page gets 80 px of bottom padding on phones, and the live profit bar and tour card were moved up so the bar never covers them.
+- Measured in the browser: at 375 px the bar is at 741–812 px, the live bar at 668–732 px (no overlap) and the More menu is on screen. At 1280 px the top tabs show and the bottom bar is hidden.
+
+**Checks:** 412 tests in 35 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

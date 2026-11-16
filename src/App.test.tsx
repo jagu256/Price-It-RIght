@@ -600,6 +600,29 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Phone tab bar', () => {
+  it('has four main tabs plus More, which opens the other sections and closes after choosing one', async () => {
+    const { user } = setup('home', 'demo');
+    const bar = within(screen.getByRole('navigation', { name: 'Main sections' }));
+    expect(bar.getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual(['#home', '#my-business', '#dashboard', '#pricing']);
+    expect(bar.getByRole('link', { name: /Home/ })).toHaveAttribute('aria-current', 'page');
+
+    const more = bar.getByRole('button', { name: /More/ });
+    await user.click(more);
+    expect(more).toHaveAttribute('aria-expanded', 'true');
+    const inventory = bar.getByRole('link', { name: /Smart Inventory Hub/ });
+    expect(bar.getAllByRole('link')).toHaveLength(9); // 4 + 5 under More
+    await user.click(inventory);
+    await go('inventory');
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    expect(more.className).toContain('bg-sage-700'); // "More" shows you are in one of its sections
+
+    await user.click(more);
+    await user.keyboard('{Escape}');
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+  });
+});
+
 describe('Printing', () => {
   it('the footer button opens the print dialog, and a print-only heading names the business and page', async () => {
     const print = vi.spyOn(window, 'print').mockImplementation(() => {});

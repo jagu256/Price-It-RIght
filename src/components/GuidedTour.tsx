@@ -54,7 +54,7 @@ function TourCard({ step, onStep, onClose }: { step: number; onStep: (n: number)
       role="dialog"
       aria-labelledby="tour-title"
       aria-describedby="tour-text"
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md rounded-3xl bg-white p-5 shadow-2xl ring-2 ring-sage-300 sm:bottom-6"
+      className="fixed inset-x-3 bottom-20 z-50 mx-auto max-w-md rounded-3xl bg-white p-5 shadow-2xl ring-2 ring-sage-300 sm:bottom-6"
     >
       <p className="text-xs font-bold uppercase tracking-wider text-sage-600">{t('Tour – step {n} of {total}', { n: step + 1, total: TOUR_STEPS.length })}</p>
       <h2 id="tour-title" ref={heading} tabIndex={-1} className="mt-1 font-display text-xl font-bold text-sage-900 outline-none">{t(s.title)}</h2>

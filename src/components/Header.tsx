@@ -59,7 +59,8 @@ export default function Header({ route }: { route: SectionId }) {
           </div>
         </div>
       </div>
-      <nav aria-label={t('Sections')} className="mx-auto max-w-6xl px-2 sm:px-4">
+      {/* On phones the tabs move to the bottom bar (BottomNav). */}
+      <nav aria-label={t('Sections')} className="mx-auto hidden max-w-6xl px-2 sm:block sm:px-4">
         <ul className="flex gap-1 overflow-x-auto py-2 text-sm font-semibold [scrollbar-width:thin]">
           {SECTIONS.map((s) => {
             const active = route === s.id;

@@ -63,6 +63,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **↩ Undo** (everywhere) | After a big change, a message at the top right says what happened and offers **↩ Undo**: deleting a product or inventory item, clearing or importing inventory, importing recipes, **Apply Changes**, applying a surprise event, or loading another or saved business. Undo restores the business exactly as it was. The message closes after 15 seconds or with ✕. Any other change to the business removes the chance to undo, so a later edit is never thrown away. The confirmations before deleting or replacing are still asked first. |
 | **🔠 Larger text / ◐ high contrast** (header) | Two buttons next to EN/FR. **A+** makes all text 12.5 % larger. **◐** switches to high contrast: darker text and borders, a white background and stronger focus outlines, which also helps on a projector. Each is a toggle (`aria-pressed`), remembered in this browser (try/catch), and applied before the page first appears. |
 | **🖨 Print-friendly pages** (footer) | **Print this page** (or Ctrl/Cmd + P) prints the current section on white paper. Menus, buttons and pop-ups are hidden, cards are kept together, typed values print as plain text, and a heading appears on paper only (business name, section, date, "All amounts in CAD", fictional data). |
+| **📱 Phone tab bar** | On phones, the sideways-scrolling tabs at the top are replaced by a bar at the bottom within thumb reach: Home, Business, Profit, Pricing and **☰ More** (the other five sections). The current section is highlighted, "More" is highlighted when you are in one of its sections, and the guided tour highlights the right tab. Desktop and tablet keep the top tabs. |
 | **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. **📊 Download my business as Excel** gives an .xlsx file with five sheets of real number cells. |
 | **🇫🇷 EN / FR** (header) | Switches the whole app – screens, messages, Show the math, the PDF report and the Excel file – between English and **French (Canada)**. Amounts use fr-CA formats (`1 800 $`, `63,5 %`, `6,50 $`) and a French decimal comma can be typed (`6,50`). The choice is remembered in this browser. |
 
@@ -467,6 +468,7 @@ npm run test:watch  # re-run while editing
 - 15 November 2026, after adding product ranking badges: **409 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding presentation mode: **410 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding print-friendly pages: **411 tests in 35 files passed**. `npm run build` completed (same size warning).
+- 15 November 2026, after adding the phone tab bar: **412 tests in 35 files passed**. `npm run build` completed (same size warning).
 
 Re-run `npm test` yourself to confirm.
 
@@ -610,6 +612,9 @@ Re-run `npm test` yourself to confirm.
 | 131 | On a projector / phone | Try at phone width and full screen (F11) | Large text, nothing cut off | | |
 | 132 | Print a page | Demo → Profit Dashboard → footer 🖨 Print this page → print preview | Heading "Price It Right – Maple Leaf Café (demo) – Profit Dashboard"; no menu or buttons; white background; cards not split | | |
 | 133 | Print another section | My Business → Ctrl + P | Only My Business content, product values readable as plain text | | |
+| 134 | Phone tab bar | Phone width (≈375 px) | No tabs at the top; bottom bar with Home, Business, Profit, Pricing, More | | |
+| 135 | More menu | Tap ☰ More → Smart Inventory Hub | Menu lists the other 5 sections; it closes and opens the Inventory Hub; More stays highlighted | | |
+| 136 | Nothing covered | My Business at phone width, scroll down | Live profit bar sits just above the tab bar, not under it | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:

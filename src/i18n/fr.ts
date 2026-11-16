@@ -1867,4 +1867,10 @@ export const FR: Record<string, string> = {
   'Print this page': 'Imprimer cette page',
   'Printed {date}': 'Imprimé le {date}',
   'All amounts in CAD': 'Tous les montants en CAD',
+  /* Phone tab bar */
+  'Home': 'Accueil',
+  'Business': 'Entreprise',
+  'Pricing': 'Prix',
+  'Main sections': 'Sections principales',
+  'More': 'Plus',
 };

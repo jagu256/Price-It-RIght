@@ -7,6 +7,7 @@ import { LanguageProvider, useLanguage } from './app/language';
 import { t } from './i18n/i18n';
 import Footer from './components/Footer';
 import { TourProvider } from './components/GuidedTour';
+import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import PrintHeader from './components/PrintHeader';
 import UndoToast from './components/UndoToast';
@@ -51,7 +52,8 @@ function AppInner({ initial, autoTour }: { initial?: AppState; autoTour: boolean
     <StoreProvider initial={initial}>
       <ConfirmProvider>
         <TourProvider auto={autoTour}>
-        <div className="flex min-h-screen flex-col">
+        {/* pb-20: room for the phone tab bar at the bottom (none from the sm breakpoint up). */}
+        <div className="flex min-h-screen flex-col pb-20 sm:pb-0">
           <button
             type="button"
             onClick={() => document.getElementById('main')?.focus()}
@@ -74,6 +76,7 @@ function AppInner({ initial, autoTour }: { initial?: AppState; autoTour: boolean
           </main>
           <Footer />
           <UndoToast />
+          <BottomNav route={route} />
         </div>
         </TourProvider>
       </ConfirmProvider>
