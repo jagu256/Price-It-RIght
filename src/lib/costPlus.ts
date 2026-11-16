@@ -67,3 +67,35 @@ export function costPlusPrice(cost: number, method: PricingMethod, basisPoints: 
     equivalentPercent: (method === 'markup' ? r / (1 + r) : r / (1 - r)) * 100,
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Target costing: the reverse of cost-plus                            */
+/* ------------------------------------------------------------------ */
+
+export interface TargetCostResult {
+  /** Highest variable cost per unit that still gives the target margin (rounded DOWN to the cent). */
+  targetCost: number;
+  /** Actual margin at that cost (%), or null when the price is $0. */
+  actualMarginPercent: number | null;
+  /** Current variable cost − target cost: how much the cost must fall (≤ 0 means it already meets the target). */
+  reductionNeeded: number;
+  /** reductionNeeded as % of the current cost, or null when the current cost is $0. */
+  reductionPercent: number | null;
+}
+
+/**
+ * Target cost = market price × (1 − target margin %), rounded DOWN to the cent
+ * so the margin you asked for is always reached. Margin is on price (< 100 %).
+ */
+export function targetCost(marketPrice: number, marginBasisPoints: number, currentCost: number): TargetCostResult {
+  const p = BigInt(toCents(marketPrice));
+  const tc = Number((p * BigInt(10_000 - marginBasisPoints)) / 10_000n); // floor
+  const cur = toCents(currentCost);
+  const reduction = cur - tc;
+  return {
+    targetCost: tc / 100,
+    actualMarginPercent: p === 0n ? null : ((Number(p) - tc) / Number(p)) * 100,
+    reductionNeeded: reduction / 100,
+    reductionPercent: cur === 0 ? null : (reduction / cur) * 100,
+  };
+}

@@ -600,6 +600,24 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Target costing', () => {
+  it('Coffee at $6 with a 70 % margin may cost at most $1.80 – $0.20 (10%) below today', async () => {
+    const { user } = setup('pricing', 'demo');
+    const sec = within(within(panel('pricing')).getByRole('heading', { name: 'Target costing' }).closest('section')!);
+    const margin = sec.getByLabelText('Target margin %');
+    await user.clear(margin);
+    await user.type(margin, '70');
+    expect(sec.getByText('Target cost per unit').parentElement).toHaveTextContent('$1.80');
+    expect(sec.getByText('Today’s variable cost of $2.00 must fall by $0.20 (10%) to reach this margin.')).toBeInTheDocument();
+    await user.clear(margin);
+    await user.type(margin, '50'); // $3.00 ≥ $2 → already fine
+    expect(sec.getByText('Today’s variable cost of $2.00 already meets this margin, with $1.00 to spare per unit.')).toBeInTheDocument();
+    await user.clear(margin);
+    await user.type(margin, '100');
+    expect(sec.queryByText('Target cost per unit')).not.toBeInTheDocument();
+  });
+});
+
 describe('Price change: how many must I sell?', () => {
   it('Coffee $6 → $5 needs 400 units (+100); $7 needs 240 (60 fewer); $2 is not possible; can be tried in What-If', async () => {
     const { user } = setup('pricing', 'demo');

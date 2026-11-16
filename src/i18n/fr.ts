@@ -1821,4 +1821,14 @@ export const FR: Record<string, string> = {
   'other cash payments': 'autres décaissements',
   'Please enter the % of sales collected in the same month, for example 100.': 'Veuillez entrer le % des ventes encaissé le mois même, par exemple 100.',
   'The % collected must be between 0 and 100.': 'Le % encaissé doit être entre 0 et 100.',
+  /* Target costing */
+  'Target costing': 'Coût cible',
+  'Start from the price customers will pay and the margin you want: what is the most one unit may cost?': 'Partez du prix que les clients paieront et de la marge voulue : combien une unité peut-elle coûter au maximum?',
+  'Market price': 'Prix du marché',
+  'Target cost per unit': 'Coût cible par unité',
+  'Today’s variable cost of {cost} must fall by {cut} ({pct}) to reach this margin.': 'Le coût variable actuel de {cost} doit baisser de {cut} ({pct}) pour atteindre cette marge.',
+  'Today’s variable cost of {cost} already meets this margin, with {room} to spare per unit.': 'Le coût variable actuel de {cost} respecte déjà cette marge, avec {room} de marge de manœuvre par unité.',
+  'Actual margin at the target cost: {pct} (the cost is rounded down to the cent, so the margin is at least what you asked for).': 'Marge réelle au coût cible : {pct} (le coût est arrondi au cent inférieur, la marge est donc au moins celle demandée).',
+  'Cost-plus vs target costing': 'Prix coûtant majoré ou coût cible',
+  'Cost-plus starts from your cost and adds a markup to get a price. Target costing works backwards: the market sets the price, you choose the margin, and target cost = price × (1 − margin). If your cost is higher, look for cheaper ingredients, smaller portions or less waste. Nothing here changes your business.': 'Le prix coûtant majoré part de votre coût et ajoute une majoration pour obtenir un prix. Le coût cible fait l’inverse : le marché fixe le prix, vous choisissez la marge, et coût cible = prix × (1 − marge). Si votre coût est plus élevé, cherchez des ingrédients moins chers, des portions plus petites ou moins de gaspillage. Rien ici ne modifie votre entreprise.',
 };

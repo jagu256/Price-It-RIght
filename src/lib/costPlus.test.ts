@@ -71,3 +71,30 @@ describe('rate input', () => {
     expect(!r.ok && r.error).toMatch(/less than 100/);
   });
 });
+
+describe('target costing (reverse of cost-plus)', () => {
+  it('Coffee sells at $6; for a 70 % margin the cost may be at most $1.80 → $0.20 (10 %) below today’s $2', async () => {
+    const { targetCost } = await import('./costPlus');
+    expect(targetCost(6, 7000, 2)).toEqual({ targetCost: 1.8, actualMarginPercent: 70, reductionNeeded: 0.2, reductionPercent: 10 });
+  });
+
+  it('rounds the cost DOWN so the margin is always reached: $4.99 at 60 % → $1.996 → $1.99 (60.12 %)', async () => {
+    const { targetCost } = await import('./costPlus');
+    const r = targetCost(4.99, 6000, 1.5);
+    expect(r.targetCost).toBe(1.99);
+    expect(r.actualMarginPercent!).toBeGreaterThanOrEqual(60);
+    expect(r.actualMarginPercent).toBeCloseTo(60.12, 2);
+    expect(r.reductionNeeded).toBe(-0.49); // already $0.49 under the target
+  });
+
+  it('0 % margin → the cost can equal the price; $0 price and $0 cost give N/A, not NaN', async () => {
+    const { targetCost } = await import('./costPlus');
+    expect(targetCost(6, 0, 2).targetCost).toBe(6);
+    expect(targetCost(0, 5000, 0)).toEqual({ targetCost: 0, actualMarginPercent: null, reductionNeeded: 0, reductionPercent: null });
+  });
+
+  it('is the exact reverse of cost-plus when no rounding is needed: $2 at 50 % → $4 → back to $2', async () => {
+    const { targetCost, costPlusPrice } = await import('./costPlus');
+    expect(targetCost(costPlusPrice(2, 'margin', 5000).price, 5000, 2).targetCost).toBe(2);
+  });
+});

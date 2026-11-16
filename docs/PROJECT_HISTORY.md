@@ -274,6 +274,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 399 tests in 34 files passed; build passed.
 
+### More ideas – 4. Target costing (15 Nov 2026)
+- `targetCost` in `src/lib/costPlus.ts` (price × (1 − margin), rounded down so the margin is always met) and `components/TargetCosting.tsx` right after cost-plus pricing in the Pricing Lab, so the two methods sit side by side.
+- Hand checks: $6 at 70 % → $1.80 (cut $0.20, 10 %); $4.99 at 60 % → $1.99. Cost-plus followed by target costing returns the original cost.
+
+**Checks:** 404 tests in 34 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

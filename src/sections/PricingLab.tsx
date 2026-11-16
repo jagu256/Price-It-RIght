@@ -12,6 +12,7 @@ import SavedScenarios from '../components/SavedScenarios';
 import ShowMath from '../components/ShowMath';
 import SmartPricing from '../components/SmartPricing';
 import SurpriseEvents from '../components/SurpriseEvents';
+import TargetCosting from '../components/TargetCosting';
 import { CellInput, ErrorList, NeedsValidBusiness, Notice, SectionHeader, SignedMoney, SubHeader } from '../components/ui';
 import type { BusinessSummary } from '../lib/business';
 import { formatCAD, formatCompactCAD, formatNumber, formatSignedCAD, roundCents, unitsLabel } from '../lib/format';
@@ -34,6 +35,7 @@ export default function PricingLab() {
         <AfterTaxTarget plan={taxPlan} onChange={setTaxPlan} />
         <SmartPricing linkedTarget={linked} />
         <CostPlusPricing />
+        <TargetCosting />
         <PriceChangeVolume />
         <ProfitGoal linkedTarget={linked} />
         <SurpriseEvents />
