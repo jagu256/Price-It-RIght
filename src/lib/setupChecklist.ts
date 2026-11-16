@@ -16,7 +16,11 @@ export interface ChecklistItem {
   section: SectionId;
 }
 
-export function setupChecklist(model: BusinessModel): { items: ChecklistItem[]; done: number; total: number; essentialsDone: boolean } {
+/**
+ * With no inventory at all (a service business, e.g. accounting), inventory and
+ * recipes are not needed: they are left out and `servicesOnly` is true.
+ */
+export function setupChecklist(model: BusinessModel): { items: ChecklistItem[]; done: number; total: number; essentialsDone: boolean; servicesOnly: boolean } {
   const d = model.data;
   const products = d.products.length > 0 && Object.keys(model.productErrors).length === 0;
   const inventory = d.inventory.length > 0 && Object.keys(model.stockErrors).length === 0;
@@ -28,6 +32,8 @@ export function setupChecklist(model: BusinessModel): { items: ChecklistItem[]; 
     { id: 'inventory', done: inventory, optional: true, label: tx('Add your inventory'), hint: tx('Upload a spreadsheet or type items in (needed for stock checks).'), section: 'inventory' },
     { id: 'recipes', done: recipes, optional: true, label: tx('Give every product a recipe'), hint: tx('Tell the app how much of each item one product uses (needed for production planning).'), section: 'inventory' },
   ];
-  const done = items.filter((i) => i.done).length;
-  return { items, done, total: items.length, essentialsDone: items.filter((i) => !i.optional).every((i) => i.done) };
+  const servicesOnly = d.inventory.length === 0;
+  const shown = servicesOnly ? items.filter((i) => !i.optional) : items;
+  const done = shown.filter((i) => i.done).length;
+  return { items: shown, done, total: shown.length, essentialsDone: shown.filter((i) => !i.optional).every((i) => i.done), servicesOnly };
 }

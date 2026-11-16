@@ -26,10 +26,22 @@ describe('setup checklist', () => {
     expect(setupChecklist(buildModel(bad)).essentialsDone).toBe(false);
   });
 
-  it('no inventory and no products → those items are not done; inventory and recipes are optional', () => {
-    const d: BusinessData = { ...sample('demo'), products: [], inventory: [], recipes: {} };
-    const c = setupChecklist(buildModel(d));
-    expect(c.items.filter((i) => i.done).map((i) => i.id)).toEqual(['name', 'fixed']);
+  it('inventory and recipes are optional items when the business has stock', () => {
+    const c = setupChecklist(buildModel(sample('coffee')));
+    expect(c.servicesOnly).toBe(false);
     expect(c.items.filter((i) => i.optional).map((i) => i.id)).toEqual(['inventory', 'recipes']);
+  });
+
+  it('a service business (no inventory, e.g. accounting) only needs the 3 essentials: 3 of 3, inventory and recipes left out', () => {
+    const d: BusinessData = { ...sample('demo'), inventory: [], recipes: {} };
+    const c = setupChecklist(buildModel(d));
+    expect(c.servicesOnly).toBe(true);
+    expect(c.items.map((i) => i.id)).toEqual(['name', 'fixed', 'products']);
+    expect([c.done, c.total, c.essentialsDone]).toEqual([3, 3, true]);
+  });
+
+  it('no products → products not done (never assumed)', () => {
+    const d: BusinessData = { ...sample('demo'), products: [], inventory: [], recipes: {} };
+    expect(setupChecklist(buildModel(d)).items.filter((i) => i.done).map((i) => i.id)).toEqual(['name', 'fixed']);
   });
 });

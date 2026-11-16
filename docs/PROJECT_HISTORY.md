@@ -326,6 +326,11 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 419 tests in 36 files passed; build passed.
 
+### Owner-found issue: service businesses (16 Nov 2026)
+- The owner tried an **accounting business** and found the Inventory Hub still asked for recipes, although services have none. Fix: with no inventory items, the hub shows a "Selling services? No inventory needed" note and hides the recipe, costing-from-stock, capacity and shopping-list panels. The setup checklist leaves inventory and recipes out (3 of 3), and the planner says services can skip it. Detection is automatic (no inventory = services), so the save file is unchanged.
+
+**Checks:** 422 tests in 36 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

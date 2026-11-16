@@ -33,7 +33,7 @@ export default function ProductionPlanner() {
       {!model.summary ? (
         <Notice tone="error">{t('Fix the highlighted numbers in 🏠 My Business first.')}</Notice>
       ) : !stockOk || !anyRecipe ? (
-        <Notice tone="warn" title={t('Inventory and recipes needed')}>{t('Add valid inventory and at least one product recipe in the 📦 Smart Inventory Hub to plan production.')}</Notice>
+        <Notice tone="warn" title={t('Inventory and recipes needed')}>{t('Add valid inventory and at least one product recipe in the 📦 Smart Inventory Hub to plan production.')} {t('If you sell services only (no stock), you can skip this section – production planning is about limited inventory.')}</Notice>
       ) : (
         <Planner />
       )}

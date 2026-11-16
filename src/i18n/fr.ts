@@ -1881,4 +1881,9 @@ export const FR: Record<string, string> = {
   'Operating profit: {before} → {after}': 'Bénéfice d’exploitation : {before} → {after}',
   /* Jump menu */
   'On this page': 'Sur cette page',
+  /* Service businesses */
+  'No inventory entered – that’s fine for a service business, so inventory and recipes are left out. If your products use stock, add it in the 📦 Smart Inventory Hub.': 'Aucun stock saisi – c’est normal pour une entreprise de services : les stocks et les recettes sont donc laissés de côté. Si vos produits utilisent des stocks, ajoutez-les dans le 📦 Centre des stocks.',
+  'Selling services? No inventory needed': 'Vous vendez des services? Aucun stock nécessaire',
+  'Your business has no inventory items, so recipes, product costing from stock, production capacity and the shopping list are not needed and are hidden. Services (like accounting, consulting or cleaning) just use the variable cost per unit entered in 🏠 My Business. If your products do use stock, add your inventory above and these tools will appear.': 'Votre entreprise n’a aucun article en stock : les recettes, le coût des produits à partir des stocks, la capacité de production et la liste d’achats ne sont donc pas nécessaires et sont masqués. Les services (comme la comptabilité, le conseil ou le nettoyage) utilisent simplement le coût variable unitaire saisi dans 🏠 Mon entreprise. Si vos produits utilisent des stocks, ajoutez-les ci-dessus et ces outils apparaîtront.',
+  'If you sell services only (no stock), you can skip this section – production planning is about limited inventory.': 'Si vous vendez seulement des services (sans stock), vous pouvez passer cette section – la planification de la production porte sur des stocks limités.',
 };

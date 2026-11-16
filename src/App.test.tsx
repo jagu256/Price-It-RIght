@@ -609,6 +609,31 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Service businesses (no inventory)', () => {
+  it('hides recipes and stock tools, and the checklist only needs the 3 essentials', async () => {
+    const { user } = setup('inventory', 'demo');
+    const hub = within(panel('inventory'));
+    expect(hub.getByRole('heading', { name: /Connect Your Products to Inventory/ })).toBeInTheDocument();
+    await user.click(hub.getByRole('button', { name: 'Clear inventory' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Clear inventory' }));
+    // An accounting firm, say: no stock, so no recipes, costing from stock, capacity or shopping list.
+    expect(hub.getByText('Selling services? No inventory needed')).toBeInTheDocument();
+    expect(hub.queryByRole('heading', { name: /Connect Your Products to Inventory/ })).not.toBeInTheDocument();
+    expect(hub.queryByRole('heading', { name: /What should I buy\?/ })).not.toBeInTheDocument();
+    // Profit still works from the variable cost entered in My Business.
+    expect(within(panel('dashboard')).getByRole('heading', { name: 'Projected Operating Profit', hidden: true }).closest('article')).toHaveTextContent('$975');
+
+    await go('home');
+    const card = within(within(panel('home')).getByRole('heading', { name: /Your setup checklist/ }).closest('section')!);
+    expect(card.getByText('3 of 3 done')).toBeInTheDocument();
+    expect(card.getByText(/fine for a service business/)).toBeInTheDocument();
+    expect(card.queryByText('Give every product a recipe')).not.toBeInTheDocument();
+
+    await go('planner');
+    expect(within(panel('planner')).getByText(/If you sell services only/)).toBeInTheDocument();
+  });
+});
+
 describe('On this page menus', () => {
   it('list the tools on the dashboard and Pricing Lab, and every link points at a heading that exists', async () => {
     const scrolled: string[] = [];

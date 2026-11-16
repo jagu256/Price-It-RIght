@@ -12,6 +12,8 @@ import { useStore } from '../app/StoreContext';
 export default function InventoryHub() {
   const { state } = useStore();
   const note = BUSINESS_NOTES[state.business.type];
+  // A business with no inventory (e.g. an accounting firm selling services) needs no recipes or stock checks.
+  const servicesOnly = state.business.inventory.length === 0;
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <SectionHeader emoji="📦" title={t('Smart Inventory Hub')} subtitle={t('Upload your inventory, understand your stock, and plan smarter.')} />
@@ -24,10 +26,18 @@ export default function InventoryHub() {
         <InventoryTable />
       </section>
 
-      <RecipeManager />
-      <ProductCosting />
-      <ProductionCapacity />
-      <PurchasePlanner />
+      {servicesOnly ? (
+        <Notice tone="success" title={t('Selling services? No inventory needed')}>
+          {t('Your business has no inventory items, so recipes, product costing from stock, production capacity and the shopping list are not needed and are hidden. Services (like accounting, consulting or cleaning) just use the variable cost per unit entered in 🏠 My Business. If your products do use stock, add your inventory above and these tools will appear.')}
+        </Notice>
+      ) : (
+        <>
+          <RecipeManager />
+          <ProductCosting />
+          <ProductionCapacity />
+          <PurchasePlanner />
+        </>
+      )}
     </div>
   );
 }

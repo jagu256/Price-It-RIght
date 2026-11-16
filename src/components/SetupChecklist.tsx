@@ -36,6 +36,7 @@ export default function SetupChecklist() {
             </li>
           ))}
         </ul>
+        {c.servicesOnly && <p className="mt-3 text-sm text-sage-700">{t('No inventory entered – that’s fine for a service business, so inventory and recipes are left out. If your products use stock, add it in the 📦 Smart Inventory Hub.')}</p>}
         {c.essentialsDone && <p className="mt-3 text-sm font-semibold text-sage-700">🎉 {t('The essentials are done – open the Profit Dashboard to see your results.')}</p>}
       </div>
     </section>

@@ -699,6 +699,7 @@ See [docs/RUBRIC_AND_REFLECTION_GUIDE.md](docs/RUBRIC_AND_REFLECTION_GUIDE.md) f
 
 **Improvements made after feedback:**
 1. **Problem → change → result:** the export looked like a code file → the backup button was relabelled *Export my business (backup file)* with a note explaining it is for re-importing, and a new **📊 Download my business as Excel** button was added (five sheets with real numbers in CAD; see Business Report) → the business can now be opened, checked and added up in Excel. Tested in `excelExport.test.ts` (the file is read back) and in `App.test.tsx`.
+2. **Problem → change → result** (owner testing, 16 Nov 2026): the owner set up an **accounting business** (services only) and found the Smart Inventory Hub still asked for recipes, although services have none → when a business has **no inventory**, the hub now says "Selling services? No inventory needed" and hides recipes, costing from stock, capacity and the shopping list. The setup checklist counts only the 3 essentials (3 of 3) and the Production Planner says it can be skipped → a service business no longer looks unfinished. Profit still comes from the variable cost per unit entered in My Business. Tested in `setupChecklist.test.ts` and `App.test.tsx` ("Service businesses").
 
 ## Known limitations
 
