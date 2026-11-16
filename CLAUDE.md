@@ -33,6 +33,7 @@ React 18 + TypeScript + Vite 6 + Tailwind 3 + Recharts 2. Excel via read-excel-f
   - `purchasing.ts` "What should I buy?" (buffer and packs rounded UP; unknown cost never $0; buying stock is cash, not an expense). UI `components/PurchasePlanner.tsx` (Inventory Hub)
   - `costPlus.ts` markup vs margin pricing (rounded UP to the cent). UI `components/CostPlusPricing.tsx`; `compareScenarios` in `pricing.ts` + `components/SavedScenarios.tsx` (Pricing Lab; saved scenarios are NOT persisted)
   - `glossary.ts` (ⓘ term tooltips, `components/TermTip.tsx`, rendered in a portal), `tour.ts` (guided tour, `components/GuidedTour.tsx`; `App autoTour` is on only in `main.tsx`), `setupChecklist.ts` (Home), `display.ts` (larger text / high contrast; header buttons + CSS in `index.css`)
+  - Second set (15 Nov): `dropProduct` (decisions.ts), `volumeForPrice` (pricing.ts), `cashBudget.ts`, `targetCost` (costPlus.ts), `productRanking.ts`, `changeSummary.ts`; UI `Presentation.tsx`, `PrintHeader.tsx` + print CSS, `BottomNav.tsx` (phone tabs; top tabs hidden below sm), dark mode (`display.ts` darkMode + CSS; prints light), `useChangedFlash.ts`, `JumpMenu.tsx` (scrolls, never changes the hash)
   - Undo: `reducer` in `store.ts` wraps `baseReducer`; big changes (see `undoMessage`) can be undone, any other business change clears the undo. UI `components/UndoToast.tsx`
   - `showMath.ts` "Show the math" explanations – built only from already-calculated results, never its own arithmetic (UI: `components/ShowMath.tsx`)
   - `importer.ts`, `templates.ts` Excel/CSV import and templates; `events.ts`, `challenges.ts`; `report.ts` + `reportPdf.ts`
@@ -72,3 +73,4 @@ Sage green / cream / white / pastel yellow / muted dark green; rounded cards, so
 - Built: "Show the math", "Save my work", sensitivity + DOL, after-tax target, price-sensitive demand, Decisions, Excel export, 12-month projection, Best mix optimizer, French toggle (9 Nov 2026); budget vs actual, purchase plan, cost-plus pricing, saved scenarios, step fixed costs, guided tour, term tooltips, live profit bar, undo, setup checklist, larger text / high contrast (15 Nov 2026).
 
 - Have a French speaker review the translations listed in README → Language.
+- Write the team reflection (see docs/RUBRIC_AND_REFLECTION_GUIDE.md) – never write it for them or invent their decisions.

@@ -687,7 +687,7 @@ Again a separate AI agent that had **not seen the code or tests** worked only fr
 
 > **TO BE COMPLETED BY THE PROJECT TEAM.** No real user testing has been done yet. Do not fill this in until a real person has used the app.
 
-Use [docs/USER_TESTING_KIT.md](docs/USER_TESTING_KIT.md) (tasks, questions and a record sheet) to run the sessions, and [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for the 5-minute oral demo.
+See [docs/RUBRIC_AND_REFLECTION_GUIDE.md](docs/RUBRIC_AND_REFLECTION_GUIDE.md) for the grading-rubric checklist and a structure for the team reflection. Use [docs/USER_TESTING_KIT.md](docs/USER_TESTING_KIT.md) (tasks, questions and a record sheet) to run the sessions, and [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for the 5-minute oral demo.
 
 | Item | Details |
 |---|---|
