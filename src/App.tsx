@@ -8,6 +8,7 @@ import { t } from './i18n/i18n';
 import Footer from './components/Footer';
 import { TourProvider } from './components/GuidedTour';
 import Header from './components/Header';
+import PrintHeader from './components/PrintHeader';
 import UndoToast from './components/UndoToast';
 import type { AppState } from './lib/store';
 import BusinessChallenge from './sections/BusinessChallenge';
@@ -60,6 +61,7 @@ function AppInner({ initial, autoTour }: { initial?: AppState; autoTour: boolean
           </button>
           <Header route={route} />
           <main id="main" tabIndex={-1} className="flex-1 outline-none">
+            <PrintHeader route={route} />
             <Panel id="home" route={route}><Home /></Panel>
             <Panel id="my-business" route={route}><MyBusiness /></Panel>
             <Panel id="dashboard" route={route}><ProfitDashboard /></Panel>

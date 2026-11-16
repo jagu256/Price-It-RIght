@@ -175,3 +175,62 @@ html[data-contrast='high'] :focus-visible {
   outline: 3px solid #102414;
   outline-offset: 2px;
 }
+
+/* ------------------------------------------------------------------ */
+/* Printing (🖨 Print this page, or Ctrl/Cmd + P)                       */
+/* ------------------------------------------------------------------ */
+.print-only {
+  display: none;
+}
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000;
+    font-size: 11pt;
+  }
+  /* Menus, buttons and pop-ups are for the screen only. */
+  header,
+  footer,
+  nav,
+  button,
+  aside,
+  .print-hidden,
+  [role='dialog'],
+  [role='alertdialog'],
+  [role='status'].fixed {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  /* Keep cards together and flat. */
+  .card,
+  article,
+  section {
+    break-inside: avoid-page;
+    box-shadow: none !important;
+  }
+  .card,
+  article {
+    border: 1px solid #b8c9b4 !important;
+  }
+  /* Typed values print as plain text. */
+  input,
+  select {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .animate-rise {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+}

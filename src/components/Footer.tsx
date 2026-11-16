@@ -1,6 +1,15 @@
 import { t } from '../i18n/i18n';
 import Logo from './Logo';
 
+/** Opens the browser’s print dialog (print styles in index.css hide menus and buttons). */
+export function printPage() {
+  try {
+    window.print();
+  } catch {
+    /* some embedded previews block printing – nothing else to do */
+  }
+}
+
 export default function Footer() {
   return (
     <footer className="border-t border-sage-100 bg-sage-900 text-cream-100">
@@ -10,6 +19,9 @@ export default function Footer() {
             <Logo className="h-7 w-7" /> Price It Right
           </p>
           <p className="mt-2 text-sm text-cream-200/80">{t('Set your price. Know your costs. Maximize your profit.')}</p>
+          <button type="button" onClick={printPage} className="mt-4 rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-cream-100/40 hover:bg-cream-50/10">
+            🖨 {t('Print this page')}
+          </button>
         </div>
         <div className="space-y-2 text-sm text-cream-200/80">
           <p>

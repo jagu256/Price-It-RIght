@@ -1863,4 +1863,8 @@ export const FR: Record<string, string> = {
   'Slide {n} of {total}': 'Diapositive {n} de {total}',
   'Exit': 'Quitter',
   'Use ← → to move, Esc to exit': 'Utilisez ← → pour avancer, Échap pour quitter',
+  /* Printing */
+  'Print this page': 'Imprimer cette page',
+  'Printed {date}': 'Imprimé le {date}',
+  'All amounts in CAD': 'Tous les montants en CAD',
 };

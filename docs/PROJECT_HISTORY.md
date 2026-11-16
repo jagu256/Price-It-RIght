@@ -293,6 +293,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 410 tests in 35 files passed; build passed.
 
+### More ideas – 7. Print-friendly pages (15 Nov 2026)
+- `@media print` rules in `index.css` hide the header, nav, footer, buttons, pop-ups and the live bar, flatten cards, keep cards together across pages and print inputs as plain text. A print-only heading (`components/PrintHeader.tsx`) names the business, section and date. The footer has a **🖨 Print this page** button, and `window.print()` is wrapped in try/catch.
+- The test checks the button and the heading. Print preview itself can't be automated here, so it is a manual-test row for the team.
+
+**Checks:** 411 tests in 35 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

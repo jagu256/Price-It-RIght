@@ -600,6 +600,20 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Printing', () => {
+  it('the footer button opens the print dialog, and a print-only heading names the business and page', async () => {
+    const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+    const { user } = setup('dashboard', 'demo');
+    await user.click(screen.getByRole('button', { name: /Print this page/ }));
+    expect(print).toHaveBeenCalledTimes(1);
+    const header = screen.getByTestId('print-header');
+    expect(header).toHaveClass('print-only');
+    expect(header).toHaveTextContent('Price It Right – Maple Leaf Café (demo) – Profit Dashboard');
+    expect(header).toHaveTextContent('All amounts in CAD · Fictional demo data');
+    print.mockRestore();
+  });
+});
+
 describe('Presentation mode', () => {
   it('opens full screen, moves with the arrow keys and buttons, and closes with Esc', async () => {
     const { user } = setup('dashboard', 'demo');
