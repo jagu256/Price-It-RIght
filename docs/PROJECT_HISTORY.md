@@ -332,7 +332,7 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 **Checks:** 422 tests in 36 files passed; build passed.
 
 ### Service Business category (16 Nov 2026)
-- The owner suggested letting a business **choose** to be a service business. A new  category (💼 Service Business) was added to , with a fictional "My Accounting Practice" sample in  (no inventory, no recipes). It reuses the no-inventory behaviour added earlier the same day. Old save files still load: the category list only grew.
+- The owner suggested letting a business **choose** to be a service business. A new `services` category (💼 Service Business) was added to `src/lib/businesses.ts`, with a fictional "My Accounting Practice" sample in `src/lib/samples.ts` (no inventory, no recipes). It reuses the no-inventory behaviour added earlier the same day. Old save files still load: the category list only grew.
 - Hand check: revenue 3,050, VC ,795, CM 1,255, fixed ,500 → operating profit **,755** (unit and click-through tests).
 
 **Checks:** 424 tests in 36 files passed; build passed.
