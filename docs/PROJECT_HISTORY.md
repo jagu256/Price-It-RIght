@@ -280,6 +280,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 404 tests in 34 files passed; build passed.
 
+### More ideas – 5. Product ranking badges (15 Nov 2026)
+- New `src/lib/productRanking.ts` (CM per unit vs weighted average and units vs average per product, compared with BigInt cross-multiplication so there is no rounding) and `components/ProductRanking.tsx` under the product table in My Business.
+- Demo: Coffee star, Muffin review, Sandwich hidden gem, Cookie popular. Labelled as a guide, not a verdict.
+
+**Checks:** 409 tests in 35 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

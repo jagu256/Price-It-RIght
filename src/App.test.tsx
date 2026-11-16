@@ -600,6 +600,23 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Product ranking badges', () => {
+  it('labels the demo products and updates when a product becomes a loss-maker', async () => {
+    const { user } = setup('my-business', 'demo');
+    const mb = within(panel('my-business'));
+    const box = () => within(mb.getByRole('heading', { name: /How each product compares/ }).parentElement!);
+    expect(box().getByText('Coffee – Star')).toBeInTheDocument();
+    expect(box().getByText('Muffin – Review')).toBeInTheDocument();
+    expect(box().getByText('Sandwich – Hidden gem')).toBeInTheDocument();
+    expect(box().getByText('Cookie – Popular')).toBeInTheDocument();
+
+    const price = mb.getByLabelText('Selling price per unit for Cookie');
+    await user.clear(price);
+    await user.type(price, '0.50');
+    expect(box().getByText('Cookie – Loss on each sale')).toBeInTheDocument();
+  });
+});
+
 describe('Target costing', () => {
   it('Coffee at $6 with a 70 % margin may cost at most $1.80 – $0.20 (10%) below today', async () => {
     const { user } = setup('pricing', 'demo');

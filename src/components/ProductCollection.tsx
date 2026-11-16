@@ -4,6 +4,7 @@ import { useStore } from '../app/StoreContext';
 import { productMetrics, sortProducts, type ProductMetrics, type SortKey } from '../lib/business';
 import { formatCAD, formatPercent } from '../lib/format';
 import { t, tx } from '../i18n/i18n';
+import ProductRanking from './ProductRanking';
 import { CellInput, ErrorList, SignedMoney, SubHeader } from './ui';
 
 const SORTS: { key: SortKey | 'none'; label: string }[] = [
@@ -113,6 +114,7 @@ export default function ProductCollection() {
           {t('Contribution margin is not profit. Fixed costs belong to the whole business and are subtracted once, on the 💰 Profit Dashboard – never from each product.')}
         </p>
       </div>
+      <ProductRanking />
     </section>
   );
 }

@@ -1831,4 +1831,16 @@ export const FR: Record<string, string> = {
   'Actual margin at the target cost: {pct} (the cost is rounded down to the cent, so the margin is at least what you asked for).': 'Marge réelle au coût cible : {pct} (le coût est arrondi au cent inférieur, la marge est donc au moins celle demandée).',
   'Cost-plus vs target costing': 'Prix coûtant majoré ou coût cible',
   'Cost-plus starts from your cost and adds a markup to get a price. Target costing works backwards: the market sets the price, you choose the margin, and target cost = price × (1 − margin). If your cost is higher, look for cheaper ingredients, smaller portions or less waste. Nothing here changes your business.': 'Le prix coûtant majoré part de votre coût et ajoute une majoration pour obtenir un prix. Le coût cible fait l’inverse : le marché fixe le prix, vous choisissez la marge, et coût cible = prix × (1 − marge). Si votre coût est plus élevé, cherchez des ingrédients moins chers, des portions plus petites ou moins de gaspillage. Rien ici ne modifie votre entreprise.',
+  /* Product ranking */
+  'Star': 'Vedette',
+  'High margin and high sales – protect it.': 'Marge élevée et ventes élevées – à protéger.',
+  'Popular': 'Populaire',
+  'Sells well but earns less per unit – try a small price rise or a lower cost.': 'Se vend bien mais rapporte moins par unité – essayez une petite hausse de prix ou un coût plus bas.',
+  'Hidden gem': 'Perle cachée',
+  'Earns well per unit but sells less – promote it.': 'Rapporte bien par unité mais se vend moins – faites-en la promotion.',
+  'Low margin and low sales – rethink its price, cost or place on the menu.': 'Marge faible et ventes faibles – repensez son prix, son coût ou sa place au menu.',
+  'Loss on each sale': 'Perte à chaque vente',
+  'Its price is below its variable cost, so every sale lowers profit.': 'Son prix est inférieur à son coût variable : chaque vente réduit le bénéfice.',
+  'How each product compares': 'Comment chaque produit se compare',
+  'Compared with your business averages: contribution margin per unit vs the weighted average, and expected units vs the average per product. A quick guide only – it ignores shared inventory and what customers want.': 'Comparaison avec les moyennes de votre entreprise : marge sur coûts variables unitaire par rapport à la moyenne pondérée, et unités prévues par rapport à la moyenne par produit. Simple repère – il ne tient pas compte des stocks partagés ni des préférences des clients.',
 };
