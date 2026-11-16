@@ -609,6 +609,22 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Service Business category', () => {
+  it('can be chosen in My Business: a fictional accounting practice with no inventory or recipes', async () => {
+    const { user } = setup('my-business', 'coffee');
+    const mb = within(panel('my-business'));
+    await user.click(mb.getByRole('radio', { name: /Service Business/ }));
+    const dialog = document.querySelector<HTMLElement>('[role="alertdialog"]');
+    if (dialog) await user.click(within(dialog).getAllByRole('button').find((b) => b.textContent !== 'Cancel')!);
+    expect(mb.getByDisplayValue('Personal tax return')).toBeInTheDocument();
+    expect(mb.getByRole('complementary', { name: 'Live results' })).toHaveTextContent('Operating profit $4,755');
+    await go('inventory');
+    expect(within(panel('inventory')).getByText('Selling services? No inventory needed')).toBeInTheDocument();
+    await go('home');
+    expect(within(panel('home')).getByText('3 of 3 done')).toBeInTheDocument();
+  });
+});
+
 describe('Service businesses (no inventory)', () => {
   it('hides recipes and stock tools, and the checklist only needs the 3 essentials', async () => {
     const { user } = setup('inventory', 'demo');

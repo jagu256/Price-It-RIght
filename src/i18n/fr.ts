@@ -1886,4 +1886,16 @@ export const FR: Record<string, string> = {
   'Selling services? No inventory needed': 'Vous vendez des services? Aucun stock nécessaire',
   'Your business has no inventory items, so recipes, product costing from stock, production capacity and the shopping list are not needed and are hidden. Services (like accounting, consulting or cleaning) just use the variable cost per unit entered in 🏠 My Business. If your products do use stock, add your inventory above and these tools will appear.': 'Votre entreprise n’a aucun article en stock : les recettes, le coût des produits à partir des stocks, la capacité de production et la liste d’achats ne sont donc pas nécessaires et sont masqués. Les services (comme la comptabilité, le conseil ou le nettoyage) utilisent simplement le coût variable unitaire saisi dans 🏠 Mon entreprise. Si vos produits utilisent des stocks, ajoutez-les ci-dessus et ces outils apparaîtront.',
   'If you sell services only (no stock), you can skip this section – production planning is about limited inventory.': 'Si vous vendez seulement des services (sans stock), vous pouvez passer cette section – la planification de la production porte sur des stocks limités.',
+  /* Service business category */
+  'Service Business': 'Entreprise de services',
+  'Accounting, consulting & other services – no inventory': 'Comptabilité, conseil et autres services – sans stocks',
+  'services or client hours': 'services ou heures facturées',
+  'My Accounting Practice': 'Mon cabinet comptable',
+  'Personal tax return': 'Déclaration de revenus personnelle',
+  'Monthly bookkeeping (per client)': 'Tenue de livres mensuelle (par client)',
+  'Payroll service (per client)': 'Service de paie (par client)',
+  'Advisory hour': 'Heure de consultation',
+  'Tax': 'Fiscalité',
+  'Bookkeeping': 'Tenue de livres',
+  'Advisory': 'Conseil',
 };

@@ -112,6 +112,19 @@ const SAMPLES: Record<BusinessId | 'demo', Sample> = {
       'Tote bag': [['Tote bags (finished)', '1', 'pcs'], ['Shopping bags', '1', 'pcs']],
     },
   },
+  // A service business: it sells time and expertise, so it has no inventory and no recipes.
+  services: {
+    name: 'My Accounting Practice',
+    fixedCosts: '6500',
+    products: [
+      ['Personal tax return', 'Tax', '150', '20', '40'],
+      ['Monthly bookkeeping (per client)', 'Bookkeeping', '300', '60', '12'],
+      ['Payroll service (per client)', 'Bookkeeping', '120', '15', '10'],
+      ['Advisory hour', 'Advisory', '90', '5', '25'],
+    ],
+    inventory: [],
+    recipes: {},
+  },
   custom: {
     name: 'My Business',
     fixedCosts: '800',
@@ -166,6 +179,7 @@ export const SAMPLE_TEXT = [
   tx('Coffee'), tx('Latte'), tx('Muffin'), tx('Sandwich'), tx('Cookie'), tx('Sourdough loaf'), tx('Croissant'), tx('Cupcake'), tx('Cookie box'),
   tx('Classic manicure'), tx('Gel manicure'), tx('Pedicure'), tx('Nail art add-on'), tx('T-shirt'), tx('Hoodie'), tx('Cap'), tx('Tote bag'),
   tx('Product A'), tx('Product B'),
+  tx('My Accounting Practice'), tx('Personal tax return'), tx('Monthly bookkeeping (per client)'), tx('Payroll service (per client)'), tx('Advisory hour'), tx('Tax'), tx('Bookkeeping'), tx('Advisory'),
   tx('Drinks'), tx('Bakery'), tx('Food'), tx('Bread'), tx('Pastry'), tx('Sweets'), tx('Hands'), tx('Feet'), tx('Extras'), tx('Tops'), tx('Accessories'),
   tx('Coffee beans'), tx('Milk'), tx('Coffee cups'), tx('Flour'), tx('Sugar'), tx('Butter'), tx('Eggs'), tx('Gift boxes'), tx('Gel polish'), tx('Regular polish'),
   tx('Nail files'), tx('Cotton pads'), tx('Foot soak'), tx('T-shirts (finished)'), tx('Hoodies (finished)'), tx('Caps (finished)'), tx('Tote bags (finished)'),

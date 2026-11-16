@@ -5,7 +5,7 @@
 import { tx } from '../i18n/i18n';
 import type { PricingInputs } from './accounting';
 
-export type BusinessId = 'coffee' | 'bakery' | 'nails' | 'clothing' | 'custom';
+export type BusinessId = 'coffee' | 'bakery' | 'nails' | 'clothing' | 'services' | 'custom';
 
 export interface BusinessPreset {
   id: BusinessId;
@@ -49,6 +49,14 @@ export const BUSINESSES: BusinessPreset[] = [
     blurb: tx('Tees, hoodies & accessories'),
     unitExample: tx('items of clothing'),
     defaults: { sellingPrice: 40, variableCost: 18, fixedCosts: 1800, units: 120 },
+  },
+  {
+    id: 'services',
+    label: tx('Service Business'),
+    emoji: '💼',
+    blurb: tx('Accounting, consulting & other services – no inventory'),
+    unitExample: tx('services or client hours'),
+    defaults: { sellingPrice: 150, variableCost: 20, fixedCosts: 6500, units: 40 },
   },
   {
     id: 'custom',

@@ -45,3 +45,13 @@ describe('setup checklist', () => {
     expect(setupChecklist(buildModel(d)).items.filter((i) => i.done).map((i) => i.id)).toEqual(['name', 'fixed']);
   });
 });
+
+describe('Service Business example (fictional accounting practice)', () => {
+  it('has no inventory or recipes and earns $4,755 a month (revenue $13,050, CM $11,255, fixed $6,500)', () => {
+    const m = buildModel(sample('services'));
+    expect(m.data.inventory).toEqual([]);
+    expect(m.data.recipes).toEqual({});
+    expect([m.summary!.totalRevenue, m.summary!.totalVariableCosts, m.summary!.totalCM, m.summary!.operatingProfit]).toEqual([13050, 1795, 11255, 4755]);
+    expect(setupChecklist(m)).toMatchObject({ servicesOnly: true, done: 3, total: 3 });
+  });
+});
