@@ -286,6 +286,13 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 409 tests in 35 files passed; build passed.
 
+### More ideas – 6. Presentation mode (15 Nov 2026)
+- New `components/Presentation.tsx`: a button on the Profit Dashboard opens a full-screen dialog (in a portal, page scrolling locked while open) with six slides built from `model.summary` and the inventory check. There is no new arithmetic: the bar widths only scale the drawing. ← → / PageUp / PageDown / Space and Esc work, with Back/Next/Exit buttons.
+- Measured in the browser: the slides fill a 1280×720 screen and fit a 375 px phone with no sideways overflow.
+- Purpose: the oral demo. The "Keep in mind" slide repeats the key assumptions (fixed costs once, constant mix, not net income).
+
+**Checks:** 410 tests in 35 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

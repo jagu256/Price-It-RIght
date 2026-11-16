@@ -600,6 +600,35 @@ describe('Save and compare scenarios', () => {
   });
 });
 
+describe('Presentation mode', () => {
+  it('opens full screen, moves with the arrow keys and buttons, and closes with Esc', async () => {
+    const { user } = setup('dashboard', 'demo');
+    await user.click(within(panel('dashboard')).getByRole('button', { name: /Presentation mode/ }));
+    const deck = () => screen.getByRole('dialog', { name: 'Presentation mode' });
+    expect(within(deck()).getByText('Slide 1 of 6')).toBeInTheDocument();
+    expect(within(deck()).getByRole('heading', { name: 'Maple Leaf Café (demo)' })).toBeInTheDocument();
+
+    await user.keyboard('{ArrowRight}');
+    expect(within(deck()).getByRole('heading', { name: 'Each month' })).toBeInTheDocument();
+    expect(deck()).toHaveTextContent('$3,900');
+    expect(deck()).toHaveTextContent('$975');
+
+    await user.click(within(deck()).getByRole('button', { name: /Next/ }));
+    await user.click(within(deck()).getByRole('button', { name: /Next/ }));
+    expect(within(deck()).getByRole('heading', { name: 'Break-even' })).toBeInTheDocument();
+    expect(deck()).toHaveTextContent('455 units');
+    expect(deck()).toHaveTextContent('$2,363.64');
+
+    await user.keyboard('{ArrowRight}');
+    expect(deck()).toHaveTextContent(/more Milk and Butter than you have/);
+    await user.keyboard('{ArrowLeft}');
+    expect(within(deck()).getByRole('heading', { name: 'Break-even' })).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog', { name: 'Presentation mode' })).not.toBeInTheDocument();
+  });
+});
+
 describe('Product ranking badges', () => {
   it('labels the demo products and updates when a product becomes a loss-maker', async () => {
     const { user } = setup('my-business', 'demo');

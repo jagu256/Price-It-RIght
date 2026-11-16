@@ -7,6 +7,7 @@ import PriceSlider from '../components/PriceSlider';
 import ProfitLenses from '../components/ProfitLenses';
 import ResultCard from '../components/ResultCard';
 import CashBudget from '../components/CashBudget';
+import { PresentButton } from '../components/Presentation';
 import SeasonalProjection from '../components/SeasonalProjection';
 import Sensitivity from '../components/Sensitivity';
 import StepFixedCosts from '../components/StepFixedCosts';
@@ -34,7 +35,10 @@ export default function ProfitDashboard() {
   const s = model.summary;
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6">
-      <SectionHeader emoji="💰" title={t('Your Business at a Glance')} subtitle={t('Expected monthly results across all your products, based on the expected sales you entered.')} />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <SectionHeader emoji="💰" title={t('Your Business at a Glance')} subtitle={t('Expected monthly results across all your products, based on the expected sales you entered.')} />
+        <PresentButton />
+      </div>
       <NeedsValidBusiness ready={!!s}>{s && <Dashboard s={s} products={model.products} />}</NeedsValidBusiness>
     </div>
   );
