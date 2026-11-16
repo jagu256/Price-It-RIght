@@ -1875,4 +1875,8 @@ export const FR: Record<string, string> = {
   'More': 'Plus',
   /* Dark mode */
   'Dark mode': 'Mode sombre',
+  /* What changed */
+  'Undone.': 'Annulé.',
+  'Undone – operating profit is back to {profit}.': 'Annulé – le bénéfice d’exploitation est revenu à {profit}.',
+  'Operating profit: {before} → {after}': 'Bénéfice d’exploitation : {before} → {after}',
 };

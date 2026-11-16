@@ -3,6 +3,7 @@ import type { TermId } from '../lib/glossary';
 import type { MathExplanation } from '../lib/showMath';
 import ShowMath from './ShowMath';
 import TermTip from './TermTip';
+import { useChangedFlash } from './useChangedFlash';
 
 export type Tone = 'neutral' | 'profit' | 'loss';
 
@@ -27,6 +28,7 @@ const toneStyles: Record<Tone, { card: string; value: string; icon: string }> = 
 
 export default function ResultCard({ title, value, detail, icon, tone = 'neutral', badge, math, term }: Props) {
   const s = toneStyles[tone];
+  const changed = useChangedFlash(value);
   return (
     <article className={`animate-rise rounded-3xl border p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift ${s.card}`}>
       <div className="flex items-center justify-between gap-3">
@@ -38,7 +40,7 @@ export default function ResultCard({ title, value, detail, icon, tone = 'neutral
           {icon}
         </span>
       </div>
-      <p className={`mt-3 break-words font-display text-3xl font-extrabold tabular-nums sm:text-4xl ${s.value}`}>
+      <p className={`mt-3 break-words rounded-xl font-display text-3xl font-extrabold tabular-nums sm:text-4xl ${s.value}${changed ? ' value-changed' : ''}`}>
         {value}
       </p>
       {badge && (

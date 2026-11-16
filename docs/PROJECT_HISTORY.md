@@ -314,6 +314,12 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 **Checks:** 413 tests in 35 files passed; build passed.
 
+### More ideas – 10. What-changed highlights (15 Nov 2026)
+- `src/lib/changeSummary.ts` (operating profit before and after, via the same `buildModel`) feeds the Undo message ("Operating profit: $975 → $600") and a new "Undone – back to $975" confirmation. `components/useChangedFlash.ts` makes a `ResultCard` number glow for 1.6 s when it changes (not when first shown), with a static outline under reduced motion.
+- **Design decision found by a failing test:** typing a new price passes through an invalid moment (the box is cleared), so the dashboard cards are removed and redrawn and can't glow. The glow is therefore for changes made while the cards stay valid, such as Apply and Undo, which is exactly what the feature is for. The test uses Apply.
+
+**Checks:** 418 tests in 36 files passed; build passed.
+
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
 1. Real user testing + one improvement based on it (required by the brief).

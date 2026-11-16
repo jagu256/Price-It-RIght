@@ -398,7 +398,8 @@ describe('Undo', () => {
     expect(toast()).toHaveTextContent('Deleted the product “Muffin”.');
     await user.click(within(toast()!).getByRole('button', { name: /Undo/ }));
     expect(mb.getByDisplayValue('Muffin')).toBeInTheDocument();
-    expect(toast()).toBeNull();
+    expect(toast()).toHaveTextContent('Undone'); // a short confirmation replaces the Undo offer
+    await user.click(within(toast()!).getByRole('button', { name: 'Close' }));
     expect(mb.getByRole('complementary', { name: 'Live results' })).toHaveTextContent('Operating profit $975');
 
     await go('pricing');
@@ -605,6 +606,40 @@ describe('Save and compare scenarios', () => {
     expect(sec.queryByRole('columnheader', { name: /Scenario 2/ })).not.toBeInTheDocument();
     // The business itself never changed.
     expect(within(panel('dashboard')).getByRole('heading', { name: 'Projected Operating Profit', hidden: true }).closest('article')).toHaveTextContent('$975');
+  });
+});
+
+describe('What changed?', () => {
+  const toast = () => document.querySelector<HTMLElement>('[role="status"].fixed');
+
+  it('the Undo message shows how operating profit moved, and confirms after undoing', async () => {
+    const { user } = setup('my-business', 'demo');
+    const mb = within(panel('my-business'));
+    await user.click(mb.getByRole('button', { name: 'Delete Muffin' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Delete product' }));
+    expect(toast()).toHaveTextContent('Operating profit: $975 → $600'); // Muffin CM $375
+    await user.click(within(toast()!).getByRole('button', { name: /Undo/ }));
+    expect(toast()).toHaveTextContent('Undone – operating profit is back to $975.');
+    await user.click(within(toast()!).getByRole('button', { name: 'Close' }));
+    expect(toast()).toBeNull();
+  });
+
+  it('a dashboard number that changes glows briefly; one that doesn’t, doesn’t', async () => {
+    const { user } = setup('dashboard', 'demo');
+    const card = (name: string) => within(panel('dashboard')).getByRole('heading', { name }).closest('article')!.querySelector('p')!;
+    expect(card('Projected Operating Profit')).not.toHaveClass('value-changed');
+    // Apply a What-If change (no invalid step in between, so the card stays on screen and its number moves).
+    await go('pricing');
+    const lab = within(panel('pricing'));
+    const price = lab.getByLabelText('Modified price for Coffee');
+    await user.clear(price);
+    await user.type(price, '7');
+    await user.click(lab.getByRole('button', { name: /Apply Changes/ }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Apply changes' }));
+    await go('dashboard');
+    expect(card('Projected Operating Profit')).toHaveClass('value-changed');
+    expect(card('Projected Operating Profit')).toHaveTextContent('$1,275');
+    expect(card('Monthly Fixed Costs')).not.toHaveClass('value-changed');
   });
 });
 

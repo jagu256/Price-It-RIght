@@ -65,6 +65,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 | **🖨 Print-friendly pages** (footer) | **Print this page** (or Ctrl/Cmd + P) prints the current section on white paper. Menus, buttons and pop-ups are hidden, cards are kept together, typed values print as plain text, and a heading appears on paper only (business name, section, date, "All amounts in CAD", fictional data). |
 | **📱 Phone tab bar** | On phones, the sideways-scrolling tabs at the top are replaced by a bar at the bottom within thumb reach: Home, Business, Profit, Pricing and **☰ More** (the other five sections). The current section is highlighted, "More" is highlighted when you are in one of its sections, and the guided tour highlights the right tab. Desktop and tablet keep the top tabs. |
 | **🌙 Dark mode** (header) | A third display button next to A+ and ◐: sage green on charcoal for cards, text, inputs, tables and chart labels, remembered like the other options. It combines with high contrast (white text), and printing automatically uses the light colours. Every screen was checked for readable text in both themes. |
+| **✨ What changed?** | After Apply, a delete, an import or any other undoable change, the Undo message also shows **"Operating profit: before → after"**. After Undo, a short note confirms "Undone – operating profit is back to …". On the dashboard, any card whose number changed glows briefly (a static outline if "reduce motion" is on). |
 | **📊 Business Report** | Preview, then **📥 Download My Business Report** as a PDF generated in the browser. It covers products, totals, a chart, break-even, inventory, shortages, production planning, any scenario comparison, and assumptions. All amounts are labelled CAD. **📊 Download my business as Excel** gives an .xlsx file with five sheets of real number cells. |
 | **🇫🇷 EN / FR** (header) | Switches the whole app – screens, messages, Show the math, the PDF report and the Excel file – between English and **French (Canada)**. Amounts use fr-CA formats (`1 800 $`, `63,5 %`, `6,50 $`) and a French decimal comma can be typed (`6,50`). The choice is remembered in this browser. |
 
@@ -435,6 +436,7 @@ npm run test:watch  # re-run while editing
 | `cashBudget.test.ts` | **Demo: all paid now → $1,475 / $2,450 / $3,425; 60 % paid now → −$85 shortfall in month 1, $890, $1,865, $1,560 still owed**; extra stock and loan repayment use cash but not profit; opening receivables collected; a 60 % month; cent rounding adds up; % input validation |
 | `costPlus.test.ts` (target) | Target costing: **$6 at 70 % → $1.80, cut $0.20 (10 %)**; $4.99 at 60 % → $1.99 (rounded down, ≥ 60 %); 0 % margin → cost = price; $0 → N/A; exact reverse of cost-plus |
 | `productRanking.test.ts` | **Demo: Coffee star, Muffin review, Sandwich gem, Cookie popular**; exactly-average counts as high (no rounding); price below variable cost → loss-maker; no products or no sales → no ranking |
+| `changeSummary.test.ts` | What changed: deleting the Muffin → $975 → $600; Coffee at $7 applied → $975 → $1,275; invalid numbers → null (never 0) |
 | `App.test.tsx` | Click-through workflows in a simulated browser: home buttons and demo; Best mix (proven-optimal label, feasible, at least as much profit as "keep my mix" and the suggested plan; the heuristic keeps its "not proven optimal" label); 12-month projection ($11,700 default, January −$15 "below break-even", best July / worst January, year $11,452.50, invalid level pauses results); Decisions (special order +$15 when stock covers it, "not achievable" with "Sugar: 100 grams short" for a larger order, +$5 after giving up 10 regular sales; make-or-buy "Make it", $4,800 vs $5,000, unavoidable fixed costs marked irrelevant); price-sensitive demand (off by default; best price $11.50 / 190 units / $1,580 for demo Coffee; "Try" fills the What-If plan without changing the business; also in the price assistant; negative X rejected); after-tax target ($1,250 pre-tax, $195 tax, $780 after tax, price tool $6.92 and goal tracker −$275 using the pre-tax target, invalid rate shown and tools back on their own targets); sensitivity table, DOL 2.54 and its math, then "Not meaningful" after raising fixed costs to a loss; Save my work (auto-save and restore after "reopening" the app, storage blocked → "Saving is off", damaged saved copy, export read back, bad files rejected with friendly errors and nothing changed, import asks first, Start fresh asks first, privacy note); Show the math (opens, matches the card's figure, hides again; break-even and required price); add / duplicate / delete with confirmation; sorting; invalid input pausing results; confirmation before switching business; what-if compare / reset / apply; required price; CSV upload with mapping, problems and editing afterwards; unsupported file; saving a recipe; shared-inventory shortages; production planner; challenge success rules; PDF report generation |
 
 **Automated test record (development environment, Vitest 3.2.7, Node 22):**
@@ -471,6 +473,7 @@ npm run test:watch  # re-run while editing
 - 15 November 2026, after adding print-friendly pages: **411 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding the phone tab bar: **412 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding dark mode and the readability fixes: **413 tests in 35 files passed**. `npm run build` completed (same size warning).
+- 15 November 2026, after adding the what-changed highlights: **418 tests in 36 files passed**. `npm run build` completed (same size warning).
 
 Re-run `npm test` yourself to confirm.
 
@@ -620,6 +623,9 @@ Re-run `npm test` yourself to confirm.
 | 137 | Dark mode | Click 🌙 in the header and visit every section | Dark background, light readable text, charts' labels readable; click again to return | | |
 | 138 | Dark mode printing | Dark mode on → Ctrl + P → print preview | Preview is in the normal light colours on white paper | | |
 | 139 | Dark + high contrast | Turn on 🌙 and ◐ | Text turns pure white | | |
+| 140 | What changed – Undo message | My Business → delete Muffin → confirm | Message also says "Operating profit: $975 → $600" | | |
+| 141 | Undone note | Click ↩ Undo | "Undone – operating profit is back to $975." | | |
+| 142 | Glow | Pricing Lab → Coffee 7 → Apply → open the dashboard | The profit card's number glows briefly; Monthly Fixed Costs does not | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:

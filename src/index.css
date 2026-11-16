@@ -348,3 +348,26 @@ html[data-theme='dark'] .recharts-legend-item-text {
 .recharts-legend-item-text {
   color: #304633 !important;
 }
+
+/* "What changed?" – a number that just moved glows briefly (see useChangedFlash). */
+.value-changed {
+  animation: value-flash 1.6s ease-out;
+}
+@keyframes value-flash {
+  0%,
+  35% {
+    background-color: rgba(245, 223, 122, 0.75);
+    box-shadow: 0 0 0 6px rgba(245, 223, 122, 0.75);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .value-changed {
+    animation: none;
+    outline: 3px solid #c9a227;
+    outline-offset: 3px;
+  }
+}
