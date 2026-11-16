@@ -8,6 +8,8 @@ It is an **educational decision-support tool**: every result depends on the assu
 
 **Live app:** https://price-it-r-ight.vercel.app (no sign-in needed)
 
+**GitHub:** https://github.com/jagu256/Price-It-RIght
+
 ## Project summary
 
 **Problem.** Small-business owners (cafés, bakeries, salons, shops, service firms) often set prices by guessing. They don't know their break-even point, which product really earns money, or whether their stock can cover expected sales. Price It Right answers these questions with course accounting concepts (contribution margin, CVP and break-even, relevant costs, budgeting) in a free web app. All amounts are in CAD.
@@ -38,6 +40,7 @@ It is an **educational decision-support tool**: every result depends on the assu
 ---
 
 ## Contents
+0. [Project summary](#project-summary) (for the course submission)
 1. [Problem being solved](#problem-being-solved)
 2. [Target users](#target-users)
 3. [Features](#features)
@@ -50,9 +53,10 @@ It is an **educational decision-support tool**: every result depends on the assu
 10. [Language: English / Français](#language-english--français)
 11. [Installation](#installation)
 12. [Testing](#testing)
-13. [Known limitations](#known-limitations)
-14. [AI-assisted development disclosure](#ai-assisted-development-disclosure)
-15. [Deployment](#deployment-github--vercel)
+13. [Real user testing and feedback](#real-user-testing-and-feedback)
+14. [Known limitations](#known-limitations)
+15. [AI-assisted development disclosure](#ai-assisted-development-disclosure)
+16. [Deployment](#deployment-github--vercel)
 
 ---
 
@@ -77,7 +81,7 @@ Price It Right brings cost-volume-profit (CVP) analysis, product costing and inv
 
 | Section | What it does |
 |---|---|
-| **Home** | Name, tagline and description. **🚀 Start My Business** and **✨ Try a Demo Business** (a complete fictional café). Four-step guide. **📚 Understand Your Numbers** explains ten concepts. **✅ Your setup checklist**: name, fixed costs, valid products, inventory (optional) and recipes (optional). It ticks itself off from the same validated numbers the rest of the app uses, shows "x of 5 done" with a progress bar, and links to whatever is missing. |
+| **Home** | Name, tagline and description. **🚀 Start My Business** and **✨ Try a Demo Business** (a complete fictional café). Four-step guide. **📚 Understand Your Numbers** explains ten concepts. **✅ Your setup checklist**: name, fixed costs, valid products, inventory (optional) and recipes (optional). It ticks itself off from the same validated numbers the rest of the app uses, shows "x of 5 done" with a progress bar, and links to whatever is missing. A business with no inventory (services) only needs the 3 essentials ("x of 3"). |
 | **🏠 My Business** | Choose ☕ Coffee Shop, 🧁 Bakery, 💅 Nail Salon, 👕 Clothing Store, 💼 Service Business (no inventory, e.g. an accounting practice) or ✨ Custom (fictional samples). The app asks for confirmation before replacing your work. Enter the business name and monthly fixed costs once. **🛒 My Product Collection** is an editable table: add, edit, duplicate or delete (with confirmation), optional category, sorting, and per-product revenue, variable costs, CM per unit, total CM and CM ratio. **📈 Live profit bar**: a small bar stays at the bottom of the screen while you edit, showing revenue, contribution margin and operating profit (or loss) as you type, with a link to the dashboard. When a value is invalid it says how many fields to fix, instead of showing a number. Its figures come from the same summary as the dashboard. **🏅 How each product compares**: badges under the product table. ⭐ Star (high margin and volume), 🐴 Popular (high volume, lower margin), 💎 Hidden gem (high margin, lower volume), ⚠️ Review (both low) or ❗ Loss on each sale, each with a one-line tip. |
 | **💰 Profit Dashboard** | **Your Business at a Glance**: six summary cards with explanations. *Three ways to look at profit*: expected, inventory-constrained and scenario. Charts: **A** revenue vs. total costs (with the break-even point), **B** contribution by product, **C** revenue breakdown. Sales-mix break-even with a whole-unit split per product, plus an interactive single-product break-even calculator. **🌪️ Sensitivity analysis**: operating profit when selling prices, variable costs, sales volume (same mix) or fixed costs move ±10 % one at a time, as a table and a tornado chart, plus the **degree of operating leverage** (or "Not meaningful" with an explanation when there is no profit). **📅 12-month projection**: a sales level (100 % = expected sales) and fixed costs for each month → monthly revenue, contribution margin and operating profit, the annual totals, the best and worst month and the months below break-even, as a chart and a table. **📋 Budget vs actual**: type in a month's actual units, prices, variable costs and fixed costs; the app explains the difference from the budget as sales volume (split into quantity and mix), selling price, variable cost and fixed cost variances, each marked F (favourable) or U (unfavourable), adding up exactly to the actual profit. **🪜 Step fixed costs (relevant range)**: add up to 3 steps such as "above 600 units, fixed costs rise $500". The app shows the fixed costs and break-even in each range (there can be more than one break-even point), operating profit at expected sales, and a profit-vs-units chart with the drop at each step. **💵 3-month cash budget**: cash at the start, the % of sales paid in the same month (the rest the next month), and per month a sales level, extra stock bought and other cash payments. It shows cash from sales, cash paid out, net cash flow and cash at month end beside operating profit, and warns about any month that runs below $0. **🎬 Presentation mode** (button at the top): six full-screen slides for a demo or projector, made from the same numbers. They are title, each month (revenue, CM, operating profit), contribution by product, break-even and margin of safety, inventory, and "keep in mind" assumptions. Move with ← → or the buttons; Esc exits. An **On this page** menu at the top jumps straight to each tool (the Pricing Lab has one too). |
 | **🎯 Pricing Lab** | **What-If Pricing Simulator** comparing the current and modified plans, with Apply Changes (confirmed), Reset Scenario and Compare Results. **📉 Optional price-sensitive demand** (off by default, in the What-If simulator and the price assistant): "for every $1 change in price, sales change by X units"; shows a profit-vs-price chart and the **best price under this assumption only**, found by checking every cent, with a button to try it in the modified plan. **🧾 After-tax target profit (optional)**: enter the profit you want after income tax and your own tax rate; the app shows the required pre-tax profit, the estimated tax and after-tax profit, and feeds the pre-tax figure into the next two tools (a simplified estimate, not tax advice). **💡 What Price Should I Charge?** finds the minimum price for a target profit. **Profit Goal Tracker** shows progress, the gap, and the plan needed (same mix, your own mix, or one product). **🎲 Surprise Me!** offers five hypothetical events; you can accept, modify or reset each. **🏷️ Cost-plus pricing helper**: pick a product and a markup on cost or a target margin on price; it shows the price (rounded up to the cent), CM per unit, the actual markup and margin, the equivalent of the other measure, and operating profit at that price if expected units stay the same, with a button to try the price in the What-If simulator. **📸 Save and compare scenarios**: save the What-If plan under a name (up to 6), then compare them side by side with the current plan (revenue, costs, CM, operating profit, change, break-even). The one with the most profit is marked "highest profit of these", and you can load a scenario back into the simulator or delete it (with confirmation). Saved scenarios last while the app is open and never change the business. **🔁 Price change: how many must I sell?**: choose a product and a new price to see how many units keep the same profit (more after a cut, fewer after a rise), with a button to try it in the What-If simulator. **🎯 Target costing**: enter the market price and target margin to get the most one unit may cost (rounded down), and how much today's variable cost must fall to reach it. |
@@ -504,6 +508,7 @@ npm run test:watch  # re-run while editing
 - 15 November 2026, after adding dark mode and the readability fixes: **413 tests in 35 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding the what-changed highlights: **418 tests in 36 files passed**. `npm run build` completed (same size warning).
 - 15 November 2026, after adding the On this page menus: **419 tests in 36 files passed**. `npm run build` completed (same size warning).
+- 16 November 2026, after the service-business changes (final check before submission): **424 tests in 36 files passed**.
 
 Re-run `npm test` yourself to confirm.
 
@@ -657,6 +662,8 @@ Re-run `npm test` yourself to confirm.
 | 141 | Undone note | Click ↩ Undo | "Undone – operating profit is back to $975." | | |
 | 142 | Glow | Pricing Lab → Coffee 7 → Apply → open the dashboard | The profit card's number glows briefly; Monthly Fixed Costs does not | | |
 | 143 | On this page menu | Profit Dashboard → click "Budget vs actual" in On this page | Page scrolls to that panel; the address stays #dashboard | | |
+| 144 | Service Business | My Business → 💼 Service Business → confirm | Accounting practice example loads (4 services, no inventory); operating profit $4,755 | | |
+| 145 | No inventory needed | Same → 📦 Smart Inventory Hub, then Home | "Selling services? No inventory needed"; no recipes or shopping list; checklist "3 of 3 done" | | |
 
 ### Independent verification
 On 2 November 2026 a separate checking step (a second AI agent that had not seen the code) recalculated eight scenarios from first principles in exact Python fractions. It then called the app's own functions and compared the results:
@@ -736,12 +743,13 @@ See [docs/RUBRIC_AND_REFLECTION_GUIDE.md](docs/RUBRIC_AND_REFLECTION_GUIDE.md) f
 - **Saving is per browser, per device.** The business is kept in this browser's storage (no database or accounts), so it does not follow you to another device or browser unless you export and import a file. Clearing browser data, or some private windows, remove it. Only one business is saved at a time. Pricing Lab / Production Planner experiments, surprise events and challenge progress are not saved, by design.
 - **Save files are not encrypted.** Anyone with the .json file can open it in a text editor. Don't put confidential data in the app.
 - **Imported files are checked for structure, not for sense.** A typed value like `abc` imports exactly as typed and then shows the usual validation message (it is never turned into 0). Recipe lines that point at an inventory item missing from the file are kept and flagged, as elsewhere in the app.
-- **Constant sales mix and linear costs.** Break-even and goal plans assume a fixed mix; costs don't change with volume (no step costs or volume discounts). Demand doesn't react to price unless the optional straight-line demand assumption is switched on.
+- **Constant sales mix and linear costs.** Break-even and goal plans assume a fixed mix; variable costs per unit don't change with volume (no volume discounts). Fixed costs only change if you add steps in the optional *Step fixed costs* tool. Demand doesn't react to price unless the optional straight-line demand assumption is switched on.
 - **Optimizer scope.** "Best mix" maximises contribution margin for the numbers entered: it trusts expected demand, prices, costs and recipes, uses current stock only (not the hypothetical extra inventory), and leaves products without a recipe at expected demand. It finds one best plan; others may tie. On very large problems the search can stop at its 2,000,000-step limit, and then the plan is labelled "not proven optimal". The older "Suggested plan" is still a labelled rule of thumb.
 - **Recipes:** one fixed recipe per product. There is no waste, spoilage, expiry, batch sizes or labour/time constraints (for services, staff and appointment capacity are not modelled).
 - **Units:** weight (g, kg), volume (mL, L) and pieces only. There are no imperial units and no conversion between weight and volume. Quantities allow up to 3 decimals, costs up to 6 decimals and money up to 2; each value is capped at 1,000,000,000.
 - **Imports:** .xlsx and .csv only (not .xls), first worksheet row as headings (optional), up to 5 MB / 2,000 rows. Formulas in Excel are read as their saved values.
-- **Inventory is a snapshot**; there is no purchasing, reorder points, lead times or inventory turnover.
+- **Inventory is a snapshot.** *What should I buy?* suggests a shopping list, but nothing is actually ordered or tracked over time; there are no reorder points, lead times or inventory turnover.
+- **Service businesses:** staff hours and appointment capacity are not modelled; each service's variable cost per unit is entered by hand.
 - **Taxes:** only the optional after-tax target estimates income tax, at one flat user-entered rate on operating profit. There is no GST/PST/HST, interest, deductions, loss carry-forward or financing costs anywhere. Operating profit is not net income.
 - **Rounding:** itemized variable costs are rounded to the nearest cent per unit before multiplying by volume.
 - **Sensitivity analysis** is fixed at ±10 % and moves one input at a time; it does not model inputs changing together, step costs, or demand reacting to price. DOL only describes small changes around the current sales level.
@@ -752,7 +760,7 @@ See [docs/RUBRIC_AND_REFLECTION_GUIDE.md](docs/RUBRIC_AND_REFLECTION_GUIDE.md) f
 
 ## AI-assisted development disclosure
 
-This application was developed with substantial help from **Claude**, an AI assistant by Anthropic, which wrote the code, tests and first draft of this README from the project team's detailed requirements. The project team is responsible for:
+This application was developed with substantial help from **Claude**, an AI assistant by Anthropic, which wrote the code, tests and first draft of this README from the project team's detailed requirements. The team also used **ChatGPT** and **Gemini** to review the website and suggest features and improvements. The project team is responsible for:
 
 - reviewing every formula and assumption against course material,
 - checking results by hand (see the manual testing table),
@@ -763,12 +771,14 @@ The calculations were also checked by an independent recalculation step. AI-gene
 
 ## Deployment (GitHub + Vercel)
 
-1. Put the project on GitHub (repository `price-it-right`). From a terminal:
+The project is on GitHub at <https://github.com/jagu256/Price-It-RIght> and deployed on Vercel at <https://price-it-r-ight.vercel.app>. To set it up again from scratch:
+
+1. Put the project on GitHub. From a terminal:
    ```bash
    git init && git add . && git commit -m "Price It Right"
    git branch -M main
-   git remote add origin https://github.com/<username>/price-it-right.git
+   git remote add origin https://github.com/<username>/<repository>.git
    git push -u origin main
    ```
-2. Go to <https://vercel.com>, **sign in with GitHub**, choose **Add New → Project**, import `price-it-right` and click **Deploy**. Vercel detects Vite automatically (see `vercel.json`: build `npm run build`, output `dist`).
+2. Go to <https://vercel.com>, **sign in with GitHub**, choose **Add New → Project**, import the repository and click **Deploy**. Vercel detects Vite automatically (see `vercel.json`: build `npm run build`, output `dist`).
 3. Every push to `main` redeploys automatically.
