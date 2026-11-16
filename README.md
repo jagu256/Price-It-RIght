@@ -28,6 +28,7 @@ It is an **educational decision-support tool**: every result depends on the assu
 
 **AI use and contributions.** We used **Claude** (Anthropic) through Claude Code. It wrote the code, tests and draft documentation. Our group wrote the requirements briefs, chose the features, found the two usability problems above, decided how to fix them, asked for independent recalculation of the numbers, and checked results against hand calculations. Individual contributions:
 - **Vaishnavi:** took part in group discussions and brainstorming sessions, shared opinions on the ideas, contributed to group decisions, and supported the development of the project through collaboration with the team.
+- **Muskaan:** contributed ideas for the app, including adding the inventory features.
 - [add the other members' names and what they did]
 
 ---
