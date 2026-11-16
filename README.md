@@ -6,6 +6,28 @@ Price It Right is a small-business pricing, inventory and profitability simulato
 
 It is an **educational decision-support tool**: every result depends on the assumptions the user enters. All sample and demo data is **fictional**.
 
+**Live app:** https://price-it-r-ight.vercel.app (no sign-in needed)
+
+## Project summary
+
+**Problem.** Small-business owners (cafés, bakeries, salons, shops, service firms) often set prices by guessing. They don't know their break-even point, which product really earns money, or whether their stock can cover expected sales. Price It Right answers these questions with course accounting concepts (contribution margin, CVP and break-even, relevant costs, budgeting) in a free web app. All amounts are in CAD.
+
+**Core function.** Enter products (price, variable cost, expected sales) and monthly fixed costs. The app then shows revenue, contribution margin, operating profit and break-even, and lets you test price changes safely before applying them. Optional tools cover inventory and recipes, production planning, decisions (special order, make-or-buy, drop a product), cash and variance budgets, and a PDF or Excel report. Try it: click **Try a Demo Business**: profit $975/month, break-even 455 units.
+
+**Testing** (what we did and what happened):
+- *Normal input:* the demo café gives revenue $3,900, CM $2,475, profit $975 and break-even 455 units, matching hand calculations. A separate AI agent that never saw the code recalculated the key results three times (2, 9 and 15 Nov 2026) with no differences. 424 automated tests pass.
+- *Invalid input:* typing `abc`, a negative number or a blank shows a clear message beside the field and pauses the results. The bad value is never treated as $0.
+- *Reset / retry:* *Reset Scenario* undoes What-If experiments, *Start fresh* (after a confirmation) reloads the example, and **Undo** restores a deleted product or an applied change. Correcting a bad value brings the results straight back.
+- *Phone-sized display:* every screen was checked at 375 px wide. There is no sideways scrolling, and a bottom tab bar replaces the top tabs on phones.
+
+**Improvement.** Two changes came from using the app:
+1. *Export my business* produced a file that looked like computer code, so we relabelled it as a backup file and added **Download as Excel**.
+2. An accounting firm was still asked for inventory recipes. Service businesses now skip inventory, and there is a **💼 Service Business** option.
+
+**Limitations.** Sales are forecasts, not real transactions; break-even assumes the sales mix stays the same; costs are assumed linear; taxes are only a simple optional estimate (no GST/HST); data is saved in one browser only; all amounts are in CAD. Formal testing with outside users was not completed before submission. The results would need real business data and review by an accountant before real-world use.
+
+**AI use and contributions.** We used **Claude** (Anthropic) through Claude Code. It wrote the code, tests and draft documentation. Our group wrote the requirements briefs, chose the features, found the two usability problems above, decided how to fix them, asked for independent recalculation of the numbers, and checked results against hand calculations. Individual contributions: [add each member's name and what they did].
+
 ---
 
 ## Contents
