@@ -27,8 +27,8 @@ It is an **educational decision-support tool**: every result depends on the assu
 **Limitations.** Sales are forecasts, not real transactions; break-even assumes the sales mix stays the same; costs are assumed linear; taxes are only a simple optional estimate (no GST/HST); data is saved in one browser only; all amounts are in CAD. Formal testing with outside users was not completed before submission. The results would need real business data and review by an accountant before real-world use.
 
 **AI use and contributions.** We used **Claude** (Anthropic) through Claude Code. It wrote the code, tests and draft documentation. Our group wrote the requirements briefs, chose the features, found the two usability problems above, decided how to fix them, asked for independent recalculation of the numbers, and checked results against hand calculations. Individual contributions:
-- **Vaishnavi:** took part in group discussions and brainstorming sessions, shared opinions on the ideas, contributed to group decisions, and supported the development of the project through collaboration with the team.
-- **Muskaan:** contributed ideas for the app, including adding the inventory features.
+- **Vaishnavi:** took an active part in the group's discussions and brainstorming sessions, where the app's direction and features were shaped. She gave her opinion on the ideas put forward, helped the group weigh options and agree on decisions, and supported development by working with the team as the project moved from first idea to finished app.
+- **Muskaan:** contributed ideas for the app's features. In particular, she suggested **adding inventory**, so the app looks not only at prices and profit but also at whether the business has enough stock. That idea grew into a major part of the project: the **Smart Inventory Hub** (uploading stock from Excel/CSV, linking each product to its recipe, costing products from their ingredients, and showing shortages and what to buy) and the **Production Planner**, which works out which products make the best use of limited stock.
 - [add the other members' names and what they did]
 
 ---
