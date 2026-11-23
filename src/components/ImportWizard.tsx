@@ -23,12 +23,14 @@ import {
 } from '../lib/importer';
 import { normaliseName } from '../lib/stock';
 import { downloadBlob, inventoryTemplateBlob, recipeTemplateBlob } from '../lib/templates';
-import { Notice } from './ui';
+import { Notice, Rich } from './ui';
 
 type Kind = 'inventory' | 'recipes';
 type Step = 'choose' | 'map' | 'resolve' | 'review' | 'done';
 
 const STEP_LABELS: Record<Step, string> = { choose: tx('Choose file'), map: tx('Match columns'), resolve: tx('Match names'), review: tx('Review'), done: tx('Done') };
+
+const ACCEPT = '.xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 export default function ImportWizard({ kind }: { kind: Kind }) {
   const { state, dispatch, model } = useStore();
@@ -42,12 +44,13 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
   const [sheetIndex, setSheetIndex] = useState(0);
   const [hasHeader, setHasHeader] = useState(true);
   const [mapping, setMapping] = useState<Mapping<string>>({});
-  const [mode, setMode] = useState<'replace' | 'append'>('replace');
+  const [mode, setMode] = useState<'replace' | 'append'>('append');
   const [productRes, setProductRes] = useState<NameResolution>({});
   const [itemRes, setItemRes] = useState<NameResolution>({});
   const [doneMessage, setDoneMessage] = useState('');
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const replaceRef = useRef<HTMLInputElement>(null);
 
   const sheet = sheets[sheetIndex];
   const headers = sheet ? columnHeaders(sheet, hasHeader) : [];
@@ -61,7 +64,7 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
   const inventoryResult = useMemo(
     () => (kind === 'inventory' && step === 'review' ? validateInventoryRows(rows, mapping as never, mode === 'append' ? state.business.inventory.map((i) => i.name) : []) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [kind, step, sheetIndex, hasHeader, mapping, mode, sheets],
+    [kind, step, sheetIndex, hasHeader, mapping, mode, sheets, state.business.inventory],
   );
   const recipeRead = useMemo(
     () => (kind === 'recipes' && (step === 'resolve' || step === 'review') ? readRecipeRows(rows, mapping as never, products, items) : null),
@@ -78,6 +81,7 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
     setProductRes({});
     setItemRes({});
     if (inputRef.current) inputRef.current.value = '';
+    if (replaceRef.current) replaceRef.current.value = '';
   };
 
   const pickSheet = (all: RawSheet[], index: number, header: boolean) => {
@@ -85,8 +89,10 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
     setMapping(guessMapping(columnHeaders(all[index], header), fields));
   };
 
-  const handleFile = async (file: File | undefined) => {
+  /** `how` comes from the button used: Add inventory or Replace inventory (a dropped file is added). */
+  const handleFile = async (file: File | undefined, how: 'replace' | 'append' = 'append') => {
     if (!file) return;
+    setMode(how);
     setBusy(true);
     setError(null);
     setFileName(file.name);
@@ -125,7 +131,10 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
       if (!ok) return;
     }
     dispatch({ type: 'import-stock', mode, items: inventoryResult.valid.map((v) => v.record) });
-    const imported = plural(inventoryResult.valid.length, 'Imported {n} inventory item', 'Imported {n} inventory items');
+    const imported =
+      mode === 'append'
+        ? plural(inventoryResult.valid.length, 'Added {n} inventory item', 'Added {n} inventory items')
+        : plural(inventoryResult.valid.length, 'Imported {n} inventory item', 'Imported {n} inventory items');
     setDoneMessage(
       inventoryResult.problems.length
         ? `${imported} ${plural(inventoryResult.problems.length, '({n} row with problems skipped).', '({n} rows with problems skipped).')}`
@@ -162,6 +171,8 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
   };
 
   const title = kind === 'inventory' ? t('Upload inventory') : t('Upload recipes (optional)');
+  /** Replacing only makes sense when there is something to replace. */
+  const canReplace = kind === 'inventory' && state.business.inventory.length > 0;
   const recipeCount = recipeResult ? Object.keys(recipeResult.recipes).length : 0;
 
   return (
@@ -201,9 +212,24 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
           className={`rounded-3xl border-2 border-dashed p-8 text-center transition ${dragging ? 'border-sage-600 bg-sage-50' : 'border-sage-200 bg-cream-50/60'}`}
         >
           <p className="text-3xl" aria-hidden="true">📄</p>
-          <p className="mt-2 font-semibold text-sage-900">{t('Drag and drop a file here, or')}</p>
-          <label htmlFor={`${prefix}-file`} className="btn-secondary mt-3 cursor-pointer">{t('Choose a file')}</label>
-          <input id={`${prefix}-file`} ref={inputRef} type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="sr-only" onChange={(e) => void handleFile(e.target.files?.[0])} />
+          <p className="mt-2 font-semibold text-sage-900">{kind === 'inventory' ? t('Drag and drop a file here to add it, or') : t('Drag and drop a file here, or')}</p>
+          <div className="mt-3 flex flex-wrap justify-center gap-3">
+            <label htmlFor={`${prefix}-file`} className="btn-secondary cursor-pointer">
+              {kind === 'inventory' ? <><span aria-hidden="true">➕</span> {t('Add inventory')}</> : t('Choose a file')}
+            </label>
+            {canReplace && (
+              <label htmlFor={`${prefix}-replace`} className="btn-secondary cursor-pointer">
+                <span aria-hidden="true">🔄</span> {t('Replace inventory')}
+              </label>
+            )}
+          </div>
+          {canReplace && (
+            <p className="mx-auto mt-3 max-w-md text-sm text-sage-700">
+              <Rich text={t('**Add** keeps your current items and adds the ones in the file. **Replace** removes your current items and uses only the ones in the file.')} />
+            </p>
+          )}
+          {canReplace && <input id={`${prefix}-replace`} ref={replaceRef} type="file" accept={ACCEPT} className="sr-only" onChange={(e) => void handleFile(e.target.files?.[0], 'replace')} />}
+          <input id={`${prefix}-file`} ref={inputRef} type="file" accept={ACCEPT} className="sr-only" onChange={(e) => void handleFile(e.target.files?.[0])} />
           {busy && <p className="mt-3 text-sm text-sage-700" role="status">{t('Reading {file}…', { file: fileName })}</p>}
           {error && <p className="mt-3 text-sm font-semibold text-loss-700" role="alert">⚠ {error}</p>}
         </div>
@@ -323,19 +349,19 @@ export default function ImportWizard({ kind }: { kind: Kind }) {
               </p>
               {inventoryResult.mappingLooksWrong && <Notice tone="error" title={t('Check your column mapping')}>{t('Most rows have an invalid quantity – the wrong column may be selected.')}</Notice>}
               <Problems problems={inventoryResult.problems} />
-              <fieldset className="flex flex-wrap gap-4 text-sm">
-                <legend className="mb-1 font-semibold text-sage-900">
-                  {t('What should happen to your current inventory ({items})?', { items: plural(state.business.inventory.length, '{n} item', '{n} items') })}
-                </legend>
-                <label className="flex items-center gap-2"><input type="radio" name={`${prefix}-mode`} checked={mode === 'replace'} onChange={() => setMode('replace')} /> {t('Replace it with this file')}</label>
-                <label className="flex items-center gap-2"><input type="radio" name={`${prefix}-mode`} checked={mode === 'append'} onChange={() => setMode('append')} /> {t('Add these items to it')}</label>
-              </fieldset>
+              {canReplace && (
+                <Notice tone={mode === 'replace' ? 'warn' : 'info'}>
+                  {mode === 'replace'
+                    ? t('These items will replace your current inventory ({items}).', { items: plural(state.business.inventory.length, '{n} item', '{n} items') })
+                    : t('These items will be added to your current inventory ({items}).', { items: plural(state.business.inventory.length, '{n} item', '{n} items') })}
+                </Notice>
+              )}
               <ValidPreview rows={inventoryResult.valid.map((v) => [v.record.name, v.record.quantity, v.record.unit, v.record.cost || t('unknown')])} head={[t('Item'), t('Quantity'), t('Unit'), t('Cost per unit')]} />
             </>
           )}
           <div className="flex flex-wrap gap-3">
             <button type="button" className="btn-primary" disabled={!inventoryResult.valid.length} onClick={importInventory}>
-              {plural(inventoryResult.valid.length, 'Import {n} item', 'Import {n} items')}
+              {mode === 'replace' ? plural(inventoryResult.valid.length, 'Replace with {n} item', 'Replace with {n} items') : plural(inventoryResult.valid.length, 'Add {n} item', 'Add {n} items')}
             </button>
             <button type="button" className="btn-secondary" onClick={() => setStep('map')}>{t('Back')}</button>
             <button type="button" className="btn-secondary" onClick={reset}>{t('Cancel')}</button>

@@ -1184,14 +1184,15 @@ describe('inventory', () => {
     const { user } = setup('inventory');
     const hub = within(panel('inventory'));
     const csv = new File(['Item Name,Available Quantity,Unit,Cost Per Unit\nOat milk,4000,mL,0.003\nHoney,-2,kg,\nOat milk,10,mL,\nLids,300,pieces,0.05\n'], 'stock.csv', { type: 'text/csv' });
-    await user.upload(hub.getAllByLabelText('Choose a file')[0], csv);
+    await user.upload(hub.getByLabelText(/Replace inventory/), csv);
     await waitFor(() => expect(hub.getByRole('button', { name: /Confirm columns/ })).toBeInTheDocument());
     await user.click(hub.getByRole('button', { name: /Confirm columns/ }));
     expect(hub.getByText(/1 row ready to import/)).toBeInTheDocument();
     expect(hub.getByText(/can't be negative/)).toBeInTheDocument();
     expect(hub.getAllByText(/Duplicates are not merged/)).toHaveLength(2);
 
-    await user.click(hub.getByRole('button', { name: 'Import 1 item' }));
+    expect(hub.getByText(/These items will replace your current inventory \(5 items\)/)).toBeInTheDocument();
+    await user.click(hub.getByRole('button', { name: 'Replace with 1 item' }));
     await user.click(within(confirmDialog()).getByRole('button', { name: 'Replace inventory' }));
     expect(hub.getByText(/Imported 1 inventory item/)).toBeInTheDocument();
     const qty = hub.getByLabelText('Available quantity of Lids');
@@ -1200,11 +1201,53 @@ describe('inventory', () => {
     expect(qty).toHaveValue('250');
   });
 
+  /** The upload helpers look inside the wizard card only, because role queries on the whole panel are slow. */
+  const uploadTools = () => {
+    const { user } = setup('inventory');
+    const hub = within(panel('inventory'));
+    const card = within(hub.getByRole('heading', { name: 'Upload inventory' }).closest('.card') as HTMLElement);
+    const upload = async (button: RegExp, rows: string) => {
+      await user.upload(card.getByLabelText(button), new File(['Item Name,Available Quantity,Unit,Cost Per Unit\n' + rows], 'stock.csv', { type: 'text/csv' }));
+      await user.click(await card.findByRole('button', { name: /Confirm columns/ }));
+    };
+    const names = () => [...panel('inventory').querySelectorAll('input[id^="stock-"][id$="-quantity"]')].map((i) => i.getAttribute('aria-label')!.replace('Available quantity of ', ''));
+    return { user, card, upload, names };
+  };
+
+  it('Add inventory adds each file to the items already there, and flags repeated names', async () => {
+    const { user, card, upload, names } = uploadTools();
+    const start = names();
+    expect(start).toHaveLength(5);
+    await upload(/Add inventory/, 'Lids,300,pieces,0.05\n');
+    expect(card.getByText(/These items will be added to your current inventory \(5 items\)/)).toBeInTheDocument();
+    await user.click(card.getByRole('button', { name: 'Add 1 item' }));
+    expect(card.getByText(/Added 1 inventory item/)).toBeInTheDocument();
+    expect(names()).toEqual([...start, 'Lids']);
+
+    await user.click(card.getByRole('button', { name: 'Import another file' }));
+    await upload(/Add inventory/, 'Honey,2,kg,9\nLids,50,pieces,0.05\n');
+    expect(card.getByText(/“Lids” is already in your inventory/)).toBeInTheDocument();
+    await user.click(card.getByRole('button', { name: 'Add 1 item' }));
+    expect(names()).toEqual([...start, 'Lids', 'Honey']);
+  });
+
+  it('Replace inventory asks first, then leaves only the new file', async () => {
+    const { user, card, upload, names } = uploadTools();
+    const start = names();
+    await upload(/Replace inventory/, 'Tea,40,pieces,0.2\n');
+    await user.click(card.getByRole('button', { name: 'Replace with 1 item' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Cancel' }));
+    expect(names()).toEqual(start);
+    await user.click(card.getByRole('button', { name: 'Replace with 1 item' }));
+    await user.click(within(confirmDialog()).getByRole('button', { name: 'Replace inventory' }));
+    expect(names()).toEqual(['Tea']);
+  });
+
   it('rejects unsupported files with a clear message', async () => {
     // Simulates a file dropped on the page, which bypasses the file picker's filter.
     const { user } = setup('inventory', 'coffee', { applyAccept: false });
     const hub = within(panel('inventory'));
-    await user.upload(hub.getAllByLabelText('Choose a file')[0], new File(['x'], 'stock.pdf'));
+    await user.upload(hub.getByLabelText(/Add inventory/), new File(['x'], 'stock.pdf'));
     await waitFor(() => expect(hub.getByRole('alert')).toHaveTextContent(/Unsupported file type/));
   });
 

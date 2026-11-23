@@ -333,9 +333,17 @@ No test assertion was weakened. The slowest test went from 21 s to 6.6 s.
 
 ### Service Business category (16 Nov 2026)
 - The owner suggested letting a business **choose** to be a service business. A new `services` category (💼 Service Business) was added to `src/lib/businesses.ts`, with a fictional "My Accounting Practice" sample in `src/lib/samples.ts` (no inventory, no recipes). It reuses the no-inventory behaviour added earlier the same day. Old save files still load: the category list only grew.
-- Hand check: revenue 3,050, VC ,795, CM 1,255, fixed ,500 → operating profit **,755** (unit and click-through tests).
+- Hand check: revenue $13,050, VC $1,795, CM $11,255, fixed $6,500 → operating profit **$4,755** (unit and click-through tests).
 
 **Checks:** 424 tests in 36 files passed; build passed.
+
+## Add / Replace inventory buttons (23 Nov 2026, owner request)
+- The owner uploaded a second Excel file and it replaced the first. "Replace" was the preselected choice on the review step.
+- The upload box now has two buttons: **➕ Add inventory** (keeps current items) and **🔄 Replace inventory** (asks to confirm). Dragged files are added. With no inventory, only Add is shown. The choice on the review step was replaced by a message saying what will happen and a matching button label.
+- Duplicate names are still flagged and skipped, never merged.
+- Also fixed on 23 Nov: the focus outline of the fixed-costs box overlapped its "$" and "per month" text.
+
+**Checks:** 426 tests in 36 files passed; build passed.
 
 ## Recommendations discussed (9 Nov 2026) – built since (see above)
 Priority for the grade:
