@@ -69,13 +69,13 @@ export default function MyBusiness() {
             </InfoTip>
           </div>
           <p className="text-sm text-sage-600">{t('All amounts are in Canadian dollars (CAD).')}</p>
-          <div className={`mt-2 flex items-center rounded-2xl border-2 bg-white ${model.fixedError ? 'border-loss-600' : 'border-sage-200 focus-within:border-sage-500'}`}>
+          <div className={`field-box mt-2 flex items-center rounded-2xl border-2 bg-white transition focus-within:ring-2 focus-within:ring-offset-1 ${model.fixedError ? 'border-loss-600 focus-within:ring-loss-600/40' : 'border-sage-200 focus-within:border-sage-500 focus-within:ring-sage-400/40'}`}>
             <span className="pl-4 font-semibold text-sage-500" aria-hidden="true">$</span>
             <input
               id="fixed-costs"
               inputMode="decimal"
               autoComplete="off"
-              className="w-full min-w-0 rounded-2xl bg-transparent px-3 py-3 text-lg font-semibold tabular-nums outline-none"
+              className="w-full min-w-0 rounded-2xl bg-transparent px-3 py-3 text-lg font-semibold tabular-nums outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               value={b.fixedCosts}
               aria-invalid={model.fixedError ? true : undefined}
               aria-describedby={model.fixedError ? 'fixed-costs-error' : undefined}

@@ -175,6 +175,14 @@ html[data-contrast='high'] :focus-visible {
   outline: 3px solid #102414;
   outline-offset: 2px;
 }
+/* Boxes with a $ or a unit: outline the whole box, not just the part you type in. */
+html[data-contrast='high'] .field-box:focus-within {
+  outline: 3px solid #102414;
+  outline-offset: 2px;
+}
+html[data-contrast='high'] .field-box input:focus-visible {
+  outline: none;
+}
 
 /* ------------------------------------------------------------------ */
 /* Printing (🖨 Print this page, or Ctrl/Cmd + P)                       */

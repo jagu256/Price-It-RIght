@@ -111,7 +111,7 @@ export function CellInput({
 }) {
   return (
     <div
-      className={`flex items-center rounded-xl border-2 bg-white transition focus-within:ring-2 focus-within:ring-offset-1 ${
+      className={`field-box flex items-center rounded-xl border-2 bg-white transition focus-within:ring-2 focus-within:ring-offset-1 ${
         invalid ? 'border-loss-600 focus-within:ring-loss-600/40' : 'border-sage-200 focus-within:border-sage-500 focus-within:ring-sage-400/40'
       } ${width}`}
     >

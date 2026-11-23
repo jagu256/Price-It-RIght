@@ -43,7 +43,7 @@ export default function NumberField({
         {help}
       </p>
       <div
-        className={`mt-2 flex items-center rounded-2xl border-2 bg-white transition focus-within:ring-2 focus-within:ring-offset-1 ${
+        className={`field-box mt-2 flex items-center rounded-2xl border-2 bg-white transition focus-within:ring-2 focus-within:ring-offset-1 ${
           error
             ? 'border-loss-600 focus-within:ring-loss-600/40'
             : 'border-sage-200 focus-within:border-sage-500 focus-within:ring-sage-400/40'
